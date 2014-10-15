@@ -48,36 +48,16 @@ jQuery( function( $, undefined ) {
 		} );
 	};
 
-	var getPosition = function() {
-		var highAccuracy = null;
-		var lowAccuracy = null;
-
-		var maybeAlert = function() {
-			if ( highAccuracy === false && lowAccuracy === false ) {
-				alert( '无法获得当前位置' );
-			}
-		};
-
+	var getPosition = function( highAccuracy ) {
 		navigator.geolocation.getCurrentPosition( function( coords ) {
-			lowAccuracy = true;
-			if ( !highAccuracy ) {
-				updateData( coords.latitude, coords.longitude );
-			}
-		}, function() {
-			lowAccuracy = false;
-			maybeAlert();
-		}, {
-			enableHighAccuracy: false
-		} );
-
-		navigator.geolocation.getCurrentPosition( function( coords ) {
-			highAccuracy = true;
 			updateData( coords.latitude, coords.longitude );
+			if ( !highAccuracy ) {
+				getPosition( true );
+			}
 		}, function() {
-			highAccuracy = false;
-			maybeAlert();
+			alert( '无法获得当前位置' );
 		}, {
-			enableHighAccuracy: true
+			enableHighAccuracy: highAccuracy
 		} );
 	};
 
@@ -114,6 +94,6 @@ jQuery( function( $, undefined ) {
 		$( '#datatable' ).tablesorter();
 
 		updateData();
-		getPosition();
+		getPosition( false );
 	} );
 } );
