@@ -49,13 +49,14 @@ jQuery( function( $, undefined ) {
 	};
 
 	var getPosition = function( highAccuracy ) {
-		navigator.geolocation.getCurrentPosition( function( coords ) {
+		navigator.geolocation.getCurrentPosition( function( position ) {
+			var coords = position.coords;
 			updateData( coords.latitude, coords.longitude );
 			if ( !highAccuracy ) {
 				getPosition( true );
 			}
-		}, function() {
-			alert( '无法获得当前位置' );
+		}, function( error ) {
+			alert( '无法获得当前位置 (' + error.code + '): ' + error.message );
 		}, {
 			enableHighAccuracy: highAccuracy
 		} );
