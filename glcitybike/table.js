@@ -105,7 +105,10 @@ jQuery( function( $, undefined ) {
 							+ station.lat + '/' + station.lng + '&layers=C'
 						).append( $( '<img/>' ).attr( 'src',
 							'http://wiki.openstreetmap.org/w/thumb.php?f=Public-images-osm_logo.svg&w=18'
-						) )
+						) ).click( function( e ) {
+							e.preventDefault();
+							open( $( this ).attr( 'href' ) );
+						} )
 				) : $( '<td/>' ).text( station.name ) )
 				.append(
 					$( '<td/>' )
