@@ -64,53 +64,90 @@ jQuery( function( $, undefined ) {
 		} );
 	};
 
-	var data = window.ibike;
+	var init = function( osmFix ) {
+		var data = window.ibike;
 
-	$.each( data.station, function() {
-		var station = this;
+		$.each( data.station, function() {
+			var station = this;
 
-		if ( station.lat != 0 ) {
-			station.lat -= 0.0031832143;
-		}
-		if ( station.lng != 0 ) {
-			station.lng -= 0.0111871143;
-		}
+			if ( osmFix[station.id] ) {
+				console.log( 'Fixing station ' + station.id + ' using OSM data:' );
+				console.log( osmFix[station.id] );
 
-		$( '<tr/>' )
-			.append( $( '<td/>' ).text( station.id ) )
-			.append( $( '<td/>' ).append(
-				$( '<a/>' )
-					.attr( 'href', 'geo:' + station.lat + ',' + station.lng )
-					.text( station.name )
-			) )
-			.append(
-				$( '<td/>' )
-					.addClass( 'dir-cell' )
-					.data( 'lat', station.lat )
-					.data( 'lng', station.lng )
-					.text( '...' )
-			)
-			.append( $( '<td/>' ).append( $( '<img/>' ).addClass( 'num-image' )
-				.data( 'id', station.id ).data( 'flag', 1 )
-			) )
-			.append( $( '<td/>' ).append( $( '<img/>' ).addClass( 'num-image' )
-				.data( 'id', station.id ).data( 'flag', 2 )
-			) )
-			.append( $( '<td/>' ).text( station.address ) )
-			.appendTo( '#datatable tbody' );
-	} );
-
-	$( '#datatable' ).tablesorter( {
-		textExtraction: function( node ) {
-			var $value = $( '.sort-value', node );
-			if ( $value.length ) {
-				return $value.text();
+				$.extend( station, osmFix[station.id] );
 			} else {
-				return $( node ).text();
+				if ( station.lat != 0 ) {
+					station.lat -= 0.0031832143;
+				}
+				if ( station.lng != 0 ) {
+					station.lng -= 0.0111871143;
+				}
 			}
-		}
-	} );
 
-	updateData();
-	getPosition( false );
+			$( '<tr/>' )
+				.append( $( '<td/>' ).text( station.id ) )
+				.append( $( '<td/>' ).append(
+					$( '<a/>' )
+						.attr( 'href', 'geo:' + station.lat + ',' + station.lng )
+						.text( station.name )
+				) )
+				.append(
+					$( '<td/>' )
+						.addClass( 'dir-cell' )
+						.data( 'lat', station.lat )
+						.data( 'lng', station.lng )
+						.text( '...' )
+				)
+				.append( $( '<td/>' ).append( $( '<img/>' ).addClass( 'num-image' )
+					.data( 'id', station.id ).data( 'flag', 1 )
+				) )
+				.append( $( '<td/>' ).append( $( '<img/>' ).addClass( 'num-image' )
+					.data( 'id', station.id ).data( 'flag', 2 )
+				) )
+				.append( $( '<td/>' ).text( station.address ) )
+				.appendTo( '#datatable tbody' );
+		} );
+
+		$( '#datatable' ).tablesorter( {
+			textExtraction: function( node ) {
+				var $value = $( '.sort-value', node );
+				if ( $value.length ) {
+					return $value.text();
+				} else {
+					return $( node ).text();
+				}
+			}
+		} );
+
+		updateData();
+		getPosition( false );
+	};
+
+	$.ajax( {
+		url: 'http://overpass-api.de/api/xapi?' + encodeURIComponent(
+			'node[amenity=bicycle_rental][network=桂林市公共自行车]'
+		),
+		format: 'xml'
+	} ).done( function( osmData ) {
+		console.log( 'OSM data fetched:' );
+		console.log( osmData );
+
+		var osmFix = {};
+
+		$( 'node', osmData ).each( function() {
+			var $node = $( this );
+			var $ref = $( 'tag[k=ref]', $node );
+			var lat = parseFloat( $node.attr( 'lat' ) ), lng = parseFloat( $node.attr( 'lon' ) );
+
+			if ( $ref.length && lat && lng ) {
+				osmFix[$ref.attr( 'v' )] = { lat: lat, lng: lng };
+			}
+		} );
+
+		init( osmFix );
+	} ).fail( function() {
+		console.log( 'Cannot load OSM data' );
+
+		init( {} );
+	} );
 } );
