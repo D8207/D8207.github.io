@@ -98,7 +98,7 @@ jQuery( function( $, undefined ) {
 					$( '<a/>' )
 						.attr( 'href', 'geo:' + station.lat + ',' + station.lng )
 						.text( station.name )
-				).append( '&nbsp;' ).append(
+				).append( ' ' ).append(
 					$( '<a/>' )
 						.attr( 'href', 'http://www.openstreetmap.org/?mlat='
 							+ station.lat + '&mlon=' + station.lng + '#map=17/'
