@@ -104,7 +104,7 @@ jQuery( function( $, undefined ) {
 
 			$( '<tr/>' )
 				.append( $( '<td/>' ).text( station.id ) )
-				.append( $( '<td/>' ).append(
+				.append( ( station.lat != 0 && station.lng != 0 ) ? $( '<td/>' ).append(
 					$( '<a/>' )
 						.attr( 'href', 'geo:' + station.lat + ',' + station.lng )
 						.text( station.name )
@@ -116,7 +116,7 @@ jQuery( function( $, undefined ) {
 						).append( $( '<img/>' ).attr( 'src',
 							'http://wiki.openstreetmap.org/w/thumb.php?f=Public-images-osm_logo.svg&w=18'
 						) )
-				) )
+				) : $( '<td/>' ).text( station.name ) )
 				.append(
 					$( '<td/>' )
 						.addClass( 'dir-cell' )
