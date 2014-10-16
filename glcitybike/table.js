@@ -50,15 +50,33 @@ jQuery( function( $, undefined ) {
 		$( '#datatable' ).trigger( 'update' );
 	};
 
+	var getPositionUpdates = function() {
+		navigator.geolocation.getCurrentPosition( function( position ) {
+			var coords = position.coords;
+			updateData( coords.latitude, coords.longitude );
+			setTimeout( getPositionUpdates, 60000 );
+		}, function( error ) {
+			setTimeout( getPositionUpdates, 60000 );
+		}, {
+			enableHighAccuracy: true
+		} );
+	};
+
 	var getPosition = function( highAccuracy ) {
 		navigator.geolocation.getCurrentPosition( function( position ) {
 			var coords = position.coords;
 			updateData( coords.latitude, coords.longitude );
-			if ( !highAccuracy ) {
+			if ( highAccuracy ) {
+				setTimeout( getPositionUpdates, 60000 );
+			} else {
 				getPosition( true );
 			}
 		}, function( error ) {
-			alert( '无法获得当前位置 (' + error.code + '): ' + error.message );
+			if ( highAccuracy ) {
+				setTimeout( getPositionUpdates, 60000 );
+			} else {
+				alert( '无法获得当前位置 (' + error.code + '): ' + error.message );
+			}
 		}, {
 			enableHighAccuracy: highAccuracy
 		} );
