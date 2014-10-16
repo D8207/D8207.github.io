@@ -69,6 +69,13 @@ jQuery( function( $, undefined ) {
 	$.each( data.station, function() {
 		var station = this;
 
+		if ( station.lat != 0 ) {
+			station.lat -= 0.0031832143;
+		}
+		if ( station.lng != 0 ) {
+			station.lng -= 0.0111871143;
+		}
+
 		$( '<tr/>' )
 			.append( $( '<td/>' ).text( station.id ) )
 			.append( $( '<td/>' ).append(
