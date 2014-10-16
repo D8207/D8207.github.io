@@ -2,17 +2,7 @@ jQuery( function( $, undefined ) {
 	var updateData = function( lat, lng ) {
 		console.log( 'Updating data using lat = ' + lat + ', lng = ' + lng );
 
-		var time = new Date().getTime();
-
-		$( '.num-image' ).each( function() {
-			var $this = $( this );
-
-			$this.attr( 'src',
-				'http://218.93.33.59:85/map/guilinmap/ibikegif.asp?id='
-				+ $this.data( 'id' ) + '&flag=' + $this.data( 'flag' )
-				+ '&_=' + time
-			);
-		} );
+		$( '.num-image' ).trigger( 'reload-image' );
 
 		if ( lat === undefined || lng === undefined ) {
 			return;
@@ -143,6 +133,18 @@ jQuery( function( $, undefined ) {
 					return $( node ).text();
 				}
 			}
+		} );
+
+		$( '.num-image' ).on( 'reload-image', function() {
+			var $this = $( this );
+
+			$this.attr( 'src',
+				'http://218.93.33.59:85/map/guilinmap/ibikegif.asp?id='
+				+ $this.data( 'id' ) + '&flag=' + $this.data( 'flag' )
+				+ '&_=' + new Date().getTime()
+			);
+		} ).on( 'click', function() {
+			$( this ).trigger( 'reload-image' );
 		} );
 
 		updateData();
