@@ -40,9 +40,9 @@ jQuery( function( $, undefined ) {
 					.css( 'display', 'inline-block' )
 				).append( $( '<span/>' )
 					.html(
-						' <span class="sort-value">'
+						'&nbsp;<span class="sort-value">'
 						+ Math.round( distance * 1000 )
-						+ '</span> m'
+						+ '</span>&nbsp;m'
 					)
 				);
 		} );
