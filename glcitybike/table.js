@@ -108,6 +108,14 @@ jQuery( function( $, undefined ) {
 					$( '<a/>' )
 						.attr( 'href', 'geo:' + station.lat + ',' + station.lng )
 						.text( station.name )
+				).append( '&nbsp;' ).append(
+					$( '<a/>' )
+						.attr( 'href', 'http://www.openstreetmap.org/?mlat='
+							+ station.lat + '&mlon=' + station.lng + '#map=17/'
+							+ station.lat + '/' + station.lng + '&layers=C'
+						).append( $( '<img/>' ).attr( 'src',
+							'http://wiki.openstreetmap.org/w/thumb.php?f=Public-images-osm_logo.svg&w=18'
+						) )
 				) )
 				.append(
 					$( '<td/>' )
