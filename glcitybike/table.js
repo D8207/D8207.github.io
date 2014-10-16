@@ -40,12 +40,14 @@ jQuery( function( $, undefined ) {
 					.css( 'display', 'inline-block' )
 				).append( $( '<span/>' )
 					.html(
-						' <span class="dist-value">'
+						' <span class="sort-value">'
 						+ Math.round( distance * 1000 )
 						+ '</span> m'
 					)
 				);
 		} );
+
+		$( '#datatable' ).trigger( 'update' );
 	};
 
 	var getPosition = function( highAccuracy ) {
@@ -62,39 +64,46 @@ jQuery( function( $, undefined ) {
 		} );
 	};
 
-	$.getScript( 'http://218.93.33.59:85/map/guilinmap/ibikestation.asp', function() {
-		var data = window.ibike;
+	var data = window.ibike;
 
-		$.each( data.station, function() {
-			var station = this;
+	$.each( data.station, function() {
+		var station = this;
 
-			$( '<tr/>' )
-				.append( $( '<td/>' ).text( station.id ) )
-				.append( $( '<td/>' ).append(
-					$( '<a/>' )
-						.attr( 'href', 'geo:' + station.lat + ',' + station.lng )
-						.text( station.name )
-				) )
-				.append(
-					$( '<td/>' )
-						.addClass( 'dir-cell' )
-						.data( 'lat', station.lat )
-						.data( 'lng', station.lng )
-						.text( '...' )
-				)
-				.append( $( '<td/>' ).append( $( '<img/>' ).addClass( 'num-image' )
-					.data( 'id', station.id ).data( 'flag', 1 )
-				) )
-				.append( $( '<td/>' ).append( $( '<img/>' ).addClass( 'num-image' )
-					.data( 'id', station.id ).data( 'flag', 2 )
-				) )
-				.append( $( '<td/>' ).text( station.address ) )
-				.appendTo( '#datatable tbody' );
-		} );
-
-		$( '#datatable' ).tablesorter();
-
-		updateData();
-		getPosition( false );
+		$( '<tr/>' )
+			.append( $( '<td/>' ).text( station.id ) )
+			.append( $( '<td/>' ).append(
+				$( '<a/>' )
+					.attr( 'href', 'geo:' + station.lat + ',' + station.lng )
+					.text( station.name )
+			) )
+			.append(
+				$( '<td/>' )
+					.addClass( 'dir-cell' )
+					.data( 'lat', station.lat )
+					.data( 'lng', station.lng )
+					.text( '...' )
+			)
+			.append( $( '<td/>' ).append( $( '<img/>' ).addClass( 'num-image' )
+				.data( 'id', station.id ).data( 'flag', 1 )
+			) )
+			.append( $( '<td/>' ).append( $( '<img/>' ).addClass( 'num-image' )
+				.data( 'id', station.id ).data( 'flag', 2 )
+			) )
+			.append( $( '<td/>' ).text( station.address ) )
+			.appendTo( '#datatable tbody' );
 	} );
+
+	$( '#datatable' ).tablesorter( {
+		textExtraction: function( node ) {
+			var $value = $( '.sort-value', node );
+			if ( $value.length ) {
+				return $value.text();
+			} else {
+				return $( node ).text();
+			}
+		}
+	} );
+
+	updateData();
+	getPosition( false );
 } );
