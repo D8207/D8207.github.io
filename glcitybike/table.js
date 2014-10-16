@@ -74,6 +74,7 @@ jQuery( function( $, undefined ) {
 
 	var init = function( osmFix ) {
 		var data = window.ibike;
+		var isAndroid = navigator.userAgent.toLowerCase().indexOf( 'android' ) > -1;
 
 		$.each( data.station, function() {
 			var station = this;
@@ -96,7 +97,9 @@ jQuery( function( $, undefined ) {
 				.append( $( '<td/>' ).text( station.id ) )
 				.append( ( station.lat != 0 && station.lng != 0 ) ? $( '<td/>' ).append(
 					$( '<a/>' )
-						.attr( 'href', 'geo:' + station.lat + ',' + station.lng )
+						.attr( 'href', isAndroid ? ( 'geo:0,0?q=' + encodeURIComponent(
+							station.lat + ',' + station.lng + '(' + station.name + ' - 桂林市公共自行车)'
+						) ) : ( 'geo:' + station.lat + ',' + station.lng ) )
 						.text( station.name )
 				).append( ' ' ).append(
 					$( '<a/>' )
