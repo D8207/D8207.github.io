@@ -204,10 +204,10 @@ jQuery( function( $, undefined ) {
 	};
 
 	$.ajax( {
+		dataType: 'xml',
 		url: 'http://overpass-api.de/api/xapi?' + encodeURIComponent(
 			'node[amenity=bicycle_rental][network=桂林市公共自行车]'
-		),
-		format: 'xml'
+		)
 	} ).done( function( osmData ) {
 		console.log( 'OSM data fetched:' );
 		console.log( osmData );
