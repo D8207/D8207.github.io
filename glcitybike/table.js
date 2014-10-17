@@ -1,12 +1,43 @@
 jQuery( function( $, undefined ) {
-	var updateData = function( lat, lng ) {
-		console.log( 'Updating data using lat = ' + lat + ', lng = ' + lng );
+	var numbers = {};
 
-		$( '.num-image' ).trigger( 'reload-image' );
+	var updateNum = function() {
+		$( '.num-container' ).trigger( 'reload-num' );
+		$( '#datatable' ).trigger( 'update' );
+		setTimeout( getNumbers, 60000 );
+	};
 
-		if ( lat === undefined || lng === undefined ) {
-			return;
-		}
+	var getNumbers = function() {
+		$.ajax( {
+			dataType: 'script',
+			// Will this data source be stable enough?
+			url: 'http://ws.ibike668.com:81/WeiChat.php?myloc=110.2901685,25.2780122&e=1&k=ae5ec12e93b68f4fc20648ad95e04e96&d=10'
+		} ).done( function() {
+			var data = window.ibike;
+			delete window.ibike;
+			numbers = {};
+
+			if ( data !== undefined ) {
+				$.each( data.station, function() {
+					if ( this.id !== undefined && this.capacity !== undefined && this.availbike !== undefined ) {
+						numbers[this.id] = {
+							'bike': this.availbike,
+							'rack': this.capacity - this.availbike
+						};
+					}
+				} );
+			}
+
+			updateNum();
+		} ).fail( function() {
+			numbers = {};
+
+			updateNum();
+		} );
+	};
+
+	var updateDir = function( lat, lng ) {
+		console.log( 'Updating directions using lat = ' + lat + ', lng = ' + lng );
 
 		var latLon = new LatLon( lat, lng );
 
@@ -42,7 +73,7 @@ jQuery( function( $, undefined ) {
 	var getPositionUpdates = function() {
 		navigator.geolocation.getCurrentPosition( function( position ) {
 			var coords = position.coords;
-			updateData( coords.latitude, coords.longitude );
+			updateDir( coords.latitude, coords.longitude );
 			setTimeout( getPositionUpdates, 60000 );
 		}, function( error ) {
 			setTimeout( getPositionUpdates, 60000 );
@@ -54,7 +85,7 @@ jQuery( function( $, undefined ) {
 	var getPosition = function( highAccuracy ) {
 		navigator.geolocation.getCurrentPosition( function( position ) {
 			var coords = position.coords;
-			updateData( coords.latitude, coords.longitude );
+			updateDir( coords.latitude, coords.longitude );
 			if ( highAccuracy ) {
 				setTimeout( getPositionUpdates, 60000 );
 			} else {
@@ -73,6 +104,7 @@ jQuery( function( $, undefined ) {
 
 	var init = function( osmFix ) {
 		var data = window.ibike;
+		delete window.ibike;
 		var isAndroid = navigator.userAgent.toLowerCase().indexOf( 'android' ) > -1;
 
 		$.each( data.station, function() {
@@ -119,22 +151,17 @@ jQuery( function( $, undefined ) {
 						.data( 'lng', station.lng )
 						.text( '...' )
 				)
-				.append( $( '<td/>' ).append( $( '<img/>' ).addClass( 'num-image' )
-					.data( 'id', station.id ).data( 'flag', 1 )
+				.append( $( '<td/>' ).append( $( '<span/>' ).addClass( 'num-container' )
+					.data( 'id', station.id ).data( 'type', 'bike' ).text( '...' )
 				) )
-				.append( $( '<td/>' ).append( $( '<img/>' ).addClass( 'num-image' )
-					.data( 'id', station.id ).data( 'flag', 2 )
+				.append( $( '<td/>' ).append( $( '<span/>' ).addClass( 'num-container' )
+					.data( 'id', station.id ).data( 'type', 'rack' ).text( '...' )
 				) )
 				.append( $( '<td/>' ).text( station.address ) )
 				.appendTo( '#datatable tbody' );
 		} );
 
 		$( '#datatable' ).tablesorter( {
-			headers: {
-				3: { sorter: false },
-				4: { sorter: false },
-				5: { sorter: false }
-			},
 			textExtraction: function( node ) {
 				var $value = $( '.sort-value', node );
 				if ( $value.length ) {
@@ -145,19 +172,34 @@ jQuery( function( $, undefined ) {
 			}
 		} );
 
-		$( '.num-image' ).on( 'reload-image', function() {
+		$( '.num-container' ).on( 'reload-num', function() {
 			var $this = $( this );
 
-			$this.attr( 'src',
-				'http://218.93.33.59:85/map/guilinmap/ibikegif.asp?id='
-				+ $this.data( 'id' ) + '&flag=' + $this.data( 'flag' )
-				+ '&_=' + new Date().getTime()
-			);
+			if ( numbers[$this.data( 'id' )] !== undefined
+				&& numbers[$this.data( 'id' )][$this.data( 'type' )] !== undefined
+			) {
+				// We have the number ready
+				$this.empty().text( numbers[$this.data( 'id' )][$this.data( 'type' )] );
+			} else {
+				// Use an image
+				var $img = $( 'img', $this );
+				if ( !$img.length ) {
+					$img = $( '<img/>' ).appendTo( $this.empty() );
+				}
+				$img.attr( 'src',
+					'http://218.93.33.59:85/map/guilinmap/ibikegif.asp?id='
+					+ $this.data( 'id' ) + '&flag=' + (
+						$this.data( 'type' ) == 'bike' ? '1' : /* rack */ '2'
+					) + '&_=' + new Date().getTime()
+				);
+			}
+
 		} ).on( 'click', function() {
-			$( this ).trigger( 'reload-image' );
+			// This mainly works around broken images due to network failure
+			$( this ).trigger( 'reload-num' );
 		} );
 
-		updateData();
+		getNumbers();
 		getPosition( false );
 	};
 
