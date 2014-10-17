@@ -23,11 +23,10 @@ jQuery( function( $, undefined ) {
 
 			var cssTransform = 'rotate(' + bearing + 'deg)';
 			$this.empty()
-				.append( $( '<span/>' ).text( '↑' )
+				.append( $( '<span/>' ).addClass( 'dir-arrow' ).text( '↑' )
 					.css( '-ms-transform', cssTransform )
 					.css( '-webkit-transform', cssTransform )
 					.css( 'transform', cssTransform )
-					.css( 'display', 'inline-block' )
 				).append( $( '<span/>' )
 					.html(
 						'&nbsp;<span class="sort-value">'
@@ -131,6 +130,11 @@ jQuery( function( $, undefined ) {
 		} );
 
 		$( '#datatable' ).tablesorter( {
+			headers: {
+				3: { sorter: false },
+				4: { sorter: false },
+				5: { sorter: false }
+			},
 			textExtraction: function( node ) {
 				var $value = $( '.sort-value', node );
 				if ( $value.length ) {
