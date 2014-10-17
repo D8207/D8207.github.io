@@ -17,7 +17,7 @@ jQuery( function( $, undefined ) {
 			delete window.ibike;
 			numbers = {};
 
-			if ( data !== undefined ) {
+			if ( data !== undefined && $.isArray( data.station ) ) {
 				$.each( data.station, function() {
 					if ( this.id !== undefined && this.capacity !== undefined && this.availbike !== undefined ) {
 						numbers[this.id] = {
