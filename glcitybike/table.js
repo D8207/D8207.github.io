@@ -21,8 +21,8 @@ jQuery( function( $, undefined ) {
 				$.each( data.station, function() {
 					if ( this.id !== undefined && this.capacity !== undefined && this.availbike !== undefined ) {
 						numbers[this.id] = {
-							'bike': this.availbike,
-							'rack': this.capacity - this.availbike
+							bike: this.availbike,
+							rack: this.capacity - this.availbike
 						};
 					}
 				} );
