@@ -1,4 +1,8 @@
 jQuery( function( $, undefined ) {
+	var console = window.console || {
+		log: function() {}
+	};
+
 	var numbers = {};
 
 	var updateNum = function() {
@@ -14,7 +18,7 @@ jQuery( function( $, undefined ) {
 			url: 'http://ws.ibike668.com:81/WeiChat.php?myloc=110.2901685,25.2780122&e=1&k=ae5ec12e93b68f4fc20648ad95e04e96&d=10'
 		} ).done( function() {
 			var data = window.ibike;
-			delete window.ibike;
+			window.ibike = undefined;
 			numbers = {};
 
 			if ( data !== undefined && $.isArray( data.station ) ) {
@@ -83,6 +87,10 @@ jQuery( function( $, undefined ) {
 	};
 
 	var getPosition = function( highAccuracy ) {
+		if ( !navigator.geolocation ) {
+			$( '.dir-cell' ).html( '<abbr title=当前浏览器不支持定位>✕</abbr>' );
+			return;
+		}
 		navigator.geolocation.getCurrentPosition( function( position ) {
 			var coords = position.coords;
 			updateDir( coords.latitude, coords.longitude );
@@ -104,7 +112,7 @@ jQuery( function( $, undefined ) {
 
 	var init = function( osmFix ) {
 		var data = window.ibike;
-		delete window.ibike;
+		window.ibike = undefined;
 		var isAndroid = navigator.userAgent.toLowerCase().indexOf( 'android' ) > -1;
 
 		$.each( data.station, function() {
