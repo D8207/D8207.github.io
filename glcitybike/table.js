@@ -125,10 +125,10 @@ jQuery( function( $, undefined ) {
 				$.extend( station, osmFix[station.id] );
 			} else {
 				if ( station.lat != 0 ) {
-					station.lat -= 0.0031832143;
+					station.lat += 0.0027392125;
 				}
 				if ( station.lng != 0 ) {
-					station.lng -= 0.0111871143;
+					station.lng -= 0.0045555812;
 				}
 			}
 
