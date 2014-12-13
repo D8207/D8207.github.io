@@ -20,6 +20,9 @@ jQuery( function( $, undefined ) {
 			} );
 		}
 
+		frames[frame].location = 'about:blank';
+		$( frames[frame].document.body ).empty().append( '正在载入……' );
+
 		$form.appendTo( 'body' );
 		$form[0].submit();
 		$form.remove();
