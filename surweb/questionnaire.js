@@ -30,6 +30,7 @@ jQuery( function( $, undefined ) {
 			{ name: 'userName', value: $( '#userName' ).val() },
 			{ name: 'oldUserName', value: '' }
 		] );
+		ga( 'send', 'event', 'surweb', 'submit', 'user' );
 	} );
 
 	$( '#code-submit' ).click( function( e ) {
@@ -38,6 +39,7 @@ jQuery( function( $, undefined ) {
 			{ name: 'vc', value: $( '#code' ).val() },
 			{ name: 'seq_no', value: $( '#sequence' ).val() }
 		] );
+		ga( 'send', 'event', 'surweb', 'submit', 'code' );
 	} );
 
 	$( "#date" ).datepicker( $.extend( {}, $.datepicker.regional[ 'zh-CN' ], {
@@ -124,5 +126,6 @@ jQuery( function( $, undefined ) {
 			{ name: 'questionRadioAnswer', value: questionRadioAnswer },
 			{ name: 'otherAnswer', value: otherAnswer }
 		] );
+		ga( 'send', 'event', 'surweb', 'submit', 'form' );
 	} );
 } );
