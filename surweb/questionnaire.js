@@ -26,14 +26,14 @@ jQuery( function( $, undefined ) {
 	};
 
 	$( '#user-submit' ).click( function( e ) {
-		submit( 'user-frame', 'http://dynamic.12306.cn/surweb/registAction.do?method=sendSm', [
+		submit( 'user-frame', '//dynamic.12306.cn/surweb/registAction.do?method=sendSm', [
 			{ name: 'userName', value: $( '#userName' ).val() },
 			{ name: 'oldUserName', value: '' }
 		] );
 	} );
 
 	$( '#code-submit' ).click( function( e ) {
-		submit( 'code-frame', 'http://dynamic.12306.cn/surweb/registAction.do?method=checkVc', [
+		submit( 'code-frame', '//dynamic.12306.cn/surweb/registAction.do?method=checkVc', [
 			{ name: 'userName', value: $( '#userName' ).val() },
 			{ name: 'vc', value: $( '#code' ).val() },
 			{ name: 'seq_no', value: $( '#sequence' ).val() }
@@ -113,7 +113,7 @@ jQuery( function( $, undefined ) {
 	} );
 
 	$( '#form-submit' ).click( function( e ) {
-		submit( 'form-frame', 'http://dynamic.12306.cn/surweb/questionnaireAction.do?method=submitQuest', [
+		submit( 'form-frame', '//dynamic.12306.cn/surweb/questionnaireAction.do?method=submitQuest', [
 			{ name: 'passengerInfoAnswer', value: '{'
 				+ 'userName:' + $( '#userName' ).val() + ','
 				+ 'datepicker:' + $( '#actualDate' ).val() + ','
