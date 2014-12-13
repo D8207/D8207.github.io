@@ -21,11 +21,13 @@ jQuery( function( $, undefined ) {
 		}
 
 		frames[frame].location = 'about:blank';
-		$( frames[frame].document.body ).empty().append( '正在载入……' );
+		setTimeout( function() { // "Error: Permission denied to access property 'document'" otherwise
+			$( frames[frame].document.body ).empty().append( '正在载入……' );
 
-		$form.appendTo( 'body' );
-		$form[0].submit();
-		$form.remove();
+			$form.appendTo( 'body' );
+			$form[0].submit();
+			$form.remove();
+		}, 0 );
 	};
 
 	$( '#user-submit' ).click( function( e ) {
