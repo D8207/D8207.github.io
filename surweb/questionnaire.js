@@ -117,6 +117,10 @@ jQuery( function( $, undefined ) {
 
 			response( results );
 		}
+	} ).keyup( function( e ) {
+		var $this = $( this );
+
+		$this.val( $this.val().toUpperCase() );
 	} );
 
 	$( '#form-submit' ).click( function( e ) {
