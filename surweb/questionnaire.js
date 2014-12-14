@@ -37,7 +37,7 @@ jQuery( function( $, undefined ) {
 		$.each( JSON.parse( localStorage.surwebAnswers ), function( i ) {
 			$( '<label/>' )
 				.addClass( 'btn btn-default' )
-				.text( this.name || '\u00A0' ) // nbsp
+				.text( $.trim( this.name ) || '\u00A0' ) // nbsp
 				.prepend(
 					$( '<input type=radio />' )
 						.attr( 'name', 'answer' )
