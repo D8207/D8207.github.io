@@ -107,16 +107,23 @@ jQuery( function( $, undefined ) {
 					if ( regex.test( this[field] ) ) {
 						matched[this.telecode] = true;
 
-						results.push( {
-							label: this.name + ' | ' + this.pinyin + ' | -' + this.telecode,
-							value: this.name
-						} );
+						results.push( this );
 					}
 				} );
 			} );
 
 			response( results );
 		}
+	} ).each( function() {
+		$( this ).autocomplete( 'instance' )._renderItem = function( ul, item ) {
+			item.value = item.name;
+
+			return $( '<li/>' )
+				.append( $( '<div/>' ).text( item.name ) )
+				.append( $( '<div/>' ).text( item.pinyin ) )
+				.append( $( '<div/>' ).text( '-' + item.telecode ) )
+				.appendTo( ul );
+		};
 	} ).keyup( function( e ) {
 		var $this = $( this );
 

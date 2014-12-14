@@ -1,0 +1,12 @@
+.ui-autocomplete {
+	display: table;
+	text-align: center;
+}
+
+.ui-autocomplete li {
+	display: table-row;
+}
+
+.ui-autocomplete li div {
+	display: table-cell;
+}
