@@ -31,19 +31,24 @@ jQuery( function( $, undefined ) {
 		] );
 	}
 
-	var buildAnswerRadios = function() {
+	var buildAnswerRadios = function( selected ) {
 		var $answers = $( '#answers' ).empty();
 
 		$.each( JSON.parse( localStorage.surwebAnswers ), function( i ) {
-			$( '<label/>' )
+			var $radio = $( '<input type=radio />' )
+				.attr( 'name', 'answer' )
+				.attr( 'value', i );
+
+			var $label = $( '<label/>' )
 				.addClass( 'btn btn-default' )
 				.text( $.trim( this.name ) || '\u00A0' ) // nbsp
-				.prepend(
-					$( '<input type=radio />' )
-						.attr( 'name', 'answer' )
-						.attr( 'value', i )
-				)
+				.prepend( $radio )
 				.appendTo( $answers );
+
+			if ( i === selected ) {
+				$radio.prop( 'checked', true );
+				$label.addClass( 'active' );
+			}
 		} );
 	};
 
@@ -348,7 +353,7 @@ var executeSave = ( function() {
 		localStorage.surwebAnswers = JSON.stringify( surwebAnswers );
 
 		$( '#answers-form' ).modal( 'hide' );
-		buildAnswerRadios();
+		buildAnswerRadios( surwebAnswers.length - 1 );
 	} );
 
 	$( '#answers-delete' ).click( function( e ) {
