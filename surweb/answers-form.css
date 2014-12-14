@@ -1,0 +1,23 @@
+ul.con div,ul.con form,ul.con p,ul.con img,ul.con ul,ul.con ol,ul.con li,ul.con dl,ul.con dl,ul.con dd{border:0;list-style:none;margin:0;padding:0;text-align:left;}
+ul.con h1,ul.con h2,ul.con h3,ul.con h4,ul.con h5,ul.con h6{margin:0;padding:0; font-size:14px; font-weight:normal;}
+ul.con input,ul.con select,ul.con textarea{font-size:12px;font-family:Arial;line-height:18px;}
+
+ul.con{ border:1px solid #e7e7e7; border-bottom:none; margin:0 auto; padding: 0;}
+
+ul.con li{ border-bottom:1px solid #e7e7e7; padding:10px 0;}
+/*ul.con li:hover{ background:#c8ddae url(../images/li_bg.jpg) no-repeat;}*/
+ul.con li input.text{ height:25px; line-height:25px; border:1px solid #c5c5c5;}
+ul.con li th.text{font-size:12px;}
+ul.con li input.f1_text{  height:25px; line-height:25px; border:1px solid #c5c5c5;}
+ul.con li input.f1xg_text{ height:25px; line-height:25px; border:1px solid #c5c5c5;}
+
+ul.con dt{ font-size:14px; font-weight:700; margin-bottom:10px;}
+ul.con dt span{ font-size:12px; color:red;}
+ul.con li dd{ margin-left:10px; line-height:10px; }
+ul.con dd.tex{ float:left; margin:5px 60px 5px 10px;}
+ul.con dd.flsel{float:left;  margin:5px 85px 5px 0px;}
+ul.con dd.flsel2{float:left;  margin:5px 25px 5px 0px;}
+ul.con dd.flsel2 select{ height:25px; line-height:25px; border:1px solid #c5c5c5}
+ul.con dd label{ margin:10px 20px 10px 0; display:inline;font-size:12px}
+ul.con dd textarea{ height:77px; border:1px solid #d3d3d3}
+ul.con dd select{ height:25px; line-height:25px; border:1px solid #c5c5c5}
