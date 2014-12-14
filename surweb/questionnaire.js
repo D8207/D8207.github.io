@@ -79,7 +79,7 @@ jQuery( function( $, undefined ) {
 			var term = request.term;
 
 			var fields;
-			if ( term[0] === '-' ) {
+			if ( term.charAt(0) === '-' ) {
 				fields = [ 'telecode' ];
 				term = term.substring( 1 );
 			} else {
