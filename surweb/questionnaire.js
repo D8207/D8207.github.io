@@ -305,6 +305,30 @@ var executeSave = ( function() {
 	    otherAnswer[81]=mostNotSatisfild2;
 	    
 	    return true;
+} )() && ( function() {
+		var requiredNum=answer_required.split("_");
+		var ansValid=false;
+		$.each(requiredNum,function(n,value){
+			if(value==""){
+				return true;
+			}else{
+				if(questionRadioAnswer[value]==null || questionRadioAnswer[value]=="" || questionRadioAnswer[value]=="undefined"){
+					alert("请对问题"+value+"做出选择!");
+				    return false;
+				}else if(!ansValid && questionRadioAnswer[value]!="100"){
+					ansValid=true;
+				}
+			}
+			
+		
+		});
+		if(!ansValid){
+			alert("必选项不能都是[未关注]，请您重新选择!");
+		    return false;
+		}
+		
+		
+		return true;
 } )();
 		// /12306
 
