@@ -381,10 +381,16 @@ var executeSave = ( function() {
 		buildAnswerRadios();
 	} );
 
-	$( "#date" ).datepicker( $.extend( {}, $.datepicker.regional[ 'zh-CN' ], {
-		altField: '#actualDate',
-		altFormat: 'yy-mm-dd'
-	} ) );
+	var $date;
+	if ( Modernizr.inputtypes.date ) {
+		$date = $( '#date' );
+	} else {
+		$( "#date" ).datepicker( $.extend( {}, $.datepicker.regional[ 'zh-CN' ], {
+			altField: '#actualDate',
+			altFormat: 'yy-mm-dd'
+		} ) );
+		$date = $( '#actualDate' );
+	}
 
 	var stationNameCodeMap = {};
 	var stations = [];
@@ -475,7 +481,7 @@ var executeSave = ( function() {
 
 		var passengerInfoAnswer = {
 			userName: $( '#userName' ).val(),
-			datepicker: $( '#actualDate' ).val(),
+			datepicker: $date.val(),
 			board_train_no: $( '#train' ).val(),
 			board_station: stationNameCodeMap[ $( '#depart' ).val() ],
 			down_station: stationNameCodeMap[ $( '#arrive' ).val() ]
