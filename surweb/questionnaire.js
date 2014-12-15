@@ -107,6 +107,10 @@ jQuery( function( $, undefined ) {
 	buildAnswerRadios();
 
 	$( '#answers-new' ).click( function( e ) {
+		ga( 'send', 'event', 'surweb', 'answers', 'new' );
+	} );
+
+	$( '#answers-save' ).click( function( e ) {
 		var passengerInfoAnswer = {};
 		var questionRadioAnswer = {};
 		var otherAnswer = {};
@@ -349,6 +353,8 @@ var executeSave = ( function() {
 		// /12306
 
 		if ( !executeSave ) {
+			ga( 'send', 'event', 'surweb', 'answers', 'reject' );
+
 			return;
 		}
 
@@ -365,6 +371,8 @@ var executeSave = ( function() {
 
 		$( '#answers-form' ).modal( 'hide' );
 		buildAnswerRadios( surwebAnswers.length - 1 );
+
+		ga( 'send', 'event', 'surweb', 'answers', 'save' );
 	} );
 
 	$( '#answers-delete' ).click( function( e ) {
@@ -379,6 +387,8 @@ var executeSave = ( function() {
 		localStorage.surwebAnswers = JSON.stringify( surwebAnswers );
 
 		buildAnswerRadios();
+
+		ga( 'send', 'event', 'surweb', 'answers', 'delete' );
 	} );
 
 	var $date;
