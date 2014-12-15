@@ -1,3 +1,14 @@
+if ( !window.station_names ) {
+	if ( confirm(
+		'无法从 kyfw.12306.cn 读取数据，这可能是由于 kyfw.12306.cn 的证书错误导致。\n\n'
+		+ '请确认您可正常使用 kyfw.12306.cn 后再使用此工具。现在前往 kyfw.12306.cn 以检查？'
+	) ) {
+		location = '//kyfw.12306.cn/otn/';
+	} else {
+		window.station_names = '';
+	}
+}
+
 jQuery( function( $, undefined ) {
 	var console = window.console || {
 		log: function() {}
