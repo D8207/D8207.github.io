@@ -46,6 +46,7 @@ jQuery( function( $, undefined ) {
 	var updateDir = function( lat, lng ) {
 		console.log( 'Updating directions using lat = ' + lat + ', lng = ' + lng );
 
+		var arrow = '\u27A4', arrowBearing = 90;
 		var latLon = new LatLon( lat, lng );
 
 		$( '.dir-cell' ).each( function() {
@@ -59,10 +60,10 @@ jQuery( function( $, undefined ) {
 			var distance = latLon.distanceTo( cellLatLon );
 			var bearing = latLon.bearingTo( cellLatLon );
 
-			var cssTransform = 'rotate(' + bearing + 'deg)';
+			var cssTransform = 'rotate(' + ( bearing - arrowBearing ) + 'deg)';
 			$this.empty()
 				.append( $( '<span/>' ).addClass( 'dir-arrow dir-compass').append(
-					$( '<span/>' ).addClass( 'dir-arrow' ).text( '↑' )
+					$( '<span/>' ).addClass( 'dir-arrow' ).text( arrow )
 						.css( '-ms-transform', cssTransform )
 						.css( '-webkit-transform', cssTransform )
 						.css( 'transform', cssTransform )
