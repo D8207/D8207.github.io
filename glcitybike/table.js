@@ -40,6 +40,9 @@ jQuery( function( $, undefined ) {
 		} );
 	};
 
+	var compassListening = false;
+	var compassAlpha = 0;
+
 	var updateDir = function( lat, lng ) {
 		console.log( 'Updating directions using lat = ' + lat + ', lng = ' + lng );
 
@@ -58,11 +61,12 @@ jQuery( function( $, undefined ) {
 
 			var cssTransform = 'rotate(' + bearing + 'deg)';
 			$this.empty()
-				.append( $( '<span/>' ).addClass( 'dir-arrow' ).text( '↑' )
-					.css( '-ms-transform', cssTransform )
-					.css( '-webkit-transform', cssTransform )
-					.css( 'transform', cssTransform )
-				).append( $( '<span/>' )
+				.append( $( '<span/>' ).addClass( 'dir-arrow dir-compass').append(
+					$( '<span/>' ).addClass( 'dir-arrow' ).text( '↑' )
+						.css( '-ms-transform', cssTransform )
+						.css( '-webkit-transform', cssTransform )
+						.css( 'transform', cssTransform )
+				) ).append( $( '<span/>' )
 					.html(
 						'&nbsp;<span class="sort-value">'
 						+ Math.round( distance * 1000 )
@@ -70,6 +74,26 @@ jQuery( function( $, undefined ) {
 					)
 				);
 		} );
+
+		if ( !compassListening ) {
+			compassListening = true;
+
+			if ( window.DeviceOrientationEvent ) {
+				addEventListener( 'deviceorientation', function( e ) {
+					compassAlpha = e.alpha || 0;
+				}, false );
+
+				var updateCompass = function() {
+					var cssTransform = 'rotate(' + compassAlpha + 'deg)';
+					$( '.dir-compass' )
+						.css( '-ms-transform', cssTransform )
+						.css( '-webkit-transform', cssTransform )
+						.css( 'transform', cssTransform );
+					requestAnimationFrame( updateCompass );
+				};
+				requestAnimationFrame( updateCompass );
+			}
+		}
 
 		$( '#datatable' ).trigger( 'update' );
 	};
