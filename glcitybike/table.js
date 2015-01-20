@@ -217,15 +217,12 @@ jQuery( function( $, undefined ) {
 
 		$( '.num-container' ).on( 'reload-num', function() {
 			var $this = $( this );
+			var id = $this.data( 'id' ), type = $this.data( 'type' ), number = 0;
 
-			if ( numbers[$this.data( 'id' )] !== undefined
-				&& numbers[$this.data( 'id' )][$this.data( 'type' )] !== undefined
-			) {
+			if ( numbers[id] !== undefined && numbers[id][type] !== undefined ) {
 				// We have the number ready
-				$this.empty().text( numbers[$this.data( 'id' )][$this.data( 'type' )] );
-				$( '.num-graph.id-' + $this.data( 'id' ) + '.type-' + $this.data( 'type' ) ).width(
-					numbers[$this.data( 'id' )][$this.data( 'type' )] * 2
-				);
+				number = numbers[id][type];
+				$this.empty().text( number );
 			} else {
 				// Use an image
 				var $img = $( 'img', $this );
@@ -233,13 +230,13 @@ jQuery( function( $, undefined ) {
 					$img = $( '<img/>' ).appendTo( $this.empty() );
 				}
 				$img.attr( 'src',
-					'http://218.93.33.59:85/map/guilinmap/ibikegif.asp?id='
-					+ $this.data( 'id' ) + '&flag=' + (
-						$this.data( 'type' ) == 'bike' ? '1' : /* rack */ '2'
+					'http://218.93.33.59:85/map/guilinmap/ibikegif.asp?id=' + id + '&flag=' + (
+						type == 'bike' ? '1' : /* rack */ '2'
 					) + '&_=' + new Date().getTime()
 				);
 			}
 
+			$( '.num-graph.id-' + id + '.type-' + type ).width( number * 2 );
 		} ).on( 'click', function() {
 			// This mainly works around broken images due to network failure
 			$( this ).trigger( 'reload-num' );
