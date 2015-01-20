@@ -15,7 +15,7 @@ jQuery( function( $, undefined ) {
 		$.ajax( {
 			dataType: 'script',
 			// Will this data source be stable enough?
-			url: 'http://ws.ibike668.com:81/WeiChat.php?myloc=110.2901685,25.2780122&e=1&k=ae5ec12e93b68f4fc20648ad95e04e96&d=10'
+			url: 'http://misc.crutils.tk/glcitybike/stations/'
 		} ).done( function() {
 			var data = window.ibike;
 			window.ibike = undefined;
