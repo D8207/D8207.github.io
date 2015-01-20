@@ -64,9 +64,11 @@ jQuery( function( $, undefined ) {
 			$this.empty()
 				.append( $( '<span/>' ).addClass( 'dir-arrow dir-compass').append(
 					$( '<span/>' ).addClass( 'dir-arrow' ).text( arrow )
-						.css( '-ms-transform', cssTransform )
-						.css( '-webkit-transform', cssTransform )
-						.css( 'transform', cssTransform )
+						.css( {
+							'-ms-transform': cssTransform,
+							'-webkit-transform': cssTransform,
+							'transform': cssTransform
+						} )
 				) ).append( $( '<span/>' )
 					.html(
 						'&nbsp;<span class="sort-value">'
@@ -87,9 +89,11 @@ jQuery( function( $, undefined ) {
 				var updateCompass = function() {
 					var cssTransform = 'rotate(' + compassAlpha + 'deg)';
 					$( '.dir-compass' )
-						.css( '-ms-transform', cssTransform )
-						.css( '-webkit-transform', cssTransform )
-						.css( 'transform', cssTransform );
+						.css( {
+							'-ms-transform': cssTransform,
+							'-webkit-transform': cssTransform,
+							'transform': cssTransform
+						} );
 					requestAnimationFrame( updateCompass );
 				};
 				requestAnimationFrame( updateCompass );
