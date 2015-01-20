@@ -12,11 +12,11 @@
 	display: inline-block;
 	border: solid 1px #ddd;
 }
-.graph-box-left {
-	background: #fff;
-}
-.graph-box-right {
+.type-bike.num-graph {
 	background: #e6eeee;
+}
+.type-rack.num-graph {
+	background: #fff;
 }
 /* direction marks */
 .dir-arrow {
