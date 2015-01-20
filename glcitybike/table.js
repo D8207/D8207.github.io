@@ -186,7 +186,13 @@ jQuery( function( $, undefined ) {
 				)
 				.append( $( '<td/>' ).append( $( '<span/>' ).addClass( 'num-container' )
 					.data( 'id', station.id ).data( 'type', 'bike' ).text( '...' )
-				) )
+				).addClass( 'right' ) )
+				.append( $( '<td/>' ).append( $( '<div/>' ).addClass( 'num-graph graph-box-left' )
+					.addClass( 'type-bike id-' + station.id ).html( '&nbsp;' ).width( 0 )
+				).addClass( 'right graph-left' ) )
+				.append( $( '<td/>' ).append( $( '<div/>' ).addClass( 'num-graph graph-box-right' )
+					.addClass( 'type-rack id-' + station.id ).html( '&nbsp;' ).width( 0 )
+				).addClass( 'graph-right' ) )
 				.append( $( '<td/>' ).append( $( '<span/>' ).addClass( 'num-container' )
 					.data( 'id', station.id ).data( 'type', 'rack' ).text( '...' )
 				) )
@@ -195,6 +201,10 @@ jQuery( function( $, undefined ) {
 		} );
 
 		$( '#datatable' ).tablesorter( {
+			headers: {
+				4: { sorter: false },
+				5: { sorter: false }
+			},
 			textExtraction: function( node ) {
 				var $value = $( '.sort-value', node );
 				if ( $value.length ) {
@@ -213,6 +223,9 @@ jQuery( function( $, undefined ) {
 			) {
 				// We have the number ready
 				$this.empty().text( numbers[$this.data( 'id' )][$this.data( 'type' )] );
+				$( '.num-graph.id-' + $this.data( 'id' ) + '.type-' + $this.data( 'type' ) ).width(
+					numbers[$this.data( 'id' )][$this.data( 'type' )] * 2
+				);
 			} else {
 				// Use an image
 				var $img = $( 'img', $this );

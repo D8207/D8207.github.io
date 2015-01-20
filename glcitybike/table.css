@@ -1,3 +1,23 @@
+/* columns */
+.right {
+	text-align: right;
+}
+.graph-left {
+	padding-right: 0 !important;
+}
+.graph-right {
+	padding-left: 0 !important;
+}
+.num-graph {
+	display: inline-block;
+	border: solid 1px #ddd;
+}
+.graph-box-left {
+	background: #fff;
+}
+.graph-box-right {
+	background: #e6eeee;
+}
 /* direction marks */
 .dir-arrow {
 	display: inline-block;
