@@ -1,10 +1,10 @@
 <script>
-	var answer_required = '_1_3_6_7_15_16_17_18_20_21_22_26_30_31_36_37_38_39_40_42_44_45_46_51_52_55_56_63_64_65_66_67_68_70_73_74_75_76_77_';
+	var answer_required = '_1_3_6_12_13_14_15_16_17_18_23_24_27_28_29_31_33_34_35_38_41_46_47_48_49_50_51_52_53_54_';
 </script>
 	    <ul class="con">
 	         <li class="clearfix">
 	        	<dl>
-	            	<dt>您目前所在的省市？</dt>
+	            	<dt>您常住地所在的省市？</dt>
 	                <dd class="flsel2">
 	                	
 	                	<div>
@@ -22,12 +22,23 @@
 	           
     <li class="clearfix">
         <dl>
-            <dt>您的性别：</dt>
+            <dt>列车到站晚点情况：</dt>
             <dd>
                 <label>
-                    <input name="101" type="radio" value="225" />男</label>
+                    <input name="106" type="radio" value="231" />准点</label>
                 <label>
-                    <input name="101" type="radio" value="226" />女</label>
+                    <input name="106" type="radio" value="232" />晚1小时内</label>
+                <label>
+                	<input name="106" type="radio" value="233" />晚1-2小时</label>
+                <label>
+                    <input name="106" type="radio" value="234" />晚2-3小时</label>
+                 <label>
+                    <input name="106" type="radio" value="235" />晚3-4小时</label>
+                <label>
+                    <input name="106" type="radio" value="236" />晚4-5小时</label>
+                <label>
+                	<input name="106" type="radio" value="237" />晚5小时以上</label>
+               
             </dd>
         </dl>
     </li>
@@ -48,25 +59,7 @@
             </dd>
         </dl>
     </li>
-    <li class="clearfix">
-        <dl>
-            <dt>您的年龄段：</dt>
-            <dd>
-                <label>
-                    <input name="103" type="radio" value="206" />18岁以下</label>
-                <label>
-                    <input name="103" type="radio" value="207" />18～29岁</label>
-                <label>
-                    <input name="103" type="radio" value="208" />30～39岁</label>
-                <label>
-                    <input name="103" type="radio" value="209" />40～49岁</label>
-                <label>
-                    <input name="103" type="radio" value="210" />50～59岁</label>
-                <label>
-                    <input name="103" type="radio" value="211" />60岁以上</label>
-            </dd>
-        </dl>
-    </li>
+   
     <li class="clearfix">
         <dl>
             <dt>您目前从事的职业：</dt>
@@ -226,49 +219,54 @@
             </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>6.您本次旅行的购票方式？
+                        <dt>6.您认为购票方便吗？
                             <span>(*&nbsp;必选)</span>
                         </dt>
-                        <dd>
+                         <dd>
                             <label>
-                                <input name="6" type="radio" value="071" />车站售票处</label>
+                                <input name="6" type="radio" value="031" />特别不方便</label>
                             <label>
-                                <input name="6" type="radio" value="072" />代售点</label>
+                                <input name="6" type="radio" value="032" />很不方便</label>
                             <label>
-                                <input name="6" type="radio" value="073" />电话订票</label>
+                                <input name="6" type="radio" value="033" />比较不方便</label>
                             <label>
-                                <input name="6" type="radio" value="074" />网上购票</label>
+                                <input name="6" type="radio" value="004" />一般</label>
                             <label>
-                                <input name="6" type="radio" value="075" />其他</label>
+                                <input name="6" type="radio" value="035" />比较方便</label>
+                            <label>
+                                <input name="6" type="radio" value="036" />很方便</label>
+                            <label>
+                                <input name="6" type="radio" value="037" />特别方便</label>
                         </dd>
                     </dl>
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>7.您认为购票方便吗？
-                            <span>(*&nbsp;必选)</span>
+                        <dt>7.您认为车站售票厅的购票秩序怎么样？
                         </dt>
-                        <dd>
+                       <dd>
                             <label>
-                                <input name="7" type="radio" value="031" />特别不方便</label>
+                                <input name="7" type="radio" value="001" />特别差</label>
                             <label>
-                                <input name="7" type="radio" value="032" />很不方便</label>
+                                <input name="7" type="radio" value="002" />很差</label>
                             <label>
-                                <input name="7" type="radio" value="033" />比较不方便</label>
+                                <input name="7" type="radio" value="003" />比较差</label>
                             <label>
                                 <input name="7" type="radio" value="004" />一般</label>
                             <label>
-                                <input name="7" type="radio" value="035" />比较方便</label>
+                                <input name="7" type="radio" value="005" />比较好</label>
                             <label>
-                                <input name="7" type="radio" value="036" />很方便</label>
+                                <input name="7" type="radio" value="006" />很好</label>
                             <label>
-                                <input name="7" type="radio" value="037" />特别方便</label>
+                                <input name="7" type="radio" value="007" />特别好</label>
+                            <label>
+                                <input name="7" type="radio" value="100" />未关注</label>
                         </dd>
                     </dl>
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>8.您对车站公布的购票信息满意吗？</dt>
+                        <dt>8.您对在车站的购票等待时间满意吗？</dt>
                         <dd>
                             <label>
                                 <input name="8" type="radio" value="011" />特别不满意</label>
@@ -291,7 +289,7 @@
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>9.您对车站售票厅的环境卫生满意吗？</dt>
+                        <dt>9.您对车站售票人员的服务态度满意吗？</dt>
                         <dd>
                             <label>
                                 <input name="9" type="radio" value="011" />特别不满意</label>
@@ -314,22 +312,22 @@
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>10.您对车站售票人员的服务态度满意吗？</dt>
+                        <dt>10.车站的自助售票设施能正常使用吗？</dt>
                         <dd>
                             <label>
-                                <input name="10" type="radio" value="011" />特别不满意</label>
+                                <input name="10" type="radio" value="001" />特别差</label>
                             <label>
-                                <input name="10" type="radio" value="012" />很不满意</label>
+                                <input name="10" type="radio" value="002" />很差</label>
                             <label>
-                                <input name="10" type="radio" value="013" />比较不满意</label>
+                                <input name="10" type="radio" value="003" />比较差</label>
                             <label>
                                 <input name="10" type="radio" value="004" />一般</label>
                             <label>
-                                <input name="10" type="radio" value="015" />比较满意</label>
+                                <input name="10" type="radio" value="005" />比较好</label>
                             <label>
-                                <input name="10" type="radio" value="016" />很满意</label>
+                                <input name="10" type="radio" value="006" />很好</label>
                             <label>
-                                <input name="10" type="radio" value="017" />特别满意</label>
+                                <input name="10" type="radio" value="007" />特别好</label>
                             <label>
                                 <input name="10" type="radio" value="100" />未关注</label>
                         </dd>
@@ -337,30 +335,30 @@
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>11.您认为车站售票厅的购票秩序怎么样？</dt>
+                        <dt>11.您认为车站改签、退票方便吗？</dt>
                         <dd>
                             <label>
-                                <input name="11" type="radio" value="001" />特别差</label>
+                                <input name="11" type="radio" value="031" />特别不方便</label>
                             <label>
-                                <input name="11" type="radio" value="002" />很差</label>
+                                <input name="11" type="radio" value="032" />很不方便</label>
                             <label>
-                                <input name="11" type="radio" value="003" />比较差</label>
+                                <input name="11" type="radio" value="033" />比较不方便</label>
                             <label>
                                 <input name="11" type="radio" value="004" />一般</label>
                             <label>
-                                <input name="11" type="radio" value="005" />比较好</label>
+                                <input name="11" type="radio" value="035" />比较方便</label>
                             <label>
-                                <input name="11" type="radio" value="006" />很好</label>
+                                <input name="11" type="radio" value="036" />很方便</label>
                             <label>
-                                <input name="11" type="radio" value="007" />特别好</label>
+                                <input name="11" type="radio" value="037" />特别方便</label>
                             <label>
                                 <input name="11" type="radio" value="100" />未关注</label>
                         </dd>
                     </dl>
                 </li>
-                <li class="clearfix">
+              <li class="clearfix">
                     <dl>
-                        <dt>12.车站的自助售票设施能正常使用吗？</dt>
+                        <dt>12.您对车站的引导信息满意吗？<span>(*&nbsp;必选)</span></dt>
                         <dd>
                             <label>
                                 <input name="12" type="radio" value="001" />特别差</label>
@@ -376,60 +374,54 @@
                                 <input name="12" type="radio" value="006" />很好</label>
                             <label>
                                 <input name="12" type="radio" value="007" />特别好</label>
-                            <label>
-                                <input name="12" type="radio" value="100" />未关注</label>
                         </dd>
                     </dl>
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>13.您对在车站的购票等待时间满意吗？</dt>
+                        <dt>13.您认为候车室内的温度合适吗？<span>(*&nbsp;必选)</span></dt>
                         <dd>
                             <label>
-                                <input name="13" type="radio" value="011" />特别不满意</label>
+                                <input name="13" type="radio" value="051" />特别不合适</label>
                             <label>
-                                <input name="13" type="radio" value="012" />很不满意</label>
+                                <input name="13" type="radio" value="052" />很不合适</label>
                             <label>
-                                <input name="13" type="radio" value="013" />比较不满意</label>
+                                <input name="13" type="radio" value="053" />比较不合适</label>
                             <label>
                                 <input name="13" type="radio" value="004" />一般</label>
                             <label>
-                                <input name="13" type="radio" value="015" />比较满意</label>
+                                <input name="13" type="radio" value="055" />比较合适</label>
                             <label>
-                                <input name="13" type="radio" value="016" />很满意</label>
+                                <input name="13" type="radio" value="056" />很合适</label>
                             <label>
-                                <input name="13" type="radio" value="017" />特别满意</label>
-                            <label>
-                                <input name="13" type="radio" value="100" />未关注</label>
+                                <input name="13" type="radio" value="057" />特别合适</label>
                         </dd>
                     </dl>
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>14.您认为车站改签、退票方便吗？</dt>
-                        <dd>
+                        <dt>14.您认为候车室内的空气质量满意吗？<span>(*&nbsp;必选)</span></dt>
+                       <dd>
                             <label>
-                                <input name="14" type="radio" value="031" />特别不方便</label>
+                                <input name="14" type="radio" value="011" />特别不满意</label>
                             <label>
-                                <input name="14" type="radio" value="032" />很不方便</label>
+                                <input name="14" type="radio" value="012" />很不满意</label>
                             <label>
-                                <input name="14" type="radio" value="033" />比较不方便</label>
+                                <input name="14" type="radio" value="013" />比较不满意</label>
                             <label>
                                 <input name="14" type="radio" value="004" />一般</label>
                             <label>
-                                <input name="14" type="radio" value="035" />比较方便</label>
+                                <input name="14" type="radio" value="015" />比较满意</label>
                             <label>
-                                <input name="14" type="radio" value="036" />很方便</label>
+                                <input name="14" type="radio" value="016" />很满意</label>
                             <label>
-                                <input name="14" type="radio" value="037" />特别方便</label>
-                            <label>
-                                <input name="14" type="radio" value="100" />未关注</label>
+                                <input name="14" type="radio" value="017" />特别满意</label>
                         </dd>
                     </dl>
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>15.您对站内的引导信息满意吗？
+                        <dt>15.您对车站电梯的使用情况满意吗？
                             <span>(*&nbsp;必选)</span>
                         </dt>
                         <dd>
@@ -452,53 +444,53 @@
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>16.您认为车站的安全检查便捷吗？
+                        <dt>16.您对候车室的秩序及安全状况满意吗？
                             <span>(*&nbsp;必选)</span>
                         </dt>
-                        <dd>
+                       <dd>
                             <label>
-                                <input name="16" type="radio" value="121" />特别不便捷</label>
+                                <input name="16" type="radio" value="011" />特别不满意</label>
                             <label>
-                                <input name="16" type="radio" value="122" />很不便捷</label>
+                                <input name="16" type="radio" value="012" />很不满意</label>
                             <label>
-                                <input name="16" type="radio" value="123" />比较不便捷</label>
+                                <input name="16" type="radio" value="013" />比较不满意</label>
                             <label>
                                 <input name="16" type="radio" value="004" />一般</label>
                             <label>
-                                <input name="16" type="radio" value="125" />比较便捷</label>
+                                <input name="16" type="radio" value="015" />比较满意</label>
                             <label>
-                                <input name="16" type="radio" value="126" />很便捷</label>
+                                <input name="16" type="radio" value="016" />很满意</label>
                             <label>
-                                <input name="16" type="radio" value="127" />特别便捷</label>
+                                <input name="16" type="radio" value="017" />特别满意</label>
                         </dd>
                     </dl>
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>17.您认为候车室内的温度合适吗？
+                        <dt>17.您对车站工作人员的服务态度满意吗？
                             <span>(*&nbsp;必选)</span>
                         </dt>
-                        <dd>
+                       <dd>
                             <label>
-                                <input name="17" type="radio" value="051" />特别不合适</label>
+                                <input name="17" type="radio" value="011" />特别不满意</label>
                             <label>
-                                <input name="17" type="radio" value="052" />很不合适</label>
+                                <input name="17" type="radio" value="012" />很不满意</label>
                             <label>
-                                <input name="17" type="radio" value="053" />比较不合适</label>
+                                <input name="17" type="radio" value="013" />比较不满意</label>
                             <label>
                                 <input name="17" type="radio" value="004" />一般</label>
                             <label>
-                                <input name="17" type="radio" value="055" />比较合适</label>
+                                <input name="17" type="radio" value="015" />比较满意</label>
                             <label>
-                                <input name="17" type="radio" value="056" />很合适</label>
+                                <input name="17" type="radio" value="016" />很满意</label>
                             <label>
-                                <input name="17" type="radio" value="057" />特别合适</label>
+                                <input name="17" type="radio" value="017" />特别满意</label>
                         </dd>
                     </dl>
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>18.您认为候车室内的空气质量满意吗？
+                        <dt>18.您对车站的环境卫生满意吗？
                             <span>(*&nbsp;必选)</span>
                         </dt>
                         <dd>
@@ -519,7 +511,7 @@
                         </dd>
                     </dl>
                 </li>
-                <li class="clearfix">
+             <li class="clearfix">
                     <dl>
                         <dt>19.候车室的厕所设施能正常使用吗？</dt>
                         <dd>
@@ -544,8 +536,7 @@
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>20.您候车时，对人身财产安全状况满意吗？
-                            <span>(*&nbsp;必选)</span>
+                        <dt>20.您对候车室厕所的卫生情况满意吗？
                         </dt>
                         <dd>
                             <label>
@@ -562,13 +553,15 @@
                                 <input name="20" type="radio" value="016" />很满意</label>
                             <label>
                                 <input name="20" type="radio" value="017" />特别满意</label>
+                            <label>
+                                <input name="20" type="radio" value="100" />未关注</label>
                         </dd>
                     </dl>
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>21.您对候车室的秩序满意吗？
-                            <span>(*&nbsp;必选)</span>
+                        <dt>21.您对候车室的开水供应情况满意吗？
+                           
                         </dt>
                         <dd>
                             <label>
@@ -585,13 +578,15 @@
                                 <input name="21" type="radio" value="016" />很满意</label>
                             <label>
                                 <input name="21" type="radio" value="017" />特别满意</label>
+                                 <label>
+                                <input name="21" type="radio" value="100" />未关注</label>
                         </dd>
                     </dl>
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>22.您对车站工作人员的服务态度满意吗？
-                            <span>(*&nbsp;必选)</span>
+                        <dt>22.您对候车室洗漱用水供应满意吗？
+                           
                         </dt>
                         <dd>
                             <label>
@@ -608,12 +603,14 @@
                                 <input name="22" type="radio" value="016" />很满意</label>
                             <label>
                                 <input name="22" type="radio" value="017" />特别满意</label>
+                                 <label>
+                                <input name="22" type="radio" value="100" />未关注</label>
                         </dd>
                     </dl>
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>23.您对车站工作人员解答问讯满意吗？</dt>
+                        <dt>23.您对候车室的信息公告满意吗？ <span>(*&nbsp;必选)</span></dt>
                         <dd>
                             <label>
                                 <input name="23" type="radio" value="011" />特别不满意</label>
@@ -629,14 +626,13 @@
                                 <input name="23" type="radio" value="016" />很满意</label>
                             <label>
                                 <input name="23" type="radio" value="017" />特别满意</label>
-                            <label>
-                                <input name="23" type="radio" value="100" />未关注</label>
+                            
                         </dd>
                     </dl>
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>24.您满意车站工作人员对重点旅客（老幼病残孕）的照顾吗？</dt>
+                        <dt>24.您对车站设定的检票时间满意吗？ <span>(*&nbsp;必选)</span></dt>
                         <dd>
                             <label>
                                 <input name="24" type="radio" value="011" />特别不满意</label>
@@ -652,38 +648,37 @@
                                 <input name="24" type="radio" value="016" />很满意</label>
                             <label>
                                 <input name="24" type="radio" value="017" />特别满意</label>
-                            <label>
-                                <input name="24" type="radio" value="100" />未关注</label>
+                          
                         </dd>
                     </dl>
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>25.您认为车站工作人员对特殊情况的应急处理怎么样？</dt>
+                        <dt>25.您对车站商品销售的商品质量满意吗？</dt>
                         <dd>
                             <label>
-                                <input name="25" type="radio" value="001" />特别差</label>
+                                <input name="25" type="radio" value="011" />特别不满意</label>
                             <label>
-                                <input name="25" type="radio" value="002" />很差</label>
+                                <input name="25" type="radio" value="012" />很不满意</label>
                             <label>
-                                <input name="25" type="radio" value="003" />比较差</label>
+                                <input name="25" type="radio" value="013" />比较不满意</label>
                             <label>
                                 <input name="25" type="radio" value="004" />一般</label>
                             <label>
-                                <input name="25" type="radio" value="005" />比较好</label>
+                                <input name="25" type="radio" value="015" />比较满意</label>
                             <label>
-                                <input name="25" type="radio" value="006" />很好</label>
+                                <input name="25" type="radio" value="016" />很满意</label>
                             <label>
-                                <input name="25" type="radio" value="007" />特别好</label>
-                            <label>
+                                <input name="25" type="radio" value="017" />特别满意</label>
+                                 <label>
                                 <input name="25" type="radio" value="100" />未关注</label>
                         </dd>
                     </dl>
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>26.您对候车室的环境卫生满意吗？
-                            <span>(*&nbsp;必选)</span>
+                        <dt>26.您认为车站销售的商品价格合适吗？
+                          
                         </dt>
                         <dd>
                             <label>
@@ -700,12 +695,15 @@
                                 <input name="26" type="radio" value="016" />很满意</label>
                             <label>
                                 <input name="26" type="radio" value="017" />特别满意</label>
+                                 <label>
+                                <input name="26" type="radio" value="100" />未关注</label>
                         </dd>
                     </dl>
                 </li>
-                <li class="clearfix">
+               
+         <li class="clearfix">
                     <dl>
-                        <dt>27.您对候车室厕所的卫生情况满意吗？</dt>
+                        <dt>27.您对站台上的等待秩序满意吗？ <span>(*&nbsp;必选)</span></dt>
                         <dd>
                             <label>
                                 <input name="27" type="radio" value="011" />特别不满意</label>
@@ -721,14 +719,13 @@
                                 <input name="27" type="radio" value="016" />很满意</label>
                             <label>
                                 <input name="27" type="radio" value="017" />特别满意</label>
-                            <label>
-                                <input name="27" type="radio" value="100" />未关注</label>
+                         
                         </dd>
                     </dl>
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>28.您对候车室的开水供应情况满意吗？</dt>
+                        <dt>28.您对站台工作人员的服务满意吗？ <span>(*&nbsp;必选)</span></dt>
                         <dd>
                             <label>
                                 <input name="28" type="radio" value="011" />特别不满意</label>
@@ -744,14 +741,13 @@
                                 <input name="28" type="radio" value="016" />很满意</label>
                             <label>
                                 <input name="28" type="radio" value="017" />特别满意</label>
-                            <label>
-                                <input name="28" type="radio" value="100" />未关注</label>
+                          
                         </dd>
                     </dl>
                 </li>
-                <li class="clearfix">
+             <li class="clearfix">
                     <dl>
-                        <dt>29.您对候车室洗漱用水供应满意吗？</dt>
+                        <dt>29.您对车内的温度满意吗？ <span>(*&nbsp;必选)</span></dt>
                         <dd>
                             <label>
                                 <input name="29" type="radio" value="011" />特别不满意</label>
@@ -767,37 +763,36 @@
                                 <input name="29" type="radio" value="016" />很满意</label>
                             <label>
                                 <input name="29" type="radio" value="017" />特别满意</label>
-                            <label>
-                                <input name="29" type="radio" value="100" />未关注</label>
                         </dd>
                     </dl>
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>30.您对候车室的信息公告满意吗？
-                            <span>(*&nbsp;必选)</span>
+                        <dt>30.列车厕所设施能正常使用吗？
                         </dt>
                         <dd>
                             <label>
-                                <input name="30" type="radio" value="011" />特别不满意</label>
+                                <input name="30" type="radio" value="001" />特别差</label>
                             <label>
-                                <input name="30" type="radio" value="012" />很不满意</label>
+                                <input name="30" type="radio" value="002" />很差</label>
                             <label>
-                                <input name="30" type="radio" value="013" />比较不满意</label>
+                                <input name="30" type="radio" value="003" />比较差</label>
                             <label>
                                 <input name="30" type="radio" value="004" />一般</label>
                             <label>
-                                <input name="30" type="radio" value="015" />比较满意</label>
+                                <input name="30" type="radio" value="005" />比较好</label>
                             <label>
-                                <input name="30" type="radio" value="016" />很满意</label>
+                                <input name="30" type="radio" value="006" />很好</label>
                             <label>
-                                <input name="30" type="radio" value="017" />特别满意</label>
+                                <input name="30" type="radio" value="007" />特别好</label>
+                            <label>
+                                <input name="30" type="radio" value="100" />未关注</label>
                         </dd>
                     </dl>
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>31.您对车站设定的检票时间满意吗？
+                        <dt>31.您认为车内座套、窗帘、枕头、枕套、被褥等物品干净整洁吗？
                             <span>(*&nbsp;必选)</span>
                         </dt>
                         <dd>
@@ -820,7 +815,7 @@
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>32.您对车站提供的小件寄存服务满意吗？</dt>
+                        <dt>32.您对列车提供用品的及时补充满意吗？</dt>
                         <dd>
                             <label>
                                 <input name="32" type="radio" value="011" />特别不满意</label>
@@ -843,7 +838,7 @@
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>33.您对车站商品销售的商品品种满意吗？</dt>
+                        <dt>33.您对乘车时的人身财产安全状况满意吗？ <span>(*&nbsp;必选)</span></dt>
                         <dd>
                             <label>
                                 <input name="33" type="radio" value="011" />特别不满意</label>
@@ -859,14 +854,13 @@
                                 <input name="33" type="radio" value="016" />很满意</label>
                             <label>
                                 <input name="33" type="radio" value="017" />特别满意</label>
-                            <label>
-                                <input name="33" type="radio" value="100" />未关注</label>
+                          
                         </dd>
                     </dl>
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>34.您对车站商品销售的商品质量满意吗?</dt>
+                        <dt>34.您对列车工作人员的服务态度满意吗？ <span>(*&nbsp;必选)</span></dt>
                         <dd>
                             <label>
                                 <input name="34" type="radio" value="011" />特别不满意</label>
@@ -882,14 +876,12 @@
                                 <input name="34" type="radio" value="016" />很满意</label>
                             <label>
                                 <input name="34" type="radio" value="017" />特别满意</label>
-                            <label>
-                                <input name="34" type="radio" value="100" />未关注</label>
-                        </dd>
+                          
                     </dl>
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>35.您认为车站销售的商品价格合适吗？</dt>
+                        <dt>35.您对车内的环境卫生满意吗？ <span>(*&nbsp;必选)</span></dt>
                         <dd>
                             <label>
                                 <input name="35" type="radio" value="051" />特别不合适</label>
@@ -905,38 +897,38 @@
                                 <input name="35" type="radio" value="056" />很合适</label>
                             <label>
                                 <input name="35" type="radio" value="057" />特别合适</label>
-                            <label>
-                                <input name="35" type="radio" value="100" />未关注</label>
+                           
                         </dd>
                     </dl>
                 </li>
-            <li class="clearfix">
+                 <li class="clearfix">
                 <dl>
-                    <dt>36.您认为进站上车的过程顺畅吗？
-                        <span>(*&nbsp;必选)</span>
+                    <dt>36.您对车内的厕所卫生满意吗？
                     </dt>
                     <dd>
-                        <label>
-                            <input name="36" type="radio" value="081" />特别不顺畅</label>
-                        <label>
-                            <input name="36" type="radio" value="082" />很不顺畅</label>
-                        <label>
-                            <input name="36" type="radio" value="083" />比较不顺畅</label>
-                        <label>
-                            <input name="36" type="radio" value="004" />一般</label>
-                        <label>
-                            <input name="36" type="radio" value="085" />比较顺畅</label>
-                        <label>
-                            <input name="36" type="radio" value="086" />很顺畅</label>
-                        <label>
-                            <input name="36" type="radio" value="087" />特别顺畅</label>
-                    </dd>
+                            <label>
+                                <input name="36" type="radio" value="051" />特别不合适</label>
+                            <label>
+                                <input name="36" type="radio" value="052" />很不合适</label>
+                            <label>
+                                <input name="36" type="radio" value="053" />比较不合适</label>
+                            <label>
+                                <input name="36" type="radio" value="004" />一般</label>
+                            <label>
+                                <input name="36" type="radio" value="055" />比较合适</label>
+                            <label>
+                                <input name="36" type="radio" value="056" />很合适</label>
+                            <label>
+                                <input name="36" type="radio" value="057" />特别合适</label>
+                            <label>
+                                <input name="36" type="radio" value="100" />未关注</label>
+                        </dd>
                 </dl>
             </li>
-            <li class="clearfix">
+               
+                <li class="clearfix">
                 <dl>
-                    <dt>37.您对站台上的旅客引导信息满意吗？
-                        <span>(*&nbsp;必选)</span>
+                    <dt>37.您满意列车工作人员对有需求重点旅客（老幼病残孕）的照顾吗？
                     </dt>
                     <dd>
                         <label>
@@ -953,12 +945,14 @@
                             <input name="37" type="radio" value="016" />很满意</label>
                         <label>
                             <input name="37" type="radio" value="017" />特别满意</label>
+                              <label>
+                                <input name="37" type="radio" value="100" />未关注</label>
                     </dd>
                 </dl>
             </li>
             <li class="clearfix">
                 <dl>
-                    <dt>38.您对站台上的等待秩序满意吗？
+                    <dt>38.您对列车工作人员的仪容仪表满意吗？
                         <span>(*&nbsp;必选)</span>
                     </dt>
                     <dd>
@@ -981,8 +975,7 @@
             </li>
             <li class="clearfix">
                 <dl>
-                    <dt>39.您对站台工作人员的服务满意吗？
-                        <span>(*&nbsp;必选)</span>
+                    <dt>39.您对车内的开水供应满意吗？
                     </dt>
                     <dd>
                         <label>
@@ -999,13 +992,16 @@
                             <input name="39" type="radio" value="016" />很满意</label>
                         <label>
                             <input name="39" type="radio" value="017" />特别满意</label>
+                              <label>
+                                <input name="39" type="radio" value="100" />未关注</label>
                     </dd>
                 </dl>
             </li>
-                <li class="clearfix">
+            
+            
+             <li class="clearfix">
                     <dl>
-                        <dt>40.您对车内的温度满意吗？
-                            <span>(*&nbsp;必选)</span>
+                        <dt>40.您对列车的洗漱用水供应满意吗？
                         </dt>
                         <dd>
                             <label>
@@ -1022,12 +1018,14 @@
                                 <input name="40" type="radio" value="016" />很满意</label>
                             <label>
                                 <input name="40" type="radio" value="017" />特别满意</label>
+                                  <label>
+                                <input name="40" type="radio" value="100" />未关注</label>
                         </dd>
                     </dl>
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>41.列车厕所设施能正常使用吗？</dt>
+                        <dt>41.您对车内的广播服务满意吗？ <span>(*&nbsp;必选)</span></dt>
                         <dd>
                             <label>
                                 <input name="41" type="radio" value="001" />特别差</label>
@@ -1043,15 +1041,12 @@
                                 <input name="41" type="radio" value="006" />很好</label>
                             <label>
                                 <input name="41" type="radio" value="007" />特别好</label>
-                            <label>
-                                <input name="41" type="radio" value="100" />未关注</label>
                         </dd>
                     </dl>
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>42.您认为车内座套、台布、窗帘或枕头、被褥等备品干净整洁吗
-                            <span>(*&nbsp;必选)</span>
+                        <dt>42.您对车内销售的商品质量满意吗？
                         </dt>
                         <dd>
                             <label>
@@ -1068,12 +1063,14 @@
                                 <input name="42" type="radio" value="016" />很满意</label>
                             <label>
                                 <input name="42" type="radio" value="017" />特别满意</label>
+                                  <label>
+                                <input name="42" type="radio" value="100" />未关注</label>
                         </dd>
                     </dl>
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>43.您对列车提供的一次性用品的及时补充满意吗？</dt>
+                        <dt>43.您对车内销售的商品价格满意吗？</dt>
                         <dd>
                             <label>
                                 <input name="43" type="radio" value="011" />特别不满意</label>
@@ -1091,13 +1088,13 @@
                                 <input name="43" type="radio" value="017" />特别满意</label>
                             <label>
                                 <input name="43" type="radio" value="100" />未关注</label>
+                                
                         </dd>
                     </dl>
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>44.您对乘车时的人身财产安全状况满意吗？
-                            <span>(*&nbsp;必选)</span>
+                        <dt>44.您对餐车供应的饭菜质量满意吗？
                         </dt>
                         <dd>
                             <label>
@@ -1114,13 +1111,14 @@
                                 <input name="44" type="radio" value="016" />很满意</label>
                             <label>
                                 <input name="44" type="radio" value="017" />特别满意</label>
+                                  <label>
+                                <input name="44" type="radio" value="100" />未关注</label>
                         </dd>
                     </dl>
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>45.您对列车工作人员的服务态度满意吗？
-                            <span>(*&nbsp;必选)</span>
+                        <dt>45.您对餐车供应的饭菜价格满意吗？
                         </dt>
                         <dd>
                             <label>
@@ -1137,12 +1135,14 @@
                                 <input name="45" type="radio" value="016" />很满意</label>
                             <label>
                                 <input name="45" type="radio" value="017" />特别满意</label>
+                                  <label>
+                                <input name="45" type="radio" value="100" />未关注</label>
                         </dd>
                     </dl>
                 </li>
-                <li class="clearfix">
+             <li class="clearfix">
                     <dl>
-                        <dt>46.您对车内的环境卫生满意吗？
+                        <dt>46.您对出站的旅客引导信息满意吗？
                             <span>(*&nbsp;必选)</span>
                         </dt>
                         <dd>
@@ -1165,7 +1165,7 @@
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>47.您对车内的厕所卫生满意吗？</dt>
+                        <dt>47.您对出站验票服务满意吗？ <span>(*&nbsp;必选)</span></dt>
                         <dd>
                             <label>
                                 <input name="47" type="radio" value="011" />特别不满意</label>
@@ -1181,37 +1181,33 @@
                                 <input name="47" type="radio" value="016" />很满意</label>
                             <label>
                                 <input name="47" type="radio" value="017" />特别满意</label>
-                            <label>
-                                <input name="47" type="radio" value="100" />未关注</label>
                         </dd>
                     </dl>
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>48.您对列车工作人员解答问讯满意吗？</dt>
+                        <dt>48.您认为出站的通道顺畅吗？ <span>(*&nbsp;必选)</span></dt>
                         <dd>
-                            <label>
-                                <input name="48" type="radio" value="011" />特别不满意</label>
-                            <label>
-                                <input name="48" type="radio" value="012" />很不满意</label>
-                            <label>
-                                <input name="48" type="radio" value="013" />比较不满意</label>
-                            <label>
-                                <input name="48" type="radio" value="004" />一般</label>
-                            <label>
-                                <input name="48" type="radio" value="015" />比较满意</label>
-                            <label>
-                                <input name="48" type="radio" value="016" />很满意</label>
-                            <label>
-                                <input name="48" type="radio" value="017" />特别满意</label>
-                            <label>
-                                <input name="48" type="radio" value="100" />未关注</label>
-                        </dd>
+                        <label>
+                            <input name="48" type="radio" value="081" />特别不顺畅</label>
+                        <label>
+                            <input name="48" type="radio" value="082" />很不顺畅</label>
+                        <label>
+                            <input name="48" type="radio" value="083" />比较不顺畅</label>
+                        <label>
+                            <input name="48" type="radio" value="004" />一般</label>
+                        <label>
+                            <input name="48" type="radio" value="085" />比较顺畅</label>
+                        <label>
+                            <input name="48" type="radio" value="086" />很顺畅</label>
+                        <label>
+                            <input name="48" type="radio" value="087" />特别顺畅</label>
+                    </dd>
                     </dl>
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>49.您满意列车工作人员对重点旅客（老幼病残孕）的照顾吗？</dt>
+                        <dt>49.您对列车正点到达情况满意吗？ <span>(*&nbsp;必选)</span></dt>
                         <dd>
                             <label>
                                 <input name="49" type="radio" value="011" />特别不满意</label>
@@ -1227,37 +1223,34 @@
                                 <input name="49" type="radio" value="016" />很满意</label>
                             <label>
                                 <input name="49" type="radio" value="017" />特别满意</label>
-                            <label>
-                                <input name="49" type="radio" value="100" />未关注</label>
                         </dd>
                     </dl>
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>50.您认为列车工作人员对特殊情况的应急处理怎么样？</dt>
-                        <dd>
+                        <dt>50.您对列车超员控制情况满意吗？ <span>(*&nbsp;必选)</span></dt>
+                         <dd>
                             <label>
-                                <input name="50" type="radio" value="001" />特别差</label>
+                                <input name="50" type="radio" value="011" />特别不满意</label>
                             <label>
-                                <input name="50" type="radio" value="002" />很差</label>
+                                <input name="50" type="radio" value="012" />很不满意</label>
                             <label>
-                                <input name="50" type="radio" value="003" />比较差</label>
+                                <input name="50" type="radio" value="013" />比较不满意</label>
                             <label>
                                 <input name="50" type="radio" value="004" />一般</label>
                             <label>
-                                <input name="50" type="radio" value="005" />比较好</label>
+                                <input name="50" type="radio" value="015" />比较满意</label>
                             <label>
-                                <input name="50" type="radio" value="006" />很好</label>
+                                <input name="50" type="radio" value="016" />很满意</label>
                             <label>
-                                <input name="50" type="radio" value="007" />特别好</label>
-                            <label>
-                                <input name="50" type="radio" value="100" />未关注</label>
+                                <input name="50" type="radio" value="017" />特别满意</label>
+                          
                         </dd>
                     </dl>
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>51.您对列车工作人员使用礼貌用语满意吗？
+                        <dt>51.总的来看，您对本次旅行的满意程度如何？
                             <span>(*&nbsp;必选)</span>
                         </dt>
                         <dd>
@@ -1278,55 +1271,54 @@
                         </dd>
                     </dl>
                 </li>
+           
                 <li class="clearfix">
                     <dl>
-                        <dt>52.您对列车工作人员的仪容仪表满意吗？
+                        <dt>52.与您的预期比较，差距如何？
                             <span>(*&nbsp;必选)</span>
                         </dt>
-                        <dd>
+                       <dd>
                             <label>
-                                <input name="52" type="radio" value="011" />特别不满意</label>
+                                <input name="52" type="radio" value="061" />特别大</label>
                             <label>
-                                <input name="52" type="radio" value="012" />很不满意</label>
+                                <input name="52" type="radio" value="062" />很大</label>
                             <label>
-                                <input name="52" type="radio" value="013" />比较不满意</label>
+                                <input name="52" type="radio" value="063" />比较大</label>
                             <label>
                                 <input name="52" type="radio" value="004" />一般</label>
                             <label>
-                                <input name="52" type="radio" value="015" />比较满意</label>
+                                <input name="52" type="radio" value="065" />比较小</label>
                             <label>
-                                <input name="52" type="radio" value="016" />很满意</label>
+                                <input name="52" type="radio" value="066" />很小</label>
                             <label>
-                                <input name="52" type="radio" value="017" />特别满意</label>
+                                <input name="52" type="radio" value="067" />特别小</label>
                         </dd>
                     </dl>
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>53.您对车内的开水供应满意吗？</dt>
-                        <dd>
+                        <dt>53.您出行时愿意再次选择铁路吗？ <span>(*&nbsp;必选)</span></dt>
+                          <dd>
                             <label>
-                                <input name="53" type="radio" value="011" />特别不满意</label>
+                                <input name="53" type="radio" value="111" />特别不愿意</label>
                             <label>
-                                <input name="53" type="radio" value="012" />很不满意</label>
+                                <input name="53" type="radio" value="112" />很不愿意</label>
                             <label>
-                                <input name="53" type="radio" value="013" />比较不满意</label>
+                                <input name="53" type="radio" value="113" />比较不愿意</label>
                             <label>
                                 <input name="53" type="radio" value="004" />一般</label>
                             <label>
-                                <input name="53" type="radio" value="015" />比较满意</label>
+                                <input name="53" type="radio" value="115" />比较愿意</label>
                             <label>
-                                <input name="53" type="radio" value="016" />很满意</label>
+                                <input name="53" type="radio" value="116" />很愿意</label>
                             <label>
-                                <input name="53" type="radio" value="017" />特别满意</label>
-                            <label>
-                                <input name="53" type="radio" value="100" />未关注</label>
+                                <input name="53" type="radio" value="117" />特别愿意</label>
                         </dd>
                     </dl>
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>54.您对列车的洗漱用水供应满意吗？</dt>
+                        <dt>54.与其他运输方式相比，您认为铁路出行的性价比如何？ <span>(*&nbsp;必选)</span></dt>
                         <dd>
                             <label>
                                 <input name="54" type="radio" value="011" />特别不满意</label>
@@ -1342,545 +1334,12 @@
                                 <input name="54" type="radio" value="016" />很满意</label>
                             <label>
                                 <input name="54" type="radio" value="017" />特别满意</label>
-                            <label>
-                                <input name="54" type="radio" value="100" />未关注</label>
                         </dd>
                     </dl>
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>55.您对车内的广播服务满意吗？
-                            <span>(*&nbsp;必选)</span>
-                        </dt>
-                        <dd>
-                            <label>
-                                <input name="55" type="radio" value="011" />特别不满意</label>
-                            <label>
-                                <input name="55" type="radio" value="012" />很不满意</label>
-                            <label>
-                                <input name="55" type="radio" value="013" />比较不满意</label>
-                            <label>
-                                <input name="55" type="radio" value="004" />一般</label>
-                            <label>
-                                <input name="55" type="radio" value="015" />比较满意</label>
-                            <label>
-                                <input name="55" type="radio" value="016" />很满意</label>
-                            <label>
-                                <input name="55" type="radio" value="017" />特别满意</label>
-                        </dd>
-                    </dl>
-                </li>
-                <li class="clearfix">
-                    <dl>
-                        <dt>56.您对车内行李的摆放满意吗？
-                            <span>(*&nbsp;必选)</span>
-                        </dt>
-                        <dd>
-                            <label>
-                                <input name="56" type="radio" value="011" />特别不满意</label>
-                            <label>
-                                <input name="56" type="radio" value="012" />很不满意</label>
-                            <label>
-                                <input name="56" type="radio" value="013" />比较不满意</label>
-                            <label>
-                                <input name="56" type="radio" value="004" />一般</label>
-                            <label>
-                                <input name="56" type="radio" value="015" />比较满意</label>
-                            <label>
-                                <input name="56" type="radio" value="016" />很满意</label>
-                            <label>
-                                <input name="56" type="radio" value="017" />特别满意</label>
-                        </dd>
-                    </dl>
-                </li>
-                <li class="clearfix">
-                    <dl>
-                        <dt>57.您对列车商品销售的商品明码标价满意吗？</dt>
-                        <dd>
-                            <label>
-                                <input name="57" type="radio" value="011" />特别不满意</label>
-                            <label>
-                                <input name="57" type="radio" value="012" />很不满意</label>
-                            <label>
-                                <input name="57" type="radio" value="013" />比较不满意</label>
-                            <label>
-                                <input name="57" type="radio" value="004" />一般</label>
-                            <label>
-                                <input name="57" type="radio" value="015" />比较满意</label>
-                            <label>
-                                <input name="57" type="radio" value="016" />很满意</label>
-                            <label>
-                                <input name="57" type="radio" value="017" />特别满意</label>
-                            <label>
-                                <input name="57" type="radio" value="100" />未关注</label>
-                        </dd>
-                    </dl>
-                </li>
-                <li class="clearfix">
-                    <dl>
-                        <dt>58.您对车内销售的商品品种满意吗？</dt>
-                        <dd>
-                            <label>
-                                <input name="58" type="radio" value="011" />特别不满意</label>
-                            <label>
-                                <input name="58" type="radio" value="012" />很不满意</label>
-                            <label>
-                                <input name="58" type="radio" value="013" />比较不满意</label>
-                            <label>
-                                <input name="58" type="radio" value="004" />一般</label>
-                            <label>
-                                <input name="58" type="radio" value="015" />比较满意</label>
-                            <label>
-                                <input name="58" type="radio" value="016" />很满意</label>
-                            <label>
-                                <input name="58" type="radio" value="017" />特别满意</label>
-                            <label>
-                                <input name="58" type="radio" value="100" />未关注</label>
-                        </dd>
-                    </dl>
-                </li>
-                <li class="clearfix">
-                    <dl>
-                        <dt>59.您对车内销售的商品质量满意吗？</dt>
-                        <dd>
-                            <label>
-                                <input name="59" type="radio" value="011" />特别不满意</label>
-                            <label>
-                                <input name="59" type="radio" value="012" />很不满意</label>
-                            <label>
-                                <input name="59" type="radio" value="013" />比较不满意</label>
-                            <label>
-                                <input name="59" type="radio" value="004" />一般</label>
-                            <label>
-                                <input name="59" type="radio" value="015" />比较满意</label>
-                            <label>
-                                <input name="59" type="radio" value="016" />很满意</label>
-                            <label>
-                                <input name="59" type="radio" value="017" />特别满意</label>
-                            <label>
-                                <input name="59" type="radio" value="100" />未关注</label>
-                        </dd>
-                    </dl>
-                </li>
-                <li class="clearfix">
-                    <dl>
-                        <dt>60.您对车内销售的商品价格满意吗？</dt>
-                        <dd>
-                            <label>
-                                <input name="60" type="radio" value="011" />特别不满意</label>
-                            <label>
-                                <input name="60" type="radio" value="012" />很不满意</label>
-                            <label>
-                                <input name="60" type="radio" value="013" />比较不满意</label>
-                            <label>
-                                <input name="60" type="radio" value="004" />一般</label>
-                            <label>
-                                <input name="60" type="radio" value="015" />比较满意</label>
-                            <label>
-                                <input name="60" type="radio" value="016" />很满意</label>
-                            <label>
-                                <input name="60" type="radio" value="017" />特别满意</label>
-                            <label>
-                                <input name="60" type="radio" value="100" />未关注</label>
-                        </dd>
-                    </dl>
-                </li>
-                <li class="clearfix">
-                    <dl>
-                        <dt>61.您对餐车供应的饭菜质量满意吗？</dt>
-                        <dd>
-                            <label>
-                                <input name="61" type="radio" value="011" />特别不满意</label>
-                            <label>
-                                <input name="61" type="radio" value="012" />很不满意</label>
-                            <label>
-                                <input name="61" type="radio" value="013" />比较不满意</label>
-                            <label>
-                                <input name="61" type="radio" value="004" />一般</label>
-                            <label>
-                                <input name="61" type="radio" value="015" />比较满意</label>
-                            <label>
-                                <input name="61" type="radio" value="016" />很满意</label>
-                            <label>
-                                <input name="61" type="radio" value="017" />特别满意</label>
-                            <label>
-                                <input name="61" type="radio" value="100" />未关注</label>
-                        </dd>
-                    </dl>
-                </li>
-                <li class="clearfix">
-                    <dl>
-                        <dt>62.您对餐车供应的饭菜价格满意吗？</dt>
-                        <dd>
-                            <label>
-                                <input name="62" type="radio" value="011" />特别不满意</label>
-                            <label>
-                                <input name="62" type="radio" value="012" />很不满意</label>
-                            <label>
-                                <input name="62" type="radio" value="013" />比较不满意</label>
-                            <label>
-                                <input name="62" type="radio" value="004" />一般</label>
-                            <label>
-                                <input name="62" type="radio" value="015" />比较满意</label>
-                            <label>
-                                <input name="62" type="radio" value="016" />很满意</label>
-                            <label>
-                                <input name="62" type="radio" value="017" />特别满意</label>
-                            <label>
-                                <input name="62" type="radio" value="100" />未关注</label>
-                        </dd>
-                    </dl>
-                </li>
-            <li class="clearfix">
-                <dl>
-                    <dt>63.您对出站的旅客引导信息满意吗？
-                        <span>(*&nbsp;必选)</span>
-                    </dt>
-                    <dd>
-                        <label>
-                            <input name="63" type="radio" value="011" />特别不满意</label>
-                        <label>
-                            <input name="63" type="radio" value="012" />很不满意</label>
-                        <label>
-                            <input name="63" type="radio" value="013" />比较不满意</label>
-                        <label>
-                            <input name="63" type="radio" value="004" />一般</label>
-                        <label>
-                            <input name="63" type="radio" value="015" />比较满意</label>
-                        <label>
-                            <input name="63" type="radio" value="016" />很满意</label>
-                        <label>
-                            <input name="63" type="radio" value="017" />特别满意</label>
-                    </dd>
-                </dl>
-            </li>
-            <li class="clearfix">
-                <dl>
-                    <dt>64.您对出站验票服务满意吗？
-                        <span>(*&nbsp;必选)</span>
-                    </dt>
-                    <dd>
-                        <label>
-                            <input name="64" type="radio" value="011" />特别不满意</label>
-                        <label>
-                            <input name="64" type="radio" value="012" />很不满意</label>
-                        <label>
-                            <input name="64" type="radio" value="013" />比较不满意</label>
-                        <label>
-                            <input name="64" type="radio" value="004" />一般</label>
-                        <label>
-                            <input name="64" type="radio" value="015" />比较满意</label>
-                        <label>
-                            <input name="64" type="radio" value="016" />很满意</label>
-                        <label>
-                            <input name="64" type="radio" value="017" />特别满意</label>
-                    </dd>
-                </dl>
-            </li>
-            <li class="clearfix">
-                <dl>
-                    <dt>65.您认为出站的通道顺畅吗？
-                        <span>(*&nbsp;必选)</span>
-                    </dt>
-                    <dd>
-                        <label>
-                            <input name="65" type="radio" value="081" />特别不顺畅</label>
-                        <label>
-                            <input name="65" type="radio" value="082" />很不顺畅</label>
-                        <label>
-                            <input name="65" type="radio" value="083" />比较不顺畅</label>
-                        <label>
-                            <input name="65" type="radio" value="004" />一般</label>
-                        <label>
-                            <input name="65" type="radio" value="085" />比较顺畅</label>
-                        <label>
-                            <input name="65" type="radio" value="086" />很顺畅</label>
-                        <label>
-                            <input name="65" type="radio" value="087" />特别顺畅</label>
-                    </dd>
-                </dl>
-            </li>
-            <li class="clearfix">
-                <dl>
-                    <dt>66.您觉得铁路现行的车票价格合适吗？
-                        <span>(*&nbsp;必选)</span>
-                    </dt>
-                    <dd>
-                        <label>
-                            <input name="66" type="radio" value="051" />特别不合适</label>
-                        <label>
-                            <input name="66" type="radio" value="052" />很不合适</label>
-                        <label>
-                            <input name="66" type="radio" value="053" />比较不合适</label>
-                        <label>
-                            <input name="66" type="radio" value="004" />一般</label>
-                        <label>
-                            <input name="66" type="radio" value="055" />比较合适</label>
-                        <label>
-                            <input name="66" type="radio" value="056" />很合适</label>
-                        <label>
-                            <input name="66" type="radio" value="057" />特别合适</label>
-                    </dd>
-                </dl>
-            </li>
-            <li class="clearfix">
-                <dl>
-                    <dt>67.对应目前的车票价格，您对铁路的服务质量满意吗？
-                        <span>(*&nbsp;必选)</span>
-                    </dt>
-                    <dd>
-                        <label>
-                            <input name="67" type="radio" value="011" />特别不满意</label>
-                        <label>
-                            <input name="67" type="radio" value="012" />很不满意</label>
-                        <label>
-                            <input name="67" type="radio" value="013" />比较不满意</label>
-                        <label>
-                            <input name="67" type="radio" value="004" />一般</label>
-                        <label>
-                            <input name="67" type="radio" value="015" />比较满意</label>
-                        <label>
-                            <input name="67" type="radio" value="016" />很满意</label>
-                        <label>
-                            <input name="67" type="radio" value="017" />特别满意</label>
-                    </dd>
-                </dl>
-            </li>
-            <li class="clearfix">
-                <dl>
-                    <dt>68.对应目前的服务质量，您对铁路的车票价格满意吗？
-                        <span>(*&nbsp;必选)</span>
-                    </dt>
-                    <dd>
-                        <label>
-                            <input name="68" type="radio" value="011" />特别不满意</label>
-                        <label>
-                            <input name="68" type="radio" value="012" />很不满意</label>
-                        <label>
-                            <input name="68" type="radio" value="013" />比较不满意</label>
-                        <label>
-                            <input name="68" type="radio" value="004" />一般</label>
-                        <label>
-                            <input name="68" type="radio" value="015" />比较满意</label>
-                        <label>
-                            <input name="68" type="radio" value="016" />很满意</label>
-                        <label>
-                            <input name="68" type="radio" value="017" />特别满意</label>
-                    </dd>
-                </dl>
-            </li>
-                <li class="clearfix">
-                    <dl>
-                        <dt>69.您对铁路受理旅客投诉和建议满意吗？</dt>
-                        <dd>
-                            <label>
-                                <input name="69" type="radio" value="011" />特别不满意</label>
-                            <label>
-                                <input name="69" type="radio" value="012" />很不满意</label>
-                            <label>
-                                <input name="69" type="radio" value="013" />比较不满意</label>
-                            <label>
-                                <input name="69" type="radio" value="004" />一般</label>
-                            <label>
-                                <input name="69" type="radio" value="015" />比较满意</label>
-                            <label>
-                                <input name="69" type="radio" value="016" />很满意</label>
-                            <label>
-                                <input name="69" type="radio" value="017" />特别满意</label>
-                            <label>
-                                <input name="69" type="radio" value="100" />未关注</label>
-                        </dd>
-                    </dl>
-                </li>
-                <li class="clearfix">
-                    <dl>
-                        <dt>70.您认为与铁路服务人员的沟通便利吗？
-                            <span>(*&nbsp;必选)</span>
-                        </dt>
-                        <dd>
-                            <label>
-                                <input name="70" type="radio" value="091" />特别不便利</label>
-                            <label>
-                                <input name="70" type="radio" value="092" />很不便利</label>
-                            <label>
-                                <input name="70" type="radio" value="093" />比较不便利</label>
-                            <label>
-                                <input name="70" type="radio" value="004" />一般</label>
-                            <label>
-                                <input name="70" type="radio" value="095" />比较便利</label>
-                            <label>
-                                <input name="70" type="radio" value="096" />很便利</label>
-                            <label>
-                                <input name="70" type="radio" value="097" />特别便利</label>
-                        </dd>
-                    </dl>
-                </li>
-                <li class="clearfix">
-                    <dl>
-                        <dt>71.您对车站提供的行包办理业务满意吗？
-                        </dt>
-                        <dd>
-                            <label>
-                                <input name="71" type="radio" value="011" />特别不满意</label>
-                            <label>
-                                <input name="71" type="radio" value="012" />很不满意</label>
-                            <label>
-                                <input name="71" type="radio" value="013" />比较不满意</label>
-                            <label>
-                                <input name="71" type="radio" value="004" />一般</label>
-                            <label>
-                                <input name="71" type="radio" value="015" />比较满意</label>
-                            <label>
-                                <input name="71" type="radio" value="016" />很满意</label>
-                            <label>
-                                <input name="71" type="radio" value="017" />特别满意</label>
-                            <label>
-                                <input name="71" type="radio" value="100" />未关注</label>    
-                        </dd>
-                    </dl>
-                </li>
-                <li class="clearfix">
-                    <dl>
-                        <dt>72.您对车站提供的“小红帽”服务满意吗？
-                        </dt>
-                        <dd>
-                            <label>
-                                <input name="72" type="radio" value="011" />特别不满意</label>
-                            <label>
-                                <input name="72" type="radio" value="012" />很不满意</label>
-                            <label>
-                                <input name="72" type="radio" value="013" />比较不满意</label>
-                            <label>
-                                <input name="72" type="radio" value="004" />一般</label>
-                            <label>
-                                <input name="72" type="radio" value="015" />比较满意</label>
-                            <label>
-                                <input name="72" type="radio" value="016" />很满意</label>
-                            <label>
-                                <input name="72" type="radio" value="017" />特别满意</label>
-                            <label>
-                                <input name="72" type="radio" value="100" />未关注</label>       
-                        </dd>
-                    </dl>
-                </li>
-                <li class="clearfix">
-                    <dl>
-                        <dt>73.您对列车正点到达情况满意吗？
-                            <span>(*&nbsp;必选)</span>
-                        </dt>
-                        <dd>
-                            <label>
-                                <input name="73" type="radio" value="011" />特别不满意</label>
-                            <label>
-                                <input name="73" type="radio" value="012" />很不满意</label>
-                            <label>
-                                <input name="73" type="radio" value="013" />比较不满意</label>
-                            <label>
-                                <input name="73" type="radio" value="004" />一般</label>
-                            <label>
-                                <input name="73" type="radio" value="015" />比较满意</label>
-                            <label>
-                                <input name="73" type="radio" value="016" />很满意</label>
-                            <label>
-                                <input name="73" type="radio" value="017" />特别满意</label>
-                        </dd>
-                    </dl>
-                </li>
-                <li class="clearfix">
-                    <dl>
-                        <dt>74.您对列车超员控制情况满意吗？
-                            <span>(*&nbsp;必选)</span>
-                        </dt>
-                        <dd>
-                            <label>
-                                <input name="74" type="radio" value="011" />特别不满意</label>
-                            <label>
-                                <input name="74" type="radio" value="012" />很不满意</label>
-                            <label>
-                                <input name="74" type="radio" value="013" />比较不满意</label>
-                            <label>
-                                <input name="74" type="radio" value="004" />一般</label>
-                            <label>
-                                <input name="74" type="radio" value="015" />比较满意</label>
-                            <label>
-                                <input name="74" type="radio" value="016" />很满意</label>
-                            <label>
-                                <input name="74" type="radio" value="017" />特别满意</label>
-                        </dd>
-                    </dl>
-                </li>
-                <li class="clearfix">
-                    <dl>
-                        <dt>75.总的来看，您对铁路的满意程度如何？
-                            <span>(*&nbsp;必选)</span>
-                        </dt>
-                        <dd>
-                            <label>
-                                <input name="75" type="radio" value="011" />特别不满意</label>
-                            <label>
-                                <input name="75" type="radio" value="012" />很不满意</label>
-                            <label>
-                                <input name="75" type="radio" value="013" />比较不满意</label>
-                            <label>
-                                <input name="75" type="radio" value="004" />一般</label>
-                            <label>
-                                <input name="75" type="radio" value="015" />比较满意</label>
-                            <label>
-                                <input name="75" type="radio" value="016" />很满意</label>
-                            <label>
-                                <input name="75" type="radio" value="017" />特别满意</label>
-                        </dd>
-                    </dl>
-                </li>
-                <li class="clearfix">
-                    <dl>
-                        <dt>76.与您的预期比较，差距如何？
-                            <span>(*&nbsp;必选)</span>
-                        </dt>
-                        <dd>
-                            <label>
-                                <input name="76" type="radio" value="061" />特别大</label>
-                            <label>
-                                <input name="76" type="radio" value="062" />很大</label>
-                            <label>
-                                <input name="76" type="radio" value="063" />比较大</label>
-                            <label>
-                                <input name="76" type="radio" value="004" />一般</label>
-                            <label>
-                                <input name="76" type="radio" value="065" />比较小</label>
-                            <label>
-                                <input name="76" type="radio" value="066" />很小</label>
-                            <label>
-                                <input name="76" type="radio" value="067" />特别小</label>
-                        </dd>
-                    </dl>
-                </li>
-                <li class="clearfix">
-                    <dl>
-                        <dt>77.您出行时愿意再次选择铁路吗？
-                            <span>(*&nbsp;必选)</span>
-                        </dt>
-                        <dd>
-                            <label>
-                                <input name="77" type="radio" value="111" />特别不愿意</label>
-                            <label>
-                                <input name="77" type="radio" value="112" />很不愿意</label>
-                            <label>
-                                <input name="77" type="radio" value="113" />比较不愿意</label>
-                            <label>
-                                <input name="77" type="radio" value="004" />一般</label>
-                            <label>
-                                <input name="77" type="radio" value="115" />比较愿意</label>
-                            <label>
-                                <input name="77" type="radio" value="116" />很愿意</label>
-                            <label>
-                                <input name="77" type="radio" value="117" />特别愿意</label>
-                        </dd>
-                    </dl>
-                </li>
-                <li class="clearfix">
-                    <dl>
-                        <dt>78.对以上问题，您最关注的是？
+                        <dt>55.对以上问题，您最关注的是？
                             <span>(*&nbsp;必选)</span>
                         </dt>
                         <dd class="flsel2">
@@ -1912,38 +1371,10 @@
                         </dd>
                     </dl>
                 </li>
+               
                 <li class="clearfix">
                     <dl>
-                        <dt>79.对以上问题，您最不关注的是？</dt>
-                        <dd class="flsel2">
-                            <div>1.&nbsp;
-                                <select name='notFocus_class1' id='notFocus_class1' style='width:100px;'></select>
-                                <select name='notFocus_question1' id="notFocus_question1" style='width:400px;'>
-                                    <option selected="selected" value="问题">请选择</option>
-                                </select>
-                            </div>
-                        </dd>
-                        <dd class="flsel2">
-                            <div>2.&nbsp;
-                                <select name='notFocus_class2' id='notFocus_class2' style='width:100px;'></select>
-                                <select name='notFocus_question2' id="notFocus_question2" style='width:400px;'>
-                                    <option selected="selected" value="问题">请选择</option>
-                                </select>
-                            </div>
-                        </dd>
-                        <dd class="flsel2">
-                            <div>3.&nbsp;
-                                <select name='notFocus_class3' id='notFocus_class3' style='width:100px;'></select>
-                                <select name='notFocus_question3' id="notFocus_question3" style='width:400px;'>
-                                    <option selected="selected" value="问题">请选择</option>
-                                </select>
-                            </div>
-                        </dd>
-                    </dl>
-                </li>
-                <li class="clearfix">
-                    <dl>
-                        <dt>80.对以上问题，您最满意的是？</dt>
+                        <dt>56.对以上问题，您最满意的是？</dt>
                         <dd class="flsel2">
                             <div>1.&nbsp;
                                 <select name='satisfild_class1' id='satisfild_class1' style='width:100px;'></select>
@@ -1972,7 +1403,7 @@
                 </li>
                 <li class="clearfix">
                     <dl>
-                        <dt>81.对以上问题，您最不满意的是？
+                        <dt>57.对以上问题，您最不满意的是？
                             <span>(*&nbsp;必选)</span>
                         </dt>
                         <dd class="flsel2">
@@ -1982,7 +1413,7 @@
                                 style='width:400px;'>
                                     <option selected="selected" value="问题">请选择</option>
                                 </select>
-                                <span>
+                              
                             </div>
                         </dd>
                         <dd class="flsel2">

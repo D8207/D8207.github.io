@@ -17,11 +17,12 @@ jQuery( function( $, undefined ) {
 	var localStorage = window.localStorage || {};
 
 	var initAnswers = false;
-	if ( !localStorage.surwebAnswers ) {
+	var surwebAnswersKey = 'surwebAnswersV2';
+	if ( !localStorage[surwebAnswersKey] ) {
 		initAnswers = true;
 	} else {
 		try {
-			var surwebAnswers = JSON.parse( localStorage.surwebAnswers );
+			var surwebAnswers = JSON.parse( localStorage[surwebAnswersKey] );
 
 			if ( !$.isArray( surwebAnswers ) || surwebAnswers.length === 0 ) {
 				initAnswers = true;
@@ -32,12 +33,10 @@ jQuery( function( $, undefined ) {
 	}
 
 	if ( initAnswers ) {
-		localStorage.surwebAnswers = JSON.stringify( [
+		localStorage[surwebAnswersKey] = JSON.stringify( [
 			{
 				name: '（预置）',
-				province: null,
-				questionRadioAnswer: '{1:007,2:100,3:007,4:100,5:100,6:075,7:037,8:100,9:100,10:100,11:100,12:100,13:100,14:100,15:017,16:127,17:057,18:017,19:100,20:017,21:017,22:017,23:100,24:100,25:100,26:017,27:100,28:100,29:100,30:017,31:017,32:100,33:100,34:100,35:100,36:087,37:017,38:017,39:017,40:017,41:100,42:017,43:100,44:017,45:017,46:017,47:100,48:100,49:100,50:100,51:017,52:017,53:100,54:100,55:017,56:017,57:100,58:100,59:100,60:100,61:100,62:100,63:017,64:017,65:087,66:057,67:017,68:017,69:100,70:097,71:100,72:100,73:017,74:017,75:017,76:067,77:117,101:226,102:205,103:211,104:224,105:216}',
-				otherAnswer: '{78:购票的方便程度/车站的旅客引导信息/进站上车的过程/,79:,80:,81:列车内的温度/出站的通道/车票的价格/}'
+				data: {"passengerInfoAnswer":{},"questionRadioAnswer":{"1":"004","3":"004","6":"004","12":"004","13":"004","14":"004","15":"004","16":"004","17":"004","18":"004","23":"004","24":"004","27":"004","28":"004","29":"004","31":"004","33":"004","34":"004","35":"004","38":"004","41":"004","46":"004","47":"004","48":"004","49":"004","50":"004","51":"004","52":"004","53":"004","54":"004"},"otherAnswer":{"55":"购票的方便程度/车站的引导信息/站台的等待秩序/","56":"","57":"列车内的温度/出站的旅客引导信息/列车正点到达情况/"}},
 			}
 		] );
 	}
@@ -45,7 +44,7 @@ jQuery( function( $, undefined ) {
 	var buildAnswerRadios = function( selected ) {
 		var $answers = $( '#answers' ).empty();
 
-		$.each( JSON.parse( localStorage.surwebAnswers ), function( i ) {
+		$.each( JSON.parse( localStorage[surwebAnswersKey] ), function( i ) {
 			var $radio = $( '<input type=radio />' )
 				.attr( 'name', 'answer' )
 				.attr( 'value', i );
@@ -114,7 +113,7 @@ jQuery( function( $, undefined ) {
 		var passengerInfoAnswer = {};
 		var questionRadioAnswer = {};
 		var otherAnswer = {};
-		var questionMinNum = 1;
+		var questionMinNum = 0;
 		var questionMaxNum = 105;
 
 		// 12306
@@ -125,21 +124,26 @@ jQuery( function( $, undefined ) {
      var qnum=questionMinNum;
      var size=0;
      while(qnum<=questionMaxNum){
+    	qnum++;
+    	if(qnum==103){//年龄段
+    		continue;
+    	}
     	size=$('input[name='+qnum+'][type=radio]:checked').size();
      	if(size>0){
      		questionRadioAnswer[qnum]=$('input[name='+qnum+'][type=radio]:checked').val();
  		}
-    	qnum++;
+    	
 	 }
 
 var executeSave = ( function() {
+	
     	var paramNum=1;
  	    var mostFocus="";
  	    var mostNotFocus="";
  	    var compareStr="";
  	    
  	    var mostFocus2="";
-	    var mostNotFocus2="";
+	    //var mostNotFocus2="";
 	    var compareStr2="";
  	    while(paramNum<=3){
  	    	if( $('#focus_question'+paramNum).val()!="问题"){
@@ -159,7 +163,7 @@ var executeSave = ( function() {
  	    			}
  	    			
  		    }
- 	    	if( $('#notFocus_question'+paramNum).val()!="问题"){
+ 	    	/*if( $('#notFocus_question'+paramNum).val()!="问题"){
  	    		compareStr="_"+$('#notFocus_question'+paramNum).val()+"_";
  	    		compareStr2=$('#notFocus_question'+paramNum).val();
  	    		if(mostNotFocus.length>1){
@@ -174,12 +178,12 @@ var executeSave = ( function() {
 	    			mostNotFocus+=compareStr+"/";
 	    			mostNotFocus2+=compareStr2+"/";
 	    		}
- 		    }
+ 		    }*/
  	    	paramNum++;
  	    }
  	    
  	   if(mostFocus.length==0){
-		    alert("请对问题78做出选择!");
+		    alert("请对问题55做出选择!");
 			return false;
 	   }else{
 		   var mostFocusArray=new Array();
@@ -267,7 +271,7 @@ var executeSave = ( function() {
 	    }
  	   
 	 	  if(mostNotSatisfild.length==0){
-	 		    alert("请对问题81做出选择!");
+	 		    alert("请对问题57做出选择!");
 				return false;
 	 	  }
 	    if(mostSatisfild.length>1){
@@ -317,12 +321,12 @@ var executeSave = ( function() {
 	    //最关注，最不关注,以/分割
 	  
 	    
-	    otherAnswer[78]=mostFocus2;
-	    otherAnswer[79]=mostNotFocus2;
+	    otherAnswer[55]=mostFocus2;
+	    //otherAnswer[79]=mostNotFocus2;
 	    
 	    
-	    otherAnswer[80]=mostSatisfild2;
-	    otherAnswer[81]=mostNotSatisfild2;
+	    otherAnswer[56]=mostSatisfild2;
+	    otherAnswer[57]=mostNotSatisfild2;
 	    
 	    return true;
 } )() && ( function() {
@@ -330,6 +334,7 @@ var executeSave = ( function() {
 		var ansValid=false;
 		$.each(requiredNum,function(n,value){
 			if(value==""){
+				ansValid=true;
 				return true;
 			}else{
 				if(questionRadioAnswer[value]==null || questionRadioAnswer[value]=="" || questionRadioAnswer[value]=="undefined"){
@@ -358,16 +363,18 @@ var executeSave = ( function() {
 			return;
 		}
 
-		var surwebAnswers = JSON.parse( localStorage.surwebAnswers );
+		var surwebAnswers = JSON.parse( localStorage[surwebAnswersKey] );
 		var surwebAnswer = {
 			name: $( '#answers-name' ).val(),
-			province: passengerInfoAnswer.province,
-			questionRadioAnswer: obj2str( questionRadioAnswer ),
-			otherAnswer: obj2str( otherAnswer )
+			data: {
+				passengerInfoAnswer: passengerInfoAnswer,
+				questionRadioAnswer: questionRadioAnswer,
+				otherAnswer: otherAnswer
+			}
 		};
 
 		surwebAnswers.push( surwebAnswer );
-		localStorage.surwebAnswers = JSON.stringify( surwebAnswers );
+		localStorage[surwebAnswersKey] = JSON.stringify( surwebAnswers );
 
 		$( '#answers-form' ).modal( 'hide' );
 		buildAnswerRadios( surwebAnswers.length - 1 );
@@ -382,9 +389,9 @@ var executeSave = ( function() {
 			return;
 		}
 
-		var surwebAnswers = JSON.parse( localStorage.surwebAnswers );
+		var surwebAnswers = JSON.parse( localStorage[surwebAnswersKey] );
 		surwebAnswers.splice( parseInt( index ), 1 );
-		localStorage.surwebAnswers = JSON.stringify( surwebAnswers );
+		localStorage[surwebAnswersKey] = JSON.stringify( surwebAnswers );
 
 		buildAnswerRadios();
 
@@ -485,26 +492,26 @@ var executeSave = ( function() {
 
 		var index = $('input[name=answer]:checked').val();
 		if ( index !== undefined ) {
-			var surwebAnswers = JSON.parse( localStorage.surwebAnswers );
+			var surwebAnswers = JSON.parse( localStorage[surwebAnswersKey] );
 			surwebAnswer = surwebAnswers[ parseInt( index ) ];
 		}
 
-		var passengerInfoAnswer = {
-			userName: $( '#userName' ).val(),
-			datepicker: $date.val(),
-			board_train_no: $( '#train' ).val(),
-			board_station: stationNameCodeMap[ $( '#depart' ).val() ],
-			down_station: stationNameCodeMap[ $( '#arrive' ).val() ]
+		var data = {
+			passengerInfoAnswer: {
+				userName: $( '#userName' ).val(),
+				datepicker: $date.val(),
+				board_train_no: $( '#train' ).val(),
+				board_station: stationNameCodeMap[ $( '#depart' ).val() ],
+				down_station: stationNameCodeMap[ $( '#arrive' ).val() ]
+			}
 		};
 
-		if ( surwebAnswer.province ) {
-			passengerInfoAnswer.province = surwebAnswer.province;
-		}
+		data = $.extend( true, {}, surwebAnswer.data, data );
 
 		submit( 'form-frame', '//kyfw.12306.cn/surweb/questionnaireAction.do?method=submitQuest', [
-			{ name: 'passengerInfoAnswer', value: obj2str( passengerInfoAnswer ) },
-			{ name: 'questionRadioAnswer', value: surwebAnswer.questionRadioAnswer },
-			{ name: 'otherAnswer', value: surwebAnswer.otherAnswer }
+			{ name: 'passengerInfoAnswer', value: obj2str( data.passengerInfoAnswer ) },
+			{ name: 'questionRadioAnswer', value: obj2str( data.questionRadioAnswer ) },
+			{ name: 'otherAnswer', value: obj2str( data.otherAnswer ) }
 		] );
 		ga( 'send', 'event', 'surweb', 'submit', 'form' );
 	} );

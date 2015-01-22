@@ -5,21 +5,26 @@
      var qnum=questionMinNum;
      var size=0;
      while(qnum<=questionMaxNum){
+    	qnum++;
+    	if(qnum==103){//年龄段
+    		continue;
+    	}
     	size=$('input[name='+qnum+'][type=radio]:checked').size();
      	if(size>0){
      		questionRadioAnswer[qnum]=$('input[name='+qnum+'][type=radio]:checked').val();
  		}
-    	qnum++;
+    	
 	 }
 
 var executeSave = ( function() {
+	
     	var paramNum=1;
  	    var mostFocus="";
  	    var mostNotFocus="";
  	    var compareStr="";
  	    
  	    var mostFocus2="";
-	    var mostNotFocus2="";
+	    //var mostNotFocus2="";
 	    var compareStr2="";
  	    while(paramNum<=3){
  	    	if( $('#focus_question'+paramNum).val()!="问题"){
@@ -39,7 +44,7 @@ var executeSave = ( function() {
  	    			}
  	    			
  		    }
- 	    	if( $('#notFocus_question'+paramNum).val()!="问题"){
+ 	    	/*if( $('#notFocus_question'+paramNum).val()!="问题"){
  	    		compareStr="_"+$('#notFocus_question'+paramNum).val()+"_";
  	    		compareStr2=$('#notFocus_question'+paramNum).val();
  	    		if(mostNotFocus.length>1){
@@ -54,12 +59,12 @@ var executeSave = ( function() {
 	    			mostNotFocus+=compareStr+"/";
 	    			mostNotFocus2+=compareStr2+"/";
 	    		}
- 		    }
+ 		    }*/
  	    	paramNum++;
  	    }
  	    
  	   if(mostFocus.length==0){
-		    alert("请对问题78做出选择!");
+		    alert("请对问题55做出选择!");
 			return false;
 	   }else{
 		   var mostFocusArray=new Array();
@@ -147,7 +152,7 @@ var executeSave = ( function() {
 	    }
  	   
 	 	  if(mostNotSatisfild.length==0){
-	 		    alert("请对问题81做出选择!");
+	 		    alert("请对问题57做出选择!");
 				return false;
 	 	  }
 	    if(mostSatisfild.length>1){
@@ -197,12 +202,12 @@ var executeSave = ( function() {
 	    //最关注，最不关注,以/分割
 	  
 	    
-	    otherAnswer[78]=mostFocus2;
-	    otherAnswer[79]=mostNotFocus2;
+	    otherAnswer[55]=mostFocus2;
+	    //otherAnswer[79]=mostNotFocus2;
 	    
 	    
-	    otherAnswer[80]=mostSatisfild2;
-	    otherAnswer[81]=mostNotSatisfild2;
+	    otherAnswer[56]=mostSatisfild2;
+	    otherAnswer[57]=mostNotSatisfild2;
 	    
 	    return true;
 } )() && ( function() {
@@ -210,6 +215,7 @@ var executeSave = ( function() {
 		var ansValid=false;
 		$.each(requiredNum,function(n,value){
 			if(value==""){
+				ansValid=true;
 				return true;
 			}else{
 				if(questionRadioAnswer[value]==null || questionRadioAnswer[value]=="" || questionRadioAnswer[value]=="undefined"){
