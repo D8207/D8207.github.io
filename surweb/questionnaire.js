@@ -76,14 +76,14 @@ jQuery( function( $, undefined ) {
 			} );
 		}
 
-		frames[frame].location = 'about:blank';
-		setTimeout( function() { // "Error: Permission denied to access property 'document'" otherwise
+		$( 'iframe[name=' + frame + ']' ).on( 'load', function( e ) {
 			$( frames[frame].document.body ).empty().append( '正在载入……' );
+			$( this ).off( 'load' );
 
 			$form.appendTo( 'body' );
 			$form[0].submit();
 			$form.remove();
-		}, 0 );
+		} ).attr( 'src', 'about:blank' );
 	};
 
 	$( '#user-submit' ).click( function( e ) {
