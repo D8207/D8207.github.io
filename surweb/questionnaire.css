@@ -1,3 +1,6 @@
+---
+---
+
 .ui-autocomplete {
 	display: table;
 	text-align: center;
@@ -10,3 +13,7 @@
 .ui-autocomplete li div {
 	display: table-cell;
 }
+
+/* 12306 */
+{% include surweb/answers-form.css %}
+/* /12306 */
