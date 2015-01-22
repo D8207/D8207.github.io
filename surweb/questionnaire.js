@@ -481,7 +481,7 @@ var executeSave = ( function() {
 				.append( $( '<div/>' ).text( '-' + item.telecode ) )
 				.appendTo( ul );
 		};
-	} ).keyup( function( e ) {
+	} ).add( '#train' ).keyup( function( e ) {
 		var $this = $( this );
 
 		$this.val( $this.val().toUpperCase() );
