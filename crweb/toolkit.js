@@ -102,7 +102,7 @@ jQuery( function( $, undefined ) {
 			// Removal
 			$train.find( '.train-delete' ).click( function() {
 				$train.remove();
-				$( '#route-train' ).on( 'update' );
+				$( '#route-train' ).trigger( 'update' );
 			} );
 
 			// Values
