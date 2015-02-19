@@ -121,6 +121,38 @@ jQuery( function( $, undefined ) {
 				$train.find( '.train-attrib-value' ).trigger( 'update' );
 			} );
 		} );
+
+		// Stations
+		var stations = {};
+		var $stationsBody = $( '#stations-table tbody' );
+		var stationTemplate = Handlebars.compile( $( '#station-template' ).html() );
+		$.each( staticData.station, function() {
+			stations[this[0]] = this;
+			$stationsBody.append( stationTemplate( {
+				id: this[0],
+				name: this[1],
+				desc: this[2],
+				stars: this[4],
+				starArray: new Array( this[4] ),
+				X: this[5],
+				Y: this[6],
+				pop: this[7],
+				admin: this[9]
+			} ) );
+		} );
+		$stationsBody.find( 'tr' ).click( function() {
+			var $checkbox = $( this ).find( 'input[type=checkbox]' );
+			$checkbox.prop( 'checked', !$checkbox.prop( 'checked' ) );
+		} );
+		$stationsBody.find( 'input[type=checkbox]' ).click( function( e ) {
+			e.stopPropagation();
+		} );
+		$( '#stations-select a' ).click( function( e ) {
+			e.preventDefault();
+			var $this = $( this );
+			$stationsBody.find( 'input[type=checkbox][data-stars=' + $this.data( 'stars' ) + ']' )
+				.prop( 'checked', $this.data( 'value' ) );
+		} );
 	};
 
 	readStaticData( 0 );
