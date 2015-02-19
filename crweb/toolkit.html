@@ -1,0 +1,141 @@
+<!doctype html>
+<html>
+<meta charset=utf-8>
+<meta http-equiv=X-UA-Compatible content=IE=Edge>
+<title>中华铁路工具箱</title>
+<link href="//code.jquery.com/ui/1.11.2/themes/ui-lightness/jquery-ui.css" media="screen" rel="stylesheet">
+<link href="//netdna.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" media="screen" rel="stylesheet">
+<link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0-beta.3/css/select2.min.css" rel="stylesheet" />
+<!-- https://raw.githubusercontent.com/t0m/select2-bootstrap-css/bootstrap3/select2-bootstrap.min.css -->
+<link href="select2-bootstrap.min.css" rel="stylesheet" />
+<link href="toolkit.css" media="screen" rel="stylesheet">
+<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+<script src="//code.jquery.com/ui/1.11.2/jquery-ui.min.js"></script>
+<script src="//netdna.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/json2/20140204/json2.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0-beta.3/js/select2.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.0/handlebars.min.js"></script>
+<script src="toolkit.js"></script>
+<div class=container>
+	<div class=panel-group id=main-accordion role=tablist aria-multiselectable=true>
+		<div class="panel panel-default">
+			<div class=panel-heading role=tab id=trains-heading>
+				<h4 class=panel-title>
+					<a class=collapsed data-toggle=collapse data-parent=#mainAccordion href=#trains aria-expanded=false aria-controls=trains>火车</a>
+				</h4>
+			</div>
+			<div id=trains class="panel-collapse collapse" role=tabpanel aria-labelledby=trains-heading>
+				<div class=panel-body>
+					<div id=trains-container>
+						<script id=train-template type=text/x-handlebars-template>
+							<div id="train-{{id}}" class="train-row">
+								<div class=row>
+									<div class=col-md-12>
+										<p><select class="train-select form-control">
+											<option value=-1>自定义1星级火车
+											<option value=-2>自定义2星级火车
+											<option value=-3>自定义3星级火车
+										</select>
+									</div>
+								</div>
+								<div class=row>
+									<div class=col-md-2>
+										<p><img class="train-img img-responsive" src="" alt="">
+									</div>
+									<div class=col-md-10>
+										<p><span class=train-info></span> |
+										<button class="btn btn-danger btn-xs train-delete">
+											<span class="glyphicon glyphicon-remove" aria-hidden="true"></span> 移除
+										</button>
+										<p class=train-desc>
+									</div>
+								</div>
+								<div class=row>
+									<div class=col-md-12>
+										<table class=table>
+											<tr>
+												<td>&nbsp;
+												<th>速度
+												<th>距离
+												<th>重量
+												<th>电量
+											<tr>
+												<th>初始值
+												<td><input type=number min=0 value=0 size=5 class="train-attrib train-attrib-initial train-attrib-speed">
+												<td><input type=number min=0 value=0 size=5 class="train-attrib train-attrib-initial train-attrib-distance">
+												<td><input type=number min=0 value=0 size=5 class="train-attrib train-attrib-initial train-attrib-weight">
+												<td><input type=number min=0 value=0 size=5 class="train-attrib train-attrib-initial train-attrib-battery">
+											<tr>
+												<th>等级
+												<td><input type=number min=1 max=100 value=1 size=3 class="train-attrib train-attrib-level train-attrib-speed form-control">
+												<td><input type=number min=1 max=100 value=1 size=3 class="train-attrib train-attrib-level train-attrib-distance form-control">
+												<td><input type=number min=1 max=100 value=1 size=3 class="train-attrib train-attrib-level train-attrib-weight form-control">
+												<td><input type=number min=1 max=100 value=1 size=3 class="train-attrib train-attrib-level train-attrib-battery form-control">
+											<tr>
+												<th>改进值
+												<td><input type=number min=0 size=5 class="train-attrib train-attrib-value train-attrib-speed train-attrib-ro" readonly data-attrib=speed>
+												<td><input type=number min=0 size=5 class="train-attrib train-attrib-value train-attrib-distance train-attrib-ro" readonly data-attrib=distance>
+												<td><input type=number min=0 size=5 class="train-attrib train-attrib-value train-attrib-weight train-attrib-ro" readonly data-attrib=weight>
+												<td><input type=number min=0 size=5 class="train-attrib train-attrib-value train-attrib-battery train-attrib-ro" readonly data-attrib=battery>
+										</table>
+									</div>
+								</div>
+								<hr>
+							</div>
+						</script>
+					</div>
+					<button type=button id=trains-new class="btn btn-primary btn-block" disabled>新增</button>
+				</div>
+			</div>
+		</div>
+		<div class="panel panel-default">
+			<div class=panel-heading role=tab id=stations-heading>
+				<h4 class=panel-title>
+					<a class=collapsed data-toggle=collapse data-parent=#mainAccordion href=#stations aria-expanded=false aria-controls=stations>车站</a>
+				</h4>
+			</div>
+			<div id=stations class="panel-collapse collapse" role=tabpanel aria-labelledby=stations-heading>
+				<div class=panel-body>
+					车站
+				</div>
+			</div>
+		</div>
+		<div class="panel panel-default">
+			<div class=panel-heading role=tab id=routes-heading>
+				<h4 class=panel-title>
+					<a class=collapsed data-toggle=collapse data-parent=#mainAccordion href=#routes aria-expanded=false aria-controls=routes>径路</a>
+				</h4>
+			</div>
+			<div id=routes class="panel-collapse collapse" role=tabpanel aria-labelledby=routes-heading>
+				<div class=panel-body>
+					径路
+				</div>
+			</div>
+		</div>
+		<div class="panel panel-default">
+			<div class=panel-heading role=tab id=optimization-heading>
+				<h4 class=panel-title>
+					<a class=collapsed data-toggle=collapse data-parent=#mainAccordion href=#optimization aria-expanded=false aria-controls=optimization>优化</a>
+				</h4>
+			</div>
+			<div id=optimization class="panel-collapse collapse" role=tabpanel aria-labelledby=optimization-heading>
+				<div class=panel-body>
+					优化
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-55825300-4', 'auto');
+  ga('require', 'displayfeatures');
+  ga('require', 'linkid', 'linkid.js');
+  ga('send', 'pageview');
+
+</script>
