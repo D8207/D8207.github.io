@@ -16,6 +16,8 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0-beta.3/js/select2.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.0/handlebars.min.js"></script>
+<!-- https://raw.githubusercontent.com/andrewhayward/dijkstra/master/graph.js -->
+<script src="graph.js"></script>
 <script src="toolkit.js"></script>
 <div class=container>
 	<div class=panel-group id=main-accordion role=tablist aria-multiselectable=true>
@@ -29,7 +31,7 @@
 				<div class=panel-body>
 					<div id=trains-container>
 						<script id=train-template type=text/x-handlebars-template>
-							<div id="train-{{id}}" class="train-row">
+							<div id="train-{{id}}" class="train-row" data-id="{{id}}">
 								<div class=row>
 									<div class=col-md-12>
 										<p><select class="train-select form-control">
@@ -62,16 +64,16 @@
 												<th>电量
 											<tr>
 												<th>初始值
-												<td><input type=number min=0 value=0 size=5 class="train-attrib train-attrib-initial train-attrib-speed">
-												<td><input type=number min=0 value=0 size=5 class="train-attrib train-attrib-initial train-attrib-distance">
-												<td><input type=number min=0 value=0 size=5 class="train-attrib train-attrib-initial train-attrib-weight">
-												<td><input type=number min=0 value=0 size=5 class="train-attrib train-attrib-initial train-attrib-battery">
+												<td><input type=number min=0 value=0 size=5 class="train-attrib train-attrib-initial train-attrib-speed" data-attrib=speed>
+												<td><input type=number min=0 value=0 size=5 class="train-attrib train-attrib-initial train-attrib-distance" data-attrib=distance>
+												<td><input type=number min=0 value=0 size=5 class="train-attrib train-attrib-initial train-attrib-weight" data-attrib=weight>
+												<td><input type=number min=0 value=0 size=5 class="train-attrib train-attrib-initial train-attrib-battery" data-attrib=battery>
 											<tr>
 												<th>等级
-												<td><input type=number min=1 max=100 value=1 size=3 class="train-attrib train-attrib-level train-attrib-speed form-control">
-												<td><input type=number min=1 max=100 value=1 size=3 class="train-attrib train-attrib-level train-attrib-distance form-control">
-												<td><input type=number min=1 max=100 value=1 size=3 class="train-attrib train-attrib-level train-attrib-weight form-control">
-												<td><input type=number min=1 max=100 value=1 size=3 class="train-attrib train-attrib-level train-attrib-battery form-control">
+												<td><input type=number min=1 max=100 value=1 size=3 class="train-attrib train-attrib-level train-attrib-speed form-control" data-attrib=speed>
+												<td><input type=number min=1 max=100 value=1 size=3 class="train-attrib train-attrib-level train-attrib-distance form-control" data-attrib=distance>
+												<td><input type=number min=1 max=100 value=1 size=3 class="train-attrib train-attrib-level train-attrib-weight form-control" data-attrib=weight>
+												<td><input type=number min=1 max=100 value=1 size=3 class="train-attrib train-attrib-level train-attrib-battery form-control" data-attrib=battery>
 											<tr>
 												<th>改进值
 												<td><input type=number min=0 size=5 class="train-attrib train-attrib-value train-attrib-speed train-attrib-ro" readonly data-attrib=speed>
@@ -112,7 +114,7 @@
 						<tbody>
 							<script id=station-template type=text/x-handlebars-template>
 								<tr title="{{desc}}&#10;&#10;下辖：{{admin}}">
-									<td><input type=checkbox name="station-{{id}}" data-stars="{{stars}}">
+									<td><input type=checkbox name="station-{{id}}" data-id="{{id}}" data-stars="{{stars}}">
 									<td>{{name}}
 									<td>{{#each starArray}}<span class="glyphicon glyphicon-star" aria-hidden=true></span>{{/each}} {{stars}}星
 									<td>{{X}}
@@ -125,14 +127,65 @@
 			</div>
 		</div>
 		<div class="panel panel-default">
-			<div class=panel-heading role=tab id=routes-heading>
+			<div class=panel-heading role=tab id=route-heading>
 				<h4 class=panel-title>
-					<a class=collapsed data-toggle=collapse data-parent=#mainAccordion href=#routes aria-expanded=false aria-controls=routes>径路</a>
+					<a class=collapsed data-toggle=collapse data-parent=#mainAccordion href=#route aria-expanded=false aria-controls=route>径路</a>
 				</h4>
 			</div>
-			<div id=routes class="panel-collapse collapse" role=tabpanel aria-labelledby=routes-heading>
+			<div id=route class="panel-collapse collapse" role=tabpanel aria-labelledby=route-heading>
 				<div class=panel-body>
-					径路
+					<form class=form-horizontal role=form>
+						<div class=form-group>
+							<div class=col-md-6>
+								<ul id=route-stations class=route-station-list>
+									<li><strong>所有可用车站：</strong>
+								</ul>
+							</div>
+							<div class=col-md-6>
+								<ul id=route-waypoints class=route-station-list>
+									<li><strong>发到站和路径点：</strong>
+								</ul>
+							</div>
+						</div>
+						<div class=form-group>
+							<label class="col-md-2 control-label" for=route-train>使用火车：</label>
+							<div class=col-md-10>
+								<select class=form-control id=route-train>
+								</select>
+							</div>
+						</div>
+						<div class=form-group>
+							<div class="col-md-10 col-md-offset-2 checkbox">
+								<label>
+									<input type=checkbox id=route-insert checked> 计算时加入中转站
+								</label>
+							</div>
+						</div>
+						<div class=form-group>
+							<div class=col-md-12>
+								<button id=route-calculate class="btn btn-primary btn-block" disabled>计算</button>
+							</div>
+						</div>
+					</form>
+					<div class=row id=route-result>
+						<script id=route-alert-template type=text/x-handlebars-template>
+							<div class=col-md-12>
+								<div class="alert alert-{{type}} alert-dismissible" role=alert>
+									<button type=button class=close data-dismiss=alert aria-label=Close>
+										<span aria-hidden=true>&times;</span>
+									</button>
+									{{message}}
+								</div>
+							</div>
+						</script>
+						<script id=route-result-template type=text/x-handlebars-template>
+							<div class=col-md-12>
+								<p>径路：{{path}} |
+								<button class="btn btn-xs" id=route-path-transfer>设置为输入</button>
+								<p>总里程：{{totalDistance}}
+							</div>
+						</script>
+					</div>
 				</div>
 			</div>
 		</div>

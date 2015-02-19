@@ -6,3 +6,15 @@
 	border: none;
 	outline: none;
 }
+
+.route-station-list {
+	list-style-type: none;
+	padding: 0;
+}
+
+.route-station-list li {
+	margin: .5em;
+	padding: .5em;
+	width: auto !important;
+	height: auto !important;
+}
