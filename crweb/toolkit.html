@@ -47,7 +47,7 @@
 									</div>
 									<div class=col-md-10>
 										<p><span class=train-info></span> |
-										<button class="btn btn-danger btn-xs train-delete">
+										<button type=button class="btn btn-danger btn-xs train-delete">
 											<span class="glyphicon glyphicon-remove" aria-hidden="true"></span> 移除
 										</button>
 										<p class=train-desc>
@@ -163,7 +163,7 @@
 						</div>
 						<div class=form-group>
 							<div class=col-md-12>
-								<button id=route-calculate class="btn btn-primary btn-block" disabled>计算</button>
+								<button type=button id=route-calculate class="btn btn-primary btn-block" disabled>计算</button>
 							</div>
 						</div>
 					</form>
@@ -181,7 +181,7 @@
 						<script id=route-result-template type=text/x-handlebars-template>
 							<div class=col-md-12>
 								<p>径路：{{path}} |
-								<button class="btn btn-xs" id=route-path-transfer>设置为输入</button>
+								<button type=button class="btn btn-xs" id=route-path-transfer>设置为输入</button>
 								<p>总里程：{{totalDistance}}
 							</div>
 						</script>
