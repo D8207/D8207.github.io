@@ -159,6 +159,8 @@ jQuery( function( $, undefined ) {
 								connectToSortable: '#route-waypoints',
 								helper: 'clone',
 								revert: 'invalid'
+							} ).click( function() {
+								$( this ).clone().appendTo( '#route-waypoints' );
 							} )
 					);
 				}
@@ -179,6 +181,8 @@ jQuery( function( $, undefined ) {
 			revert: true,
 			placeholder: 'ui-state-highlight',
 			items: '.ui-state-default'
+		} ).on( 'click', 'li.ui-state-default', function() {
+			$( this ).remove();
 		} ).droppable( { greedy: true } );
 		$( 'body' ).droppable( {
 			drop: function ( event, ui ) {
