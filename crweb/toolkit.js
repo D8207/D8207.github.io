@@ -267,174 +267,42 @@ jQuery( function( $, undefined ) {
 				return $( this ).data( 'id' );
 			} ).get();
 
-			var calculated = calculate( train, stations, useStations, wayPoints, $( '#route-insert:checked' ).length > 0 );
-			if ( calculated.ok ) {
-				var pathStationsText = $.map( calculated.path, function( station ) {
-					return stations[station][1];
-				} );
-				$( '#route-result' ).append( routeResultTemplate( {
-					path: pathStationsText.join( ' - ' ),
-					totalDistance: calculated.totalDistance
-				} ) );
-				$( '#route-path-transfer' ).click( function() {
-					$( '#route-waypoints li.ui-state-default' ).remove();
-					$.each( calculated.path, function() {
-						$( '<li/>' ).addClass( 'ui-state-default' )
-							.attr( 'data-id', this )
-							.text( stations[this][1] )
-							.appendTo( '#route-waypoints' );
+			$( '#route-result' ).append( routeAlertTemplate( {
+				type: 'info',
+				message: '正在计算，请稍候'
+			} ) );
+
+			var worker = new Worker( 'calculator.js' );
+			worker.postMessage( [ train, stations, useStations, wayPoints, $( '#route-insert:checked' ).length > 0 ] );
+			worker.onmessage = function( e ) {
+				$( '#route-result' ).empty();
+				var calculated = e.data;
+				if ( calculated.ok ) {
+					var pathStationsText = $.map( calculated.path, function( station ) {
+						return stations[station][1];
 					} );
-				} );
-			} else {
-				$( '#route-result' ).append( routeAlertTemplate( {
-					type: 'danger',
-					message: calculated.message
-				} ) );
-				return;
-			}
-		} );
-	};
-
-	var distance = function( stations, station1, station2 ) {
-		var x1 = stations[station1][5];
-		var x2 = stations[station2][5];
-		var y1 = stations[station1][6];
-		var y2 = stations[station2][6];
-		var x = x1 - x2, y = y1 - y2
-		return Math.floor( Math.sqrt( x * x + y * y ) );
-	};
-
-	var annotatePath = function( stations, wayPoints ) {
-		var result = [], prev = null, sum = 0;
-		$.each( wayPoints, function() {
-			if ( prev !== null ) {
-				var dist = distance( stations, prev, this );
-				result.push( dist );
-				sum += dist;
-			}
-			prev = this;
-		} );
-		result.push( sum );
-		return result;
-	};
-
-	var buildPath = function( train, stations, useStations, wayPoints ) {
-		var map = {};
-		$.each( useStations, function() {
-			var i = this;
-			if ( stations[i][4] < train.stars ) {
-				return;
-			}
-			map[i] = {};
-
-			$.each( useStations, function() {
-				var j = this;
-
-				if ( i === j ) {
-					return;
-				}
-
-				if ( stations[j][4] < train.stars ) {
-					return;
-				}
-
-				var dist = distance( stations, i, j );
-				if ( dist > train.distance ) {
-					return;
-				}
-
-				map[i][j] = dist;
-			} );
-		} );
-
-		var graph = new Graph( map );
-		var result = [], prev = null;
-
-		$.each( wayPoints, function() {
-			if ( result === null ) {
-				return;
-			}
-			if ( prev !== null ) {
-				var path = graph.findShortestPath( prev, this );
-				if ( path === null ) {
-					result = null;
+					$( '#route-result' ).append( routeResultTemplate( {
+						path: pathStationsText.join( ' - ' ),
+						totalDistance: calculated.totalDistance
+					} ) );
+					$( '#route-path-transfer' ).click( function() {
+						$( '#route-waypoints li.ui-state-default' ).remove();
+						$.each( calculated.path, function() {
+							$( '<li/>' ).addClass( 'ui-state-default' )
+								.attr( 'data-id', this )
+								.text( stations[this][1] )
+								.appendTo( '#route-waypoints' );
+						} );
+					} );
 				} else {
-					result.pop();
-					result = result.concat( path );
+					$( '#route-result' ).append( routeAlertTemplate( {
+						type: 'danger',
+						message: calculated.message
+					} ) );
 				}
-			}
-			prev = this;
-		} );
-
-		return result;
-	};
-
-	/**
-	 * @param Object train { speed, distance, weight, battery, stars, load }
-	 * @param Object stations the global station data object
-	 * @param Array useStations
-	 * @param Array wayPoints
-	 * @param Boolean insert
-	 * @return Object { ok, message }
-	 */
-	var calculate = function( train, stations, useStations, wayPoints, insert ) {
-		// Sanity check
-		if ( wayPoints.length < 2 ) {
-			return {
-				ok: false,
-				message: '没有指定足够的车站'
+				worker.terminate();
 			};
-		}
-
-		// Check whether the train can go to all specified stations.
-		var result = null;
-		$.each( wayPoints, function() {
-			if ( stations[this][4] < train.stars ) {
-				result = {
-					ok: false,
-					message: '此车无法到达所有指定的车站'
-				};
-			}
 		} );
-		if ( result ) {
-			return result;
-		}
-
-		var path, totalDistance;
-		if ( insert ) {
-			// Build a path from given wayPoints.
-			path = buildPath( train, stations, useStations, wayPoints );
-			if ( path ) {
-				totalDistance = annotatePath( stations, path ).pop();
-			} else {
-				return {
-					ok: false,
-					message: '由于距离限制，此车找不到可以行走的径路'
-				};
-			}
-		} else {
-			// Check whether the train can go across all gaps.
-			var distances = annotatePath( stations, wayPoints );
-			totalDistance = distances.pop();
-			$.each( distances, function() {
-				if ( this > train.distance ) {
-					result = {
-						ok: false,
-						message: '由于距离限制，此车无法沿指定的径路行走'
-					};
-				}
-			} );
-			if ( result ) {
-				return result;
-			}
-			path = wayPoints;
-		}
-
-		return {
-			ok: true,
-			path: path,
-			totalDistance: totalDistance
-		};
 	};
 
 	readStaticData( 0 );
