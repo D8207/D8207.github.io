@@ -380,7 +380,7 @@ jQuery( function( $, undefined ) {
 			} );
 
 			$select.val( val );
-		} );
+		} ).trigger( 'do-update' );
 
 		var routeAlertTemplate = Handlebars.compile( $( '#route-alert-template' ).html() );
 		var routeResultTemplate = Handlebars.compile( $( '#route-result-template' ).html() );
