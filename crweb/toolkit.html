@@ -99,27 +99,36 @@
 			</div>
 			<div id=stations class="panel-collapse collapse" role=tabpanel aria-labelledby=stations-heading>
 				<div class=panel-body>
-					<p>只有选中的车站会参与径路和优化计算。可以选中已经开通的车站，或是选中愿意开通的所有车站。
-					<p><span id=stations-select>选中所有：<a href=### data-stars=3 data-value=true>3星级车站</a>，<a href=### data-stars=2 data-value=true>2星级车站</a>，<a href=### data-stars=1 data-value=true>1星级车站</a>；取消所有：<a href=### data-stars=3 data-value=false>3星级车站</a>，<a href=### data-stars=2 data-value=false>2星级车站</a>，<a href=### data-stars=1 data-value=false>1星级车站</a>
+					<p>只有列表中的车站会参与径路和优化计算。可以选择已经开通的车站，或是选择愿意开通的所有车站。
+					<p><span id=stations-select>加入所有：<a href=### data-stars=3>3星级车站</a>，<a href=### data-stars=2>2星级车站</a>，<a href=### data-stars=1>1星级车站</a></span>；<span id=stations-unselect>移除所有：<a href=### data-stars=3>3星级车站</a>，<a href=### data-stars=2>2星级车站</a>，<a href=### data-stars=1>1星级车站</a></span>
+					<div class=row>
+						<div class=col-md-12>
+							<select class=form-control id=stations-picker></select>
+						</div>
+					</div>
 					<table id=stations-table class="text-center table">
 						<thead>
 							<tr>
-								<th>&nbsp;
 								<th class=text-center>名称
 								<th class=text-center>星级
 								<th class=text-center>X
 								<th class=text-center>Y
 								<th class=text-center>人口
+								<th>&nbsp;
 						</thead>
 						<tbody>
 							<script id=station-template type=text/x-handlebars-template>
-								<tr title="{{desc}}&#10;&#10;下辖：{{admin}}">
-									<td><input type=checkbox name="station-{{id}}" data-id="{{id}}" data-stars="{{stars}}">
+								<tr title="{{desc}}&#10;&#10;下辖：{{admin}}"
+									id="station-{{id}}" class="station-row stars-{{stars}}" data-id="{{id}}"
+								>
 									<td>{{name}}
 									<td>{{#each starArray}}<span class="glyphicon glyphicon-star" aria-hidden=true></span>{{/each}} {{stars}}星
 									<td>{{X}}
 									<td>{{Y}}
 									<td>{{pop}}
+									<td><button type=button class="btn btn-danger btn-xs station-delete">
+										<span class="glyphicon glyphicon-remove" aria-hidden="true"></span> 移除
+									</button>
 							</script>
 						</tbody>
 					</table>

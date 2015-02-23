@@ -29,7 +29,7 @@ jQuery( function( $, undefined ) {
 			trains[this[0]] = this;
 			trainsSelect.push( {
 				id: this[0],
-				text: this[1]
+				text: this[1] + ' | ' + this[3] + '星'
 			} );
 		} );
 		var trainNextId = 0;
@@ -160,55 +160,76 @@ jQuery( function( $, undefined ) {
 
 		// Stations
 		var stations = {};
+		var stationsSelect = [];
 		var $stationsBody = $( '#stations-table tbody' );
 		var stationTemplate = Handlebars.compile( $( '#station-template' ).html() );
 		$.each( staticData.station, function() {
 			stations[this[0]] = this;
-			$stationsBody.append( stationTemplate( {
+			stationsSelect.push( {
 				id: this[0],
-				name: this[1],
-				desc: this[2],
-				stars: this[4],
-				starArray: new Array( this[4] ),
-				X: this[5],
-				Y: this[6],
-				pop: this[7],
-				admin: this[9]
-			} ) );
+				text: this[1] + ' | ' + this[4] + '星'
+			} );
 		} );
-		$stationsBody.find( 'tr' ).click( function() {
-			var $checkbox = $( this ).find( 'input[type=checkbox]' );
-			$checkbox.prop( 'checked', !$checkbox.prop( 'checked' ) ).trigger( 'change' );
-		} );
-		$stationsBody.find( 'input[type=checkbox]' ).click( function( e ) {
-			e.stopPropagation();
-		} ).change( function() {
-			var $this = $( this );
-			if ( $this.prop( 'checked' ) ) {
-				if ( !$( '#route-stations li[data-id=' + $this.data( 'id' ) + ']' ).length ) {
-					$( '#route-stations' ).append(
-						$( '<li/>' ).addClass( 'ui-state-default' )
-							.attr( 'data-id', $this.data( 'id' ) )
-							.text( stations[$this.data( 'id' )][1] )
-							.draggable( {
-								connectToSortable: '#route-waypoints',
-								helper: 'clone',
-								revert: 'invalid'
-							} ).click( function() {
-								$( this ).clone().appendTo( '#route-waypoints' );
-							} )
-					);
-				}
-			} else {
-				$( '#route-stations li[data-id=' + $this.data( 'id' ) + '],'
-					+ '#route-waypoints li[data-id=' + $this.data( 'id' ) + ']' ).remove()
+		var stationsBodyInsert = function( id ) {
+			if ( $stationsBody.find( '#station-' + id ).length > 0 ) {
+				return;
 			}
+			var station = stations[id];
+			$stationsBody.append( stationTemplate( {
+				id: station[0],
+				name: station[1],
+				desc: station[2],
+				stars: station[4],
+				starArray: new Array( station[4] ),
+				X: station[5],
+				Y: station[6],
+				pop: station[7],
+				admin: station[9]
+			} ) );
+			if ( $( '#route-stations li.station-' + id ).length == 0 ) {
+				$( '#route-stations' ).append(
+					$( '<li/>' ).addClass( 'ui-state-default station-' + id )
+						.attr( 'data-id', id )
+						.text( station[1] )
+						.draggable( {
+							connectToSortable: '#route-waypoints',
+							helper: 'clone',
+							revert: 'invalid'
+						} ).click( function() {
+							$( this ).clone().appendTo( '#route-waypoints' );
+						} )
+				);
+			}
+		};
+		$( '#stations-picker' ).select2( {
+			placeholder: '选择一个车站',
+			data: stationsSelect
+		} ).change( function() {
+			var $this = $( this ), val = $this.val();
+			if ( val === null ) {
+				return;
+			}
+			$this.val( null ).trigger( 'change' );
+			stationsBodyInsert( val );
+		} ).val( null ).trigger( 'change' );
+		$stationsBody.on( 'click', '.station-delete', function() {
+			var $row = $( this ).parents( '.station-row' );
+			$( '#route-stations li.station-' + $row.data( 'id' ) + ','
+				+ '#route-waypoints li.station-' + $row.data( 'id' ) ).remove()
+			$row.remove();
 		} );
 		$( '#stations-select a' ).click( function( e ) {
 			e.preventDefault();
-			var $this = $( this );
-			$stationsBody.find( 'input[type=checkbox][data-stars=' + $this.data( 'stars' ) + ']' )
-				.prop( 'checked', $this.data( 'value' ) ).trigger( 'change' );
+			var $this = $( this ), stars = $this.data( 'stars' );
+			$.each( stations, function() {
+				if ( this[4] === stars ) {
+					stationsBodyInsert( this[0] );
+				}
+			} );
+		} );
+		$( '#stations-unselect a' ).click( function( e ) {
+			e.preventDefault();
+			$( '.station-row.stars-' + $( this ).data( 'stars' ) ).find( '.station-delete' ).trigger( 'click' );
 		} );
 
 		// Route
@@ -294,7 +315,7 @@ jQuery( function( $, undefined ) {
 				loads: type < 0 ? -1 : ( trains[type][8] + trains[type][9] )
 			};
 
-			var useStations = $( '#stations-table input:checked' ).map( function() {
+			var useStations = $( '.station-row' ).map( function() {
 				return $( this ).data( 'id' );
 			} ).get();
 
