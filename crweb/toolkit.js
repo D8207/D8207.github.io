@@ -437,11 +437,11 @@ jQuery( function( $, undefined ) {
 				} );
 			};
 			var showSummary = function() {
-				$summary.empty().addClass( 'text-center' );
-				var $grossPie = $( '<div/>' ).addClass( 'col-md-12' ).appendTo( $summary );
-				var $netPie = $( '<div/>' ).addClass( 'col-md-12' ).appendTo( $summary );
+				$summary.empty();
+				var $grossPie = $( '<div/>' ).addClass( 'col-md-12 text-center' ).appendTo( $summary );
+				var $netPie = $( '<div/>' ).addClass( 'col-md-12 text-center' ).appendTo( $summary );
 				if ( !drawPie( $grossPie, summaryGross, '全日收入' ) || !drawPie( $netPie, summaryNet, '全日利润' ) ) {
-					$summary.removeClass( 'text-center' ).html( routeAlertTemplate( {
+					$summary.html( routeAlertTemplate( {
 						type: 'warning',
 						message: '计算结果中没有数据'
 					} ) );
