@@ -205,10 +205,14 @@
 							<h4>径路信息</h4>
 							<dl class=dl-horizontal>
 								<dt>径路
-								<dd>{{path}} |
-									<button type=button class="btn btn-xs" id=route-path-transfer>
+								<dd>{{#if path}}
+									{{path}} |
+									<button type=button class="btn btn-xs route-path-transfer">
 										<span class="glyphicon glyphicon-transfer" aria-hidden=true></span> 设置为输入
 									</button>
+								{{else}}
+									没有指定足够的车站，以此车可以行驶的最长里程计算
+								{{/if}}
 								<dt>总里程
 								<dd>{{totalDistance}}
 							</dl>

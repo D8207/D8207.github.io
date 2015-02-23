@@ -82,63 +82,63 @@ var buildPath = function( train, stations, useStations, wayPoints, penalty ) {
  * @return Object { ok, message }
  */
 var calculate = function( train, stations, useStations, wayPoints, insert, penalty ) {
-	// Sanity check
+	var path, totalDistance, distances, priceDistance;
+
 	if ( wayPoints.length < 2 ) {
-		return {
-			ok: false,
-			message: '没有指定足够的车站'
-		};
-	}
-
-	// Check whether the train can go to all specified stations.
-	var result = null;
-	wayPoints.forEach( function( curr ) {
-		if ( stations[curr][4] < train.stars ) {
-			result = {
-				ok: false,
-				message: '此车无法到达所有指定的车站'
-			};
-		}
-	} );
-	if ( result ) {
-		return result;
-	}
-
-	var path, totalDistance, distances;
-	if ( insert ) {
-		// Build a path from given wayPoints.
-		path = buildPath( train, stations, useStations, wayPoints, penalty );
-		if ( path ) {
-			distances = annotatePath( stations, path );
-			totalDistance = distances.pop();
-		} else {
-			return {
-				ok: false,
-				message: '由于距离限制，此车找不到可以行走的径路'
-			};
-		}
+		// Calculate "ideal" profit now.
+		path = distances = null;
+		totalDistance = priceDistance = Math.floor( train.battery * 60 * train.speed / 450 );
 	} else {
-		// Check whether the train can go across all gaps.
-		distances = annotatePath( stations, wayPoints );
-		totalDistance = distances.pop();
-		distances.forEach( function( curr ) {
-			if ( curr > train.distance ) {
+		// Check whether the train can go to all specified stations.
+		var result = null;
+		wayPoints.forEach( function( curr ) {
+			if ( stations[curr][4] < train.stars ) {
 				result = {
 					ok: false,
-					message: '由于距离限制，此车无法沿指定的径路行走'
+					message: '此车无法到达所有指定的车站'
 				};
 			}
 		} );
 		if ( result ) {
 			return result;
 		}
-		path = wayPoints;
+
+		if ( insert ) {
+			// Build a path from given wayPoints.
+			path = buildPath( train, stations, useStations, wayPoints, penalty );
+			if ( path ) {
+				distances = annotatePath( stations, path );
+				totalDistance = distances.pop();
+			} else {
+				return {
+					ok: false,
+					message: '由于距离限制，此车找不到可以行走的径路'
+				};
+			}
+		} else {
+			// Check whether the train can go across all gaps.
+			distances = annotatePath( stations, wayPoints );
+			totalDistance = distances.pop();
+			distances.forEach( function( curr ) {
+				if ( curr > train.distance ) {
+					result = {
+						ok: false,
+						message: '由于距离限制，此车无法沿指定的径路行走'
+					};
+				}
+			} );
+			if ( result ) {
+				return result;
+			}
+			path = wayPoints;
+		}
+
+		var fromStation = wayPoints[0], toStation = wayPoints[wayPoints.length - 1];
+		priceDistance = distance( stations, fromStation, toStation );
 	}
 
 	var runningTime = Math.floor( totalDistance * 450 / train.speed ); // In seconds
 	var batteryConsumed = Math.floor( runningTime / 60 );
-	var fromStation = wayPoints[0], toStation = wayPoints[wayPoints.length - 1];
-	var priceDistance = distance( stations, fromStation, toStation );
 	var priceCoins = priceDistance + 50;
 	var costCoins = Math.floor( train.speed * train.weight * totalDistance / 400000 );
 	var totalGross = train.loads < 0 ? NaN : ( train.loads * Math.floor( priceCoins * ( train.loads > 1 ? 1.25 : 1 ) ) );

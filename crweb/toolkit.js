@@ -518,13 +518,16 @@ jQuery( function( $, undefined ) {
 					trainRecv++;
 					var calculated = e.data;
 					if ( calculated.ok ) {
-						var pathStationsText = $.map( calculated.path, function( station, index ) {
-							if ( index < calculated.path.length - 1 ) {
-								return [ stations[station][1], calculated.distances[index] ];
-							} else {
-								return stations[station][1];
-							}
-						} );
+						var pathStationsText = null;
+						if ( calculated.path ) {
+							pathStationsText = $.map( calculated.path, function( station, index ) {
+								if ( index < calculated.path.length - 1 ) {
+									return [ stations[station][1], calculated.distances[index] ];
+								} else {
+									return stations[station][1];
+								}
+							} ).join( ' - ' );
+						}
 						if ( train.loads >= 0 ) {
 							summaryGross[trainId] = [ trainId, calculated.dailyGross ];
 							dailyGross += calculated.dailyGross;
@@ -533,7 +536,7 @@ jQuery( function( $, undefined ) {
 						}
 						$result.append( routeResultTemplate( {
 							hasLoads: train.loads >= 0,
-							path: pathStationsText.join( ' - ' ),
+							path: pathStationsText,
 							totalDistance: calculated.totalDistance,
 							runningTime: calculated.runningTime,
 							runningHours: Math.floor( calculated.runningTime / 3600 ),
@@ -551,7 +554,7 @@ jQuery( function( $, undefined ) {
 							dailyGross: calculated.dailyGross,
 							dailyNet: calculated.dailyNet
 						} ) );
-						$( '#route-path-transfer' ).click( function() {
+						$result.find( '.route-path-transfer' ).click( function() {
 							$( '#route-waypoints li.ui-state-default' ).remove();
 							$.each( calculated.path, function() {
 								$( '<li/>' ).addClass( 'ui-state-default' )
