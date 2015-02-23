@@ -22,9 +22,9 @@
 	<div class=panel-group id=main-accordion role=tablist aria-multiselectable=true>
 		<div class="panel panel-default">
 			<div class=panel-heading role=tab id=trains-heading>
-				<h4 class=panel-title>
+				<h2 class=panel-title>
 					<a class=collapsed data-toggle=collapse data-parent=#mainAccordion href=#trains aria-expanded=false aria-controls=trains>火车</a>
-				</h4>
+				</h2>
 			</div>
 			<div id=trains class="panel-collapse collapse" role=tabpanel aria-labelledby=trains-heading>
 				<div class=panel-body>
@@ -92,9 +92,9 @@
 		</div>
 		<div class="panel panel-default">
 			<div class=panel-heading role=tab id=stations-heading>
-				<h4 class=panel-title>
+				<h2 class=panel-title>
 					<a class=collapsed data-toggle=collapse data-parent=#mainAccordion href=#stations aria-expanded=false aria-controls=stations>车站</a>
-				</h4>
+				</h2>
 			</div>
 			<div id=stations class="panel-collapse collapse" role=tabpanel aria-labelledby=stations-heading>
 				<div class=panel-body>
@@ -127,9 +127,9 @@
 		</div>
 		<div class="panel panel-default">
 			<div class=panel-heading role=tab id=route-heading>
-				<h4 class=panel-title>
+				<h2 class=panel-title>
 					<a class=collapsed data-toggle=collapse data-parent=#mainAccordion href=#route aria-expanded=false aria-controls=route>径路</a>
-				</h4>
+				</h2>
 			</div>
 			<div id=route class="panel-collapse collapse" role=tabpanel aria-labelledby=route-heading>
 				<div class=panel-body>
@@ -179,9 +179,54 @@
 						</script>
 						<script id=route-result-template type=text/x-handlebars-template>
 							<div class=col-md-12>
-								<p>径路：{{path}} |
-								<button type=button class="btn btn-xs" id=route-path-transfer>设置为输入</button>
-								<p>总里程：{{totalDistance}}
+								<h4>径路信息</h4>
+								<dl class=dl-horizontal>
+									<dt>径路
+									<dd>{{path}} |
+										<button type=button class="btn btn-xs" id=route-path-transfer>
+											设置为输入
+										</button>
+									<dt>总里程
+									<dd>{{totalDistance}}
+								</dl>
+								<h4>行车信息</h4>
+								<dl class=dl-horizontal>
+									<dt>行车时间
+									<dd>{{runningHours}}时{{runningMinutes}}分{{runningSeconds}}秒
+									<dt>电量消耗
+									<dd>{{batteryConsumed}}
+								</dl>
+								<h4>客货信息</h4>
+								<dl class=dl-horizontal>
+									<dt>计价里程
+									<dd>{{priceDistance}}
+									<dt>单位客货收入
+									<dd>{{priceCoins}}金币 或 {{pricePoints}}点卷
+								</dl>
+								<h4>收入信息</h4>
+								<dl class=dl-horizontal>
+									<dt>运输成本
+									<dd>{{costCoins}}金币
+									{{#if hasLoads}}
+										<dt>满载金币收入
+										<dd>{{totalGross}}金币
+										<dt>满载金币利润
+										<dd>{{totalNet}}金币
+									{{/if}}
+								</dl>
+								<h4>全日合计</h4>
+								<dl class=dl-horizontal>
+									<dt>行车次数
+									<dd>{{dailyCount}}
+									<dt>剩余电量
+									<dd>{{dailyRemaining}}
+									{{#if hasLoads}}
+										<dt>总金币收入
+										<dd>{{dailyGross}}金币
+										<dt>总金币利润
+										<dd>{{dailyNet}}金币
+									{{/if}}
+								</dl>
 							</div>
 						</script>
 					</div>
@@ -190,9 +235,9 @@
 		</div>
 		<div class="panel panel-default">
 			<div class=panel-heading role=tab id=optimization-heading>
-				<h4 class=panel-title>
+				<h2 class=panel-title>
 					<a class=collapsed data-toggle=collapse data-parent=#mainAccordion href=#optimization aria-expanded=false aria-controls=optimization>优化</a>
-				</h4>
+				</h2>
 			</div>
 			<div id=optimization class="panel-collapse collapse" role=tabpanel aria-labelledby=optimization-heading>
 				<div class=panel-body>

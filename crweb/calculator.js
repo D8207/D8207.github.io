@@ -73,7 +73,7 @@ var buildPath = function( train, stations, useStations, wayPoints ) {
 };
 
 /**
- * @param Object train { speed, distance, weight, battery, stars, load }
+ * @param Object train { speed, distance, weight, battery, stars, loads }
  * @param Object stations the global station data object
  * @param Array useStations
  * @param Array wayPoints
@@ -133,10 +133,35 @@ var calculate = function( train, stations, useStations, wayPoints, insert ) {
 		path = wayPoints;
 	}
 
+	var runningTime = Math.floor( totalDistance * 450 / train.speed ); // In seconds
+	var batteryConsumed = Math.floor( runningTime / 60 );
+	var fromStation = wayPoints[0], toStation = wayPoints[wayPoints.length - 1];
+	var priceDistance = distance( stations, fromStation, toStation );
+	var priceCoins = priceDistance + 50;
+	var costCoins = Math.floor( train.speed * train.weight * totalDistance / 400000 );
+	var totalGross = train.loads < 0 ? NaN : ( train.loads * Math.floor( priceCoins * ( train.loads > 1 ? 1.25 : 1 ) ) );
+	var totalNet = train.loads < 0 ? NaN : ( totalGross - costCoins );
+	var dailyCount = Math.floor( train.battery / batteryConsumed );
+	var dailyRemaining = train.battery - dailyCount * batteryConsumed;
+	var dailyGross = totalGross * dailyCount;
+	var dailyNet = totalNet * dailyCount;
+
 	return {
 		ok: true,
 		path: path,
-		totalDistance: totalDistance
+		totalDistance: totalDistance,
+		runningTime: runningTime,
+		batteryConsumed: batteryConsumed,
+		priceDistance: priceDistance,
+		priceCoins: priceCoins,
+		pricePoints: Math.floor( priceDistance / 500 ),
+		costCoins: costCoins,
+		totalGross: totalGross,
+		totalNet: totalNet,
+		dailyCount: dailyCount,
+		dailyRemaining: dailyRemaining,
+		dailyGross: dailyGross,
+		dailyNet: dailyNet
 	};
 };
 

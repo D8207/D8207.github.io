@@ -282,8 +282,24 @@ jQuery( function( $, undefined ) {
 						return stations[station][1];
 					} );
 					$( '#route-result' ).append( routeResultTemplate( {
+						hasLoads: train.loads >= 0,
 						path: pathStationsText.join( ' - ' ),
-						totalDistance: calculated.totalDistance
+						totalDistance: calculated.totalDistance,
+						runningTime: calculated.runningTime,
+						runningHours: Math.floor( calculated.runningTime / 3600 ),
+						runningMinutes: Math.floor( calculated.runningTime / 60 ) % 60,
+						runningSeconds: calculated.runningTime % 60,
+						batteryConsumed: calculated.batteryConsumed,
+						priceDistance: calculated.priceDistance,
+						priceCoins: calculated.priceCoins,
+						pricePoints: calculated.pricePoints,
+						costCoins: calculated.costCoins,
+						totalGross: calculated.totalGross,
+						totalNet: calculated.totalNet,
+						dailyCount: calculated.dailyCount,
+						dailyRemaining: calculated.dailyRemaining,
+						dailyGross: calculated.dailyGross,
+						dailyNet: calculated.dailyNet
 					} ) );
 					$( '#route-path-transfer' ).click( function() {
 						$( '#route-waypoints li.ui-state-default' ).remove();
