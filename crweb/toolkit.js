@@ -518,8 +518,12 @@ jQuery( function( $, undefined ) {
 					trainRecv++;
 					var calculated = e.data;
 					if ( calculated.ok ) {
-						var pathStationsText = $.map( calculated.path, function( station ) {
-							return stations[station][1];
+						var pathStationsText = $.map( calculated.path, function( station, index ) {
+							if ( index < calculated.path.length - 1 ) {
+								return [ stations[station][1], calculated.distances[index] ];
+							} else {
+								return stations[station][1];
+							}
 						} );
 						if ( train.loads >= 0 ) {
 							summaryGross[trainId] = [ trainId, calculated.dailyGross ];

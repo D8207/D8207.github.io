@@ -104,12 +104,13 @@ var calculate = function( train, stations, useStations, wayPoints, insert, penal
 		return result;
 	}
 
-	var path, totalDistance;
+	var path, totalDistance, distances;
 	if ( insert ) {
 		// Build a path from given wayPoints.
 		path = buildPath( train, stations, useStations, wayPoints, penalty );
 		if ( path ) {
-			totalDistance = annotatePath( stations, path ).pop();
+			distances = annotatePath( stations, path );
+			totalDistance = distances.pop();
 		} else {
 			return {
 				ok: false,
@@ -118,7 +119,7 @@ var calculate = function( train, stations, useStations, wayPoints, insert, penal
 		}
 	} else {
 		// Check whether the train can go across all gaps.
-		var distances = annotatePath( stations, wayPoints );
+		distances = annotatePath( stations, wayPoints );
 		totalDistance = distances.pop();
 		distances.forEach( function( curr ) {
 			if ( curr > train.distance ) {
@@ -150,6 +151,7 @@ var calculate = function( train, stations, useStations, wayPoints, insert, penal
 	return {
 		ok: true,
 		path: path,
+		distances: distances,
 		totalDistance: totalDistance,
 		runningTime: runningTime,
 		batteryConsumed: batteryConsumed,
