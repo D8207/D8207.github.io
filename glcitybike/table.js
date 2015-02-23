@@ -15,7 +15,7 @@ jQuery( function( $, undefined ) {
 		$.ajax( {
 			dataType: 'script',
 			// Will this data source be stable enough?
-			url: 'http://misc.crutils.tk/glcitybike/stations/'
+			url: cloudServer + '/glcitybike/stations/'
 		} ).done( function() {
 			var data = window.ibike;
 			window.ibike = undefined;
