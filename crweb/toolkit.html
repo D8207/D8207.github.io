@@ -16,6 +16,9 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.0-beta.3/js/select2.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.0/handlebars.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/randomcolor/0.1.1/randomColor.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+<script src="d3pie.min.js"></script>
 <script src="/cloud.js"></script>
 <script src="toolkit.js"></script>
 <div class=container>
@@ -186,69 +189,80 @@
 						</div>
 					</form>
 					<div id=route-result>
-						<script id=route-alert-template type=text/x-handlebars-template>
-							<div class=col-md-12>
-								<div class="alert alert-{{type}} alert-dismissible" role=alert>
-									<button type=button class=close data-dismiss=alert aria-label=Close>
-										<span aria-hidden=true>&times;</span>
-									</button>
-									{{message}}
-								</div>
-							</div>
-						</script>
-						<script id=route-result-template type=text/x-handlebars-template>
-							<div class=col-md-12>
-								<h4>径路信息</h4>
-								<dl class=dl-horizontal>
-									<dt>径路
-									<dd>{{path}} |
-										<button type=button class="btn btn-xs" id=route-path-transfer>
-											<span class="glyphicon glyphicon-transfer" aria-hidden=true></span> 设置为输入
-										</button>
-									<dt>总里程
-									<dd>{{totalDistance}}
-								</dl>
-								<h4>行车信息</h4>
-								<dl class=dl-horizontal>
-									<dt>行车时间
-									<dd>{{runningHours}}时{{runningMinutes}}分{{runningSeconds}}秒
-									<dt>电量消耗
-									<dd>{{batteryConsumed}}
-								</dl>
-								<h4>客货信息</h4>
-								<dl class=dl-horizontal>
-									<dt>计价里程
-									<dd>{{priceDistance}}
-									<dt>单位客货收入
-									<dd>{{priceCoins}}金币 或 {{pricePoints}}点卷
-								</dl>
-								<h4>收入信息</h4>
-								<dl class=dl-horizontal>
-									<dt>运输成本
-									<dd>{{costCoins}}金币
-									{{#if hasLoads}}
-										<dt>满载金币收入
-										<dd>{{totalGross}}金币
-										<dt>满载金币利润
-										<dd>{{totalNet}}金币
-									{{/if}}
-								</dl>
-								<h4>全日合计</h4>
-								<dl class=dl-horizontal>
-									<dt>行车次数
-									<dd>{{dailyCount}}
-									<dt>剩余电量
-									<dd>{{dailyRemaining}}
-									{{#if hasLoads}}
-										<dt>总金币收入
-										<dd>{{dailyGross}}金币
-										<dt>总金币利润
-										<dd>{{dailyNet}}金币
-									{{/if}}
-								</dl>
-							</div>
-						</script>
 					</div>
+					<script id=route-alert-template type=text/x-handlebars-template>
+						<div class=col-md-12>
+							<div class="alert alert-{{type}} alert-dismissible" role=alert>
+								<button type=button class=close data-dismiss=alert aria-label=Close>
+									<span aria-hidden=true>&times;</span>
+								</button>
+								{{message}}
+							</div>
+						</div>
+					</script>
+					<script id=route-result-template type=text/x-handlebars-template>
+						<div class=col-md-12>
+							<h4>径路信息</h4>
+							<dl class=dl-horizontal>
+								<dt>径路
+								<dd>{{path}} |
+									<button type=button class="btn btn-xs" id=route-path-transfer>
+										<span class="glyphicon glyphicon-transfer" aria-hidden=true></span> 设置为输入
+									</button>
+								<dt>总里程
+								<dd>{{totalDistance}}
+							</dl>
+							<h4>行车信息</h4>
+							<dl class=dl-horizontal>
+								<dt>行车时间
+								<dd>{{runningHours}}时{{runningMinutes}}分{{runningSeconds}}秒
+								<dt>电量消耗
+								<dd>{{batteryConsumed}}
+							</dl>
+							<h4>客货信息</h4>
+							<dl class=dl-horizontal>
+								<dt>计价里程
+								<dd>{{priceDistance}}
+								<dt>单位客货收入
+								<dd>{{priceCoins}}金币 或 {{pricePoints}}点卷
+							</dl>
+							<h4>收入信息</h4>
+							<dl class=dl-horizontal>
+								<dt>运输成本
+								<dd>{{costCoins}}金币
+								{{#if hasLoads}}
+									<dt>满载金币收入
+									<dd>{{totalGross}}金币
+									<dt>满载金币利润
+									<dd>{{totalNet}}金币
+								{{/if}}
+							</dl>
+							<h4>全日合计</h4>
+							<dl class=dl-horizontal>
+								<dt>行车次数
+								<dd>{{dailyCount}}
+								<dt>剩余电量
+								<dd>{{dailyRemaining}}
+								{{#if hasLoads}}
+									<dt>总金币收入
+									<dd>{{dailyGross}}金币
+									<dt>总金币利润
+									<dd>{{dailyNet}}金币
+								{{/if}}
+							</dl>
+						</div>
+					</script>
+					<script id=route-summary-template type=text/x-handlebars-template>
+						<div class=col-md-12>
+							<h4>全日合计</h4>
+							<dl class=dl-horizontal>
+								<dt>总金币收入
+								<dd>{{dailyGross}}金币
+								<dt>总金币利润
+								<dd>{{dailyNet}}金币
+							</dl>
+						</div>
+					</script>
 				</div>
 			</div>
 		</div>

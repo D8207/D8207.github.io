@@ -396,9 +396,66 @@ jQuery( function( $, undefined ) {
 				).appendTo( '#route-result' );
 				return;
 			}
+			$( '<h3/>' ).text( '统计信息' ).appendTo( '#route-result' );
+			var $summary = $( '<div/>' ).addClass( 'row' ).appendTo( '#route-result' );
+			$summary.append( routeAlertTemplate( {
+				type: 'info',
+				message: '正在计算，请稍候'
+			} ) );
+			var trainCount = trainIds.length, trainRecv = 0;
+			var summaryGross = new Array( trainCount ), summaryNet = new Array( trainCount );
+			var dailyGross = 0, dailyNet = 0;
+			var trainTextById = {};
+			var trainColorById = {};
+			var drawPie = function( $dom, data, title ) {
+				var pieData = [];
+				$.each( data, function() {
+					if ( !$.isArray( this ) ) {
+						return;
+					}
+					pieData.push( {
+						label: trainTextById[this[0]],
+						value: this[1],
+						color: trainColorById[this[0]]
+					} );
+				} );
+				if ( pieData.length == 0 ) {
+					return false;
+				}
+				return new d3pie( $dom.get( 0 ), {
+					header: {
+						title: {
+							text: title
+						}
+					},
+					size: {
+						canvasWidth: $dom.width()
+					},
+					data: {
+						content: pieData
+					}
+				} );
+			};
+			var showSummary = function() {
+				$summary.empty().addClass( 'text-center' );
+				var $grossPie = $( '<div/>' ).addClass( 'col-md-12' ).appendTo( $summary );
+				var $netPie = $( '<div/>' ).addClass( 'col-md-12' ).appendTo( $summary );
+				if ( !drawPie( $grossPie, summaryGross, '全日收入' ) || !drawPie( $netPie, summaryNet, '全日利润' ) ) {
+					$summary.removeClass( 'text-center' ).html( routeAlertTemplate( {
+						type: 'warning',
+						message: '计算结果中没有数据'
+					} ) );
+				} else {
+					$summary.append( Handlebars.compile( $( '#route-summary-template' ).html() )( {
+						dailyGross: dailyGross,
+						dailyNet: dailyNet
+					} ) );
+				}
+			};
 			$.each( trainIds, function() {
-				var trainId = this;
-				$( '<h3>' ).text( $( '#route-train option[value=' + trainId + ']' ).text() ).appendTo( '#route-result' );
+				var trainId = this, trainText = $( '#route-train option[value=' + trainId + ']' ).text();
+				var trainColor = randomColor();
+				$( '<h3/>' ).text( trainText ).css( 'color', trainColor ).appendTo( '#route-result' );
 				var $result = $( '<div/>' ).addClass( 'row' ).appendTo( '#route-result' );
 				var $train = $( '#train-' + trainId );
 
@@ -407,6 +464,14 @@ jQuery( function( $, undefined ) {
 				var distance = parseInt( $train.find( '.train-attrib-value.train-attrib-distance' ).val() );
 				var weight = parseInt( $train.find( '.train-attrib-value.train-attrib-weight' ).val() );
 				var battery = parseInt( $train.find( '.train-attrib-value.train-attrib-battery' ).val() );
+
+				// trainText is too long.
+				if ( type < 0 ) {
+					trainTextById[trainId] = '自定义' + -type + '星级火车';
+				} else {
+					trainTextById[trainId] = trains[type][1];
+				}
+				trainColorById[trainId] = trainColor;
 
 				if ( isNaN( speed ) || isNaN( distance ) || isNaN( weight ) || isNaN( battery ) ) {
 					$result.append( routeAlertTemplate( {
@@ -443,12 +508,20 @@ jQuery( function( $, undefined ) {
 					$( '#route-insert:checked' ).length > 0, parseInt( $( '#route-penalty' ).val() ) || 0
 				] );
 				worker.onmessage = function( e ) {
+					worker.terminate();
 					$result.empty();
+					trainRecv++;
 					var calculated = e.data;
 					if ( calculated.ok ) {
 						var pathStationsText = $.map( calculated.path, function( station ) {
 							return stations[station][1];
 						} );
+						if ( train.loads >= 0 ) {
+							summaryGross[trainId] = [ trainId, calculated.dailyGross ];
+							dailyGross += calculated.dailyGross;
+							summaryNet[trainId] = [ trainId, calculated.dailyNet ];
+							dailyNet += calculated.dailyNet;
+						}
 						$result.append( routeResultTemplate( {
 							hasLoads: train.loads >= 0,
 							path: pathStationsText.join( ' - ' ),
@@ -484,7 +557,9 @@ jQuery( function( $, undefined ) {
 							message: calculated.message
 						} ) );
 					}
-					worker.terminate();
+					if ( trainRecv == trainCount ) {
+						showSummary();
+					}
 				};
 			} );
 		} );
