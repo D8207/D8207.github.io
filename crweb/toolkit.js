@@ -43,6 +43,22 @@ jQuery( function( $, undefined ) {
 			} );
 			return data;
 		};
+		var unserializeTrain = function( data, $train ) {
+			$train.find( '.train-select' ).val( data.type ).trigger( 'change' );
+			var attrib_rows = [ 'level' ];
+			if ( data.type < 0 ) {
+				attrib_rows.push( 'initial' );
+			}
+			$.each( attrib_rows, function() {
+				var attrib_row = this;
+				$.each( [ 'speed', 'distance', 'weight', 'battery' ], function() {
+					var attrib = this;
+					$train.find( '.train-attrib-' + attrib_row + '.train-attrib-' + attrib ).val(
+						data['attrib_' + attrib_row + '_' + attrib ] );
+				} );
+			} );
+			$train.find( '.train-attrib-value' ).trigger( 'do-update' );
+		};
 		var serializeTrains = function() {
 			return $( '.train-row' ).map( function() {
 				return serializeTrain( $( this ) );
@@ -194,6 +210,16 @@ jQuery( function( $, undefined ) {
 				trainsBatchEnd();
 			} ).change();
 
+			// Duplication
+			$train.find( '.train-duplicate' ).click( function() {
+				var trainId = trainNextId;
+				trainsBatchBegin();
+				$( '#trains-new' ).trigger( 'click' );
+				var $newTrain = $( '#train-' + trainId );
+				unserializeTrain( serializeTrain( $train ), $newTrain );
+				trainsBatchEnd();
+			} );
+
 			// Removal
 			$train.find( '.train-delete' ).click( function() {
 				$train.remove();
@@ -222,20 +248,7 @@ jQuery( function( $, undefined ) {
 			var data = this, trainId = trainNextId;
 			$( '#trains-new' ).trigger( 'click' );
 			var $train = $( '#train-' + trainId );
-			$train.find( '.train-select' ).val( data.type ).trigger( 'change' );
-			var attrib_rows = [ 'level' ];
-			if ( data.type < 0 ) {
-				attrib_rows.push( 'initial' );
-			}
-			$.each( attrib_rows, function() {
-				var attrib_row = this;
-				$.each( [ 'speed', 'distance', 'weight', 'battery' ], function() {
-					var attrib = this;
-					$train.find( '.train-attrib-' + attrib_row + '.train-attrib-' + attrib ).val(
-						data['attrib_' + attrib_row + '_' + attrib ] );
-				} );
-			} );
-			$train.find( '.train-attrib-value' ).trigger( 'do-update' );
+			unserializeTrain( data, $train );
 		} );
 		trainsBatchEnd();
 
