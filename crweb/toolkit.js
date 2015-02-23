@@ -21,7 +21,65 @@ jQuery( function( $, undefined ) {
 		}
 	};
 
+	var localStorage = window.localStorage || {};
+
 	var init = function() {
+		// Utils
+		var serializeTrain = function( $train ) {
+			var data = {
+				type: $train.find( '.train-select' ).val()
+			};
+			var attrib_rows = [ 'level' ];
+			if ( data.type < 0 ) {
+				attrib_rows.push( 'initial' );
+			}
+			$.each( attrib_rows, function() {
+				var attrib_row = this;
+				$.each( [ 'speed', 'distance', 'weight', 'battery' ], function() {
+					var attrib = this;
+					data['attrib_' + attrib_row + '_' + attrib ] =
+						$train.find( '.train-attrib-' + attrib_row + '.train-attrib-' + attrib ).val();
+				} );
+			} );
+			return data;
+		};
+		var serializeTrains = function() {
+			return $( '.train-row' ).map( function() {
+				return serializeTrain( $( this ) );
+			} ).get();
+		};
+		var serializeStations = function() {
+			return $( '.station-row' ).map( function() {
+				return $( this ).data( 'id' );
+			} ).get();
+		};
+		var inTrainsBatch = false;
+		var trainsUpdated = function() {
+			if ( !inTrainsBatch ) {
+				localStorage.crwebToolkitTrains = JSON.stringify( serializeTrains() );
+				$( '#route-train' ).trigger( 'do-update' );
+			}
+		};
+		var inStationsBatch = false;
+		var stationsUpdated = function() {
+			if ( !inStationsBatch ) {
+				localStorage.crwebToolkitStations = JSON.stringify( serializeStations() );
+			}
+		};
+		var trainsBatchBegin = function() {
+			inTrainsBatch = true;
+		};
+		var trainsBatchEnd = function() {
+			inTrainsBatch = false;
+			trainsUpdated();
+		};
+		var stationsBatchBegin = function() {
+			inStationsBatch = true;
+		};
+		var stationsBatchEnd = function() {
+			inStationsBatch = false;
+			stationsUpdated();
+		};
 		// Trains
 		var trains = {};
 		var trainsSelect = [];
@@ -81,10 +139,10 @@ jQuery( function( $, undefined ) {
 						.addClass( 'train-attrib-ro' )
 						.removeClass( 'form-control' )
 						.prop( 'readOnly', true );
-					$train.find( '.train-attrib-initial.train-attrib-speed').val( trains[trainType][5] );
-					$train.find( '.train-attrib-initial.train-attrib-distance').val( trains[trainType][4] );
-					$train.find( '.train-attrib-initial.train-attrib-weight').val( trains[trainType][6] );
-					$train.find( '.train-attrib-initial.train-attrib-battery').val( trains[trainType][7] );
+					$train.find( '.train-attrib-initial.train-attrib-speed' ).val( trains[trainType][5] );
+					$train.find( '.train-attrib-initial.train-attrib-distance' ).val( trains[trainType][4] );
+					$train.find( '.train-attrib-initial.train-attrib-weight' ).val( trains[trainType][6] );
+					$train.find( '.train-attrib-initial.train-attrib-battery' ).val( trains[trainType][7] );
 				} else {
 					desc = '在下方输入此车的相关属性';
 					img = '';
@@ -131,17 +189,19 @@ jQuery( function( $, undefined ) {
 					$train.find( '.train-price' ).hide();
 				}
 				$train.find( '.train-desc' ).text( desc );
-				$train.find( '.train-attrib-value' ).trigger( 'update' );
+				trainsBatchBegin();
+				$train.find( '.train-attrib-value' ).trigger( 'do-update' );
+				trainsBatchEnd();
 			} ).change();
 
 			// Removal
 			$train.find( '.train-delete' ).click( function() {
 				$train.remove();
-				$( '#route-train' ).trigger( 'update' );
+				trainsUpdated();
 			} );
 
 			// Values
-			$train.find( '.train-attrib-value' ).on( 'update', function() {
+			$train.find( '.train-attrib-value' ).on( 'do-update', function() {
 				var $this = $( this ), attrib = $this.data( 'attrib' );
 				var initial = parseInt( $train.find( '.train-attrib-initial.train-attrib-' + attrib ).val() );
 				var level = parseInt( $train.find( '.train-attrib-level.train-attrib-' + attrib ).val() );
@@ -151,12 +211,33 @@ jQuery( function( $, undefined ) {
 					var value = Math.floor( initial * trainLevels[level][trainLevelAttribIdx[attrib]] / 1000 );
 					$this.val( value );
 				}
-				$( '#route-train' ).trigger( 'update' );
-			} ).trigger( 'update' );
+				trainsUpdated();
+			} ).trigger( 'do-update' );
 			$train.find( '.train-attrib-initial, .train-attrib-level' ).change( function() {
-				$train.find( '.train-attrib-value.train-attrib-' + $( this ).data( 'attrib' ) ).trigger( 'update' );
+				$train.find( '.train-attrib-value.train-attrib-' + $( this ).data( 'attrib' ) ).trigger( 'do-update' );
 			} );
 		} );
+		trainsBatchBegin();
+		$.each( JSON.parse( localStorage.crwebToolkitTrains || '[]' ), function() {
+			var data = this, trainId = trainNextId;
+			$( '#trains-new' ).trigger( 'click' );
+			var $train = $( '#train-' + trainId );
+			$train.find( '.train-select' ).val( data.type ).trigger( 'change' );
+			var attrib_rows = [ 'level' ];
+			if ( data.type < 0 ) {
+				attrib_rows.push( 'initial' );
+			}
+			$.each( attrib_rows, function() {
+				var attrib_row = this;
+				$.each( [ 'speed', 'distance', 'weight', 'battery' ], function() {
+					var attrib = this;
+					$train.find( '.train-attrib-' + attrib_row + '.train-attrib-' + attrib ).val(
+						data['attrib_' + attrib_row + '_' + attrib ] );
+				} );
+			} );
+			$train.find( '.train-attrib-value' ).trigger( 'do-update' );
+		} );
+		trainsBatchEnd();
 
 		// Stations
 		var stations = {};
@@ -186,21 +267,25 @@ jQuery( function( $, undefined ) {
 				pop: station[7],
 				admin: station[9]
 			} ) );
-			if ( $( '#route-stations li.station-' + id ).length == 0 ) {
-				$( '#route-stations' ).append(
-					$( '<li/>' ).addClass( 'ui-state-default station-' + id )
-						.attr( 'data-id', id )
-						.text( station[1] )
-						.draggable( {
-							connectToSortable: '#route-waypoints',
-							helper: 'clone',
-							revert: 'invalid'
-						} ).click( function() {
-							$( this ).clone().appendTo( '#route-waypoints' );
-						} )
-				);
-			}
+			$( '#route-stations' ).append(
+				$( '<li/>' ).addClass( 'ui-state-default station-' + id )
+					.attr( 'data-id', id )
+					.text( station[1] )
+					.draggable( {
+						connectToSortable: '#route-waypoints',
+						helper: 'clone',
+						revert: 'invalid'
+					} ).click( function() {
+						$( this ).clone().appendTo( '#route-waypoints' );
+					} )
+			);
+			stationsUpdated();
 		};
+		stationsBatchBegin();
+		$.each( JSON.parse( localStorage.crwebToolkitStations || '[]' ), function() {
+			stationsBodyInsert( this );
+		} );
+		stationsBatchEnd();
 		$( '#stations-picker' ).select2( {
 			placeholder: '选择一个车站',
 			data: stationsSelect
@@ -217,19 +302,24 @@ jQuery( function( $, undefined ) {
 			$( '#route-stations li.station-' + $row.data( 'id' ) + ','
 				+ '#route-waypoints li.station-' + $row.data( 'id' ) ).remove()
 			$row.remove();
+			stationsUpdated();
 		} );
 		$( '#stations-select a' ).click( function( e ) {
 			e.preventDefault();
 			var $this = $( this ), stars = $this.data( 'stars' );
+			stationsBatchBegin();
 			$.each( stations, function() {
 				if ( this[4] === stars ) {
 					stationsBodyInsert( this[0] );
 				}
 			} );
+			stationsBatchEnd();
 		} );
 		$( '#stations-unselect a' ).click( function( e ) {
 			e.preventDefault();
+			stationsBatchBegin();
 			$( '.station-row.stars-' + $( this ).data( 'stars' ) ).find( '.station-delete' ).trigger( 'click' );
+			stationsBatchEnd();
 		} );
 
 		// Route
@@ -248,7 +338,7 @@ jQuery( function( $, undefined ) {
 			}
 		} );
 
-		$( '#route-train' ).on( 'update', function() {
+		$( '#route-train' ).on( 'do-update', function() {
 			var $select = $( this );
 			var val = $select.val();
 			$select.empty();
