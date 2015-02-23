@@ -396,13 +396,15 @@ jQuery( function( $, undefined ) {
 				).appendTo( '#route-result' );
 				return;
 			}
-			$( '<h3/>' ).text( '统计信息' ).appendTo( '#route-result' );
-			var $summary = $( '<div/>' ).addClass( 'row' ).appendTo( '#route-result' );
-			$summary.append( routeAlertTemplate( {
-				type: 'info',
-				message: '正在计算，请稍候'
-			} ) );
 			var trainCount = trainIds.length, trainRecv = 0;
+			if ( trainCount > 1 ) {
+				$( '<h3/>' ).text( '统计信息' ).appendTo( '#route-result' );
+				var $summary = $( '<div/>' ).addClass( 'row' ).appendTo( '#route-result' );
+				$summary.append( routeAlertTemplate( {
+					type: 'info',
+					message: '正在计算，请稍候'
+				} ) );
+			}
 			var summaryGross = new Array( trainCount ), summaryNet = new Array( trainCount );
 			var dailyGross = 0, dailyNet = 0;
 			var trainTextById = {};
@@ -437,6 +439,9 @@ jQuery( function( $, undefined ) {
 				} );
 			};
 			var showSummary = function() {
+				if ( trainCount <= 1 ) {
+					return;
+				}
 				$summary.empty();
 				var $grossPie = $( '<div/>' ).addClass( 'col-md-12 text-center' ).appendTo( $summary );
 				var $netPie = $( '<div/>' ).addClass( 'col-md-12 text-center' ).appendTo( $summary );
