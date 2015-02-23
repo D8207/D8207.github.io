@@ -2,7 +2,7 @@ jQuery( function( $, undefined ) {
 	var staticData = {};
 	var userData = {};
 
-	var staticDataFiles = [ 'station', 'train', 'trainLevel' ];
+	var staticDataFiles = [ 'station', 'train', 'trainLevel', 'part' ];
 	var readStaticData = function( idx ) {
 		if ( idx >= staticDataFiles.length ) {
 			init();
@@ -44,6 +44,17 @@ jQuery( function( $, undefined ) {
 		};
 		$.each( staticData.trainLevel, function() {
 			trainLevels[this[0]] = this;
+		} );
+
+		var trainParts = {};
+		var trainPartsByTrains = {};
+		var trainPartsAbbr = [ '车厢', '底盘', '车头', '图纸' ];
+		$.each( staticData.part, function() {
+			trainParts[this[0]] = this;
+			if ( !trainPartsByTrains[this[3]] ) {
+				trainPartsByTrains[this[3]] = {};
+			}
+			trainPartsByTrains[this[3]][this[2]] = this;
 		} );
 
 		$( '#trains-new' ).prop( 'disabled', false ).click( function() {
@@ -95,6 +106,30 @@ jQuery( function( $, undefined ) {
 					+ ' ' + stars + '星级火车'
 				).append( pc >= 0 ? ' | <span class="glyphicon glyphicon-user" aria-hidden=true></span> ' + pc + '客运仓位' : ''
 				).append( cc >= 0 ? ' | <span class="glyphicon glyphicon-briefcase" aria-hidden=true></span> ' + cc + '货运仓位' : '' );
+				var trainPartsTrain = trainPartsByTrains[trainType];
+				if ( trainPartsTrain ) {
+					var trainPriceText = [];
+					$.each( [ 2, 0, 1, 3 ], function() {
+						if ( trainPartsTrain[this] ) {
+							trainPriceText.push(
+								'<span title="'
+								+ trainPartsTrain[this][1].replace( /&/g, '&amp;').replace( /"/g, '&quot;')
+								+ '">'
+								+ trainPartsAbbr[this]
+								+ '</span>：'
+								+ trainPartsTrain[this][6]
+								+ '点卷'
+							);
+						}
+					} );
+					if ( trainPartsTrain[3] !== undefined ) {
+						trainPriceText.push( '启用：' + trainPartsTrain[3][6] + '点卷' );
+						trainPriceText.push( '组装：' + ( Math.floor( trainPartsTrain[3][6] / 2 ) + 1 ) + '点卷' );
+					}
+					$train.find( '.train-price' ).html( trainPriceText.join( ' | ' ) ).show();
+				} else {
+					$train.find( '.train-price' ).hide();
+				}
 				$train.find( '.train-desc' ).text( desc );
 				$train.find( '.train-attrib-value' ).trigger( 'update' );
 			} ).change();
