@@ -308,7 +308,10 @@ jQuery( function( $, undefined ) {
 			} ) );
 
 			var worker = new Worker( 'calculator.js' );
-			worker.postMessage( [ train, stations, useStations, wayPoints, $( '#route-insert:checked' ).length > 0 ] );
+			worker.postMessage( [
+				train, stations, useStations, wayPoints,
+				$( '#route-insert:checked' ).length > 0, parseInt( $( '#route-penalty' ).val() ) || 0
+			] );
 			worker.onmessage = function( e ) {
 				$( '#route-result' ).empty();
 				var calculated = e.data;
@@ -353,6 +356,10 @@ jQuery( function( $, undefined ) {
 				}
 				worker.terminate();
 			};
+		} );
+
+		$( '#route-insert' ).change( function() {
+			$( '#route-penalty-group' ).toggle( $( this ).is( ':checked' ) );
 		} );
 	};
 

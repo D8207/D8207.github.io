@@ -24,7 +24,7 @@ var annotatePath = function( stations, wayPoints ) {
 	return result;
 };
 
-var buildPath = function( train, stations, useStations, wayPoints ) {
+var buildPath = function( train, stations, useStations, wayPoints, penalty ) {
 	var map = {};
 	useStations.forEach( function( i ) {
 		if ( stations[i][4] < train.stars ) {
@@ -46,7 +46,7 @@ var buildPath = function( train, stations, useStations, wayPoints ) {
 				return;
 			}
 
-			map[i][j] = dist;
+			map[i][j] = dist + penalty;
 		} );
 	} );
 
@@ -78,9 +78,10 @@ var buildPath = function( train, stations, useStations, wayPoints ) {
  * @param Array useStations
  * @param Array wayPoints
  * @param Boolean insert
+ * @param Integer penalty
  * @return Object { ok, message }
  */
-var calculate = function( train, stations, useStations, wayPoints, insert ) {
+var calculate = function( train, stations, useStations, wayPoints, insert, penalty ) {
 	// Sanity check
 	if ( wayPoints.length < 2 ) {
 		return {
@@ -106,7 +107,7 @@ var calculate = function( train, stations, useStations, wayPoints, insert ) {
 	var path, totalDistance;
 	if ( insert ) {
 		// Build a path from given wayPoints.
-		path = buildPath( train, stations, useStations, wayPoints );
+		path = buildPath( train, stations, useStations, wayPoints, penalty );
 		if ( path ) {
 			totalDistance = annotatePath( stations, path ).pop();
 		} else {
