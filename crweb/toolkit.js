@@ -379,107 +379,114 @@ jQuery( function( $, undefined ) {
 				$( '<option/>' ).attr( 'value', id ).text( text ).appendTo( $select );
 			} );
 
-			$select.val( val );
+			$select.val( val ).attr( 'size', $select.find( 'option' ).length );
 		} ).trigger( 'do-update' );
 
 		var routeAlertTemplate = Handlebars.compile( $( '#route-alert-template' ).html() );
 		var routeResultTemplate = Handlebars.compile( $( '#route-result-template' ).html() );
 		$( '#route-calculate' ).prop( 'disabled', false ).click( function() {
 			$( '#route-result' ).empty();
-			var trainId = $( '#route-train' ).val();
-			var $train = $( '#train-' + trainId );
-			if ( $train.length === 0 ) {
-				$( '#route-result' ).append( routeAlertTemplate( {
-					type: 'danger',
-					message: '请选择火车'
-				} ) );
-				return;
-			}
-
-			var type = parseInt( $train.find( '.train-select' ).val() );
-			var speed = parseInt( $train.find( '.train-attrib-value.train-attrib-speed' ).val() );
-			var distance = parseInt( $train.find( '.train-attrib-value.train-attrib-distance' ).val() );
-			var weight = parseInt( $train.find( '.train-attrib-value.train-attrib-weight' ).val() );
-			var battery = parseInt( $train.find( '.train-attrib-value.train-attrib-battery' ).val() );
-
-			if ( isNaN( speed ) || isNaN( distance ) || isNaN( weight ) || isNaN( battery ) ) {
-				$( '#route-result' ).append( routeAlertTemplate( {
-					type: 'danger',
-					message: '指定火车的数据没有填写完整'
-				} ) );
-				return;
-			}
-			var train = {
-				speed: speed,
-				distance: distance,
-				weight: weight,
-				battery: battery,
-				stars: type < 0 ? -type : trains[type][3],
-				loads: type < 0 ? -1 : ( trains[type][8] + trains[type][9] )
-			};
-
-			var useStations = $( '.station-row' ).map( function() {
-				return $( this ).data( 'id' );
-			} ).get();
-
-			var wayPoints = $( '#route-waypoints li.ui-state-default' ).map( function() {
-				return $( this ).data( 'id' );
-			} ).get();
-
-			$( '#route-result' ).append( routeAlertTemplate( {
-				type: 'info',
-				message: '正在计算，请稍候'
-			} ) );
-
-			var worker = new Worker( 'calculator.js' );
-			worker.postMessage( [
-				train, stations, useStations, wayPoints,
-				$( '#route-insert:checked' ).length > 0, parseInt( $( '#route-penalty' ).val() ) || 0
-			] );
-			worker.onmessage = function( e ) {
-				$( '#route-result' ).empty();
-				var calculated = e.data;
-				if ( calculated.ok ) {
-					var pathStationsText = $.map( calculated.path, function( station ) {
-						return stations[station][1];
-					} );
-					$( '#route-result' ).append( routeResultTemplate( {
-						hasLoads: train.loads >= 0,
-						path: pathStationsText.join( ' - ' ),
-						totalDistance: calculated.totalDistance,
-						runningTime: calculated.runningTime,
-						runningHours: Math.floor( calculated.runningTime / 3600 ),
-						runningMinutes: Math.floor( calculated.runningTime / 60 ) % 60,
-						runningSeconds: calculated.runningTime % 60,
-						batteryConsumed: calculated.batteryConsumed,
-						priceDistance: calculated.priceDistance,
-						priceCoins: calculated.priceCoins,
-						pricePoints: calculated.pricePoints,
-						costCoins: calculated.costCoins,
-						totalGross: calculated.totalGross,
-						totalNet: calculated.totalNet,
-						dailyCount: calculated.dailyCount,
-						dailyRemaining: calculated.dailyRemaining,
-						dailyGross: calculated.dailyGross,
-						dailyNet: calculated.dailyNet
-					} ) );
-					$( '#route-path-transfer' ).click( function() {
-						$( '#route-waypoints li.ui-state-default' ).remove();
-						$.each( calculated.path, function() {
-							$( '<li/>' ).addClass( 'ui-state-default' )
-								.attr( 'data-id', this )
-								.text( stations[this][1] )
-								.appendTo( '#route-waypoints' );
-						} );
-					} );
-				} else {
-					$( '#route-result' ).append( routeAlertTemplate( {
+			var trainIds = $( '#route-train' ).val();
+			if ( trainIds === null ) {
+				$( '<div/>' ).addClass( 'row' ).append(
+					routeAlertTemplate( {
 						type: 'danger',
-						message: calculated.message
+						message: '请选择火车'
+					} )
+				).appendTo( '#route-result' );
+				return;
+			}
+			$.each( trainIds, function() {
+				var trainId = this;
+				$( '<h3>' ).text( $( '#route-train option[value=' + trainId + ']' ).text() ).appendTo( '#route-result' );
+				var $result = $( '<div/>' ).addClass( 'row' ).appendTo( '#route-result' );
+				var $train = $( '#train-' + trainId );
+
+				var type = parseInt( $train.find( '.train-select' ).val() );
+				var speed = parseInt( $train.find( '.train-attrib-value.train-attrib-speed' ).val() );
+				var distance = parseInt( $train.find( '.train-attrib-value.train-attrib-distance' ).val() );
+				var weight = parseInt( $train.find( '.train-attrib-value.train-attrib-weight' ).val() );
+				var battery = parseInt( $train.find( '.train-attrib-value.train-attrib-battery' ).val() );
+
+				if ( isNaN( speed ) || isNaN( distance ) || isNaN( weight ) || isNaN( battery ) ) {
+					$result.append( routeAlertTemplate( {
+						type: 'danger',
+						message: '指定火车的数据没有填写完整'
 					} ) );
+					return;
 				}
-				worker.terminate();
-			};
+				var train = {
+					speed: speed,
+					distance: distance,
+					weight: weight,
+					battery: battery,
+					stars: type < 0 ? -type : trains[type][3],
+					loads: type < 0 ? -1 : ( trains[type][8] + trains[type][9] )
+				};
+
+				var useStations = $( '.station-row' ).map( function() {
+					return $( this ).data( 'id' );
+				} ).get();
+
+				var wayPoints = $( '#route-waypoints li.ui-state-default' ).map( function() {
+					return $( this ).data( 'id' );
+				} ).get();
+
+				$result.append( routeAlertTemplate( {
+					type: 'info',
+					message: '正在计算，请稍候'
+				} ) );
+
+				var worker = new Worker( 'calculator.js' );
+				worker.postMessage( [
+					train, stations, useStations, wayPoints,
+					$( '#route-insert:checked' ).length > 0, parseInt( $( '#route-penalty' ).val() ) || 0
+				] );
+				worker.onmessage = function( e ) {
+					$result.empty();
+					var calculated = e.data;
+					if ( calculated.ok ) {
+						var pathStationsText = $.map( calculated.path, function( station ) {
+							return stations[station][1];
+						} );
+						$result.append( routeResultTemplate( {
+							hasLoads: train.loads >= 0,
+							path: pathStationsText.join( ' - ' ),
+							totalDistance: calculated.totalDistance,
+							runningTime: calculated.runningTime,
+							runningHours: Math.floor( calculated.runningTime / 3600 ),
+							runningMinutes: Math.floor( calculated.runningTime / 60 ) % 60,
+							runningSeconds: calculated.runningTime % 60,
+							batteryConsumed: calculated.batteryConsumed,
+							priceDistance: calculated.priceDistance,
+							priceCoins: calculated.priceCoins,
+							pricePoints: calculated.pricePoints,
+							costCoins: calculated.costCoins,
+							totalGross: calculated.totalGross,
+							totalNet: calculated.totalNet,
+							dailyCount: calculated.dailyCount,
+							dailyRemaining: calculated.dailyRemaining,
+							dailyGross: calculated.dailyGross,
+							dailyNet: calculated.dailyNet
+						} ) );
+						$( '#route-path-transfer' ).click( function() {
+							$( '#route-waypoints li.ui-state-default' ).remove();
+							$.each( calculated.path, function() {
+								$( '<li/>' ).addClass( 'ui-state-default' )
+									.attr( 'data-id', this )
+									.text( stations[this][1] )
+									.appendTo( '#route-waypoints' );
+							} );
+						} );
+					} else {
+						$result.append( routeAlertTemplate( {
+							type: 'danger',
+							message: calculated.message
+						} ) );
+					}
+					worker.terminate();
+				};
+			} );
 		} );
 
 		$( '#route-insert' ).change( function() {
