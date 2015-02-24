@@ -493,10 +493,6 @@ jQuery( function( $, undefined ) {
 				} ) );
 
 				var worker = new Worker( 'calculator.js' );
-				worker.postMessage( [
-					train, stations, useStations(), wayPoints,
-					$( '#route-insert:checked' ).length > 0, parseInt( $( '#route-penalty' ).val() ) || 0
-				] );
 				worker.onmessage = function( e ) {
 					worker.terminate();
 					$result.empty();
@@ -548,6 +544,10 @@ jQuery( function( $, undefined ) {
 						showSummary();
 					}
 				};
+				worker.postMessage( [
+					train, stations, useStations(), wayPoints,
+					$( '#route-insert:checked' ).length > 0, parseInt( $( '#route-penalty' ).val() ) || 0
+				] );
 			} );
 		} );
 
@@ -625,7 +625,6 @@ jQuery( function( $, undefined ) {
 			}
 
 			var worker = new Worker( 'calculator.js' );
-			worker.postMessage( [ train, stations, [], [], false, 0 ] );
 			worker.onmessage = function( e ) {
 				worker.terminate();
 				var calculated = e.data;
@@ -636,6 +635,7 @@ jQuery( function( $, undefined ) {
 					} ) );
 				}
 			};
+			worker.postMessage( [ train, stations, [], [], false, 0 ] );
 		} );
 		$( '.optimization-slider' ).slider( {
 			range: true,
@@ -715,11 +715,6 @@ jQuery( function( $, undefined ) {
 				var distance = Math.floor(
 					trainLevels[distanceLevel][trainLevelAttribIdx.distance] * initialTrain.distance / 1000
 				);
-				worker.postMessage( [
-					$.extend( {}, train, { distance: distance } ),
-					stations, useStationsV,
-					[ fromStation, toStation ], true, penalty
-				] );
 				worker.onmessage = function( e ) {
 					var calculated = e.data;
 					if ( calculated.ok && ( prevPathDistance === null
@@ -736,6 +731,11 @@ jQuery( function( $, undefined ) {
 					}
 					calculateDistanceLevel( distanceLevel + 1 );
 				};
+				worker.postMessage( [
+					$.extend( {}, train, { distance: distance } ),
+					stations, useStationsV,
+					[ fromStation, toStation ], true, penalty
+				] );
 			};
 
 			// Step 3, for each path, iterate over speed values. For each speed values, find battery "steps".
@@ -884,7 +884,6 @@ jQuery( function( $, undefined ) {
 
 			// Base data
 			var worker = new Worker( 'calculator.js' );
-			worker.postMessage( [ train, stations, [], [], false, 0 ] );
 			worker.onmessage = function( e ) {
 				var calculated = e.data;
 				if ( calculated.ok ) {
@@ -898,6 +897,7 @@ jQuery( function( $, undefined ) {
 					} ) );
 				}
 			};
+			worker.postMessage( [ train, stations, [], [], false, 0 ] );
 		} );
 
 		// Shared
