@@ -406,34 +406,28 @@
 						<table class=table>
 							<thead>
 								<tr>
-									<th>速度等级
-									<th>距离等级
-									<th>重量等级
-									<th>电量等级
-									<th>总里程
-									<th>行车次数
-									<th>剩余电量
-									<th>日收入
-									<th>收入比
-									<th>日利润
-									<th>利润比
-									<th>预期点卷
+									<th>速度
+									<th>距离
+									<th>重量
+									<th>电量
+									<th>里程
+									<th>行车
+									<th>收入
+									<th>利润
+									<th>点卷
 									<th>优化值
 							</thead>
 							<tbody>
 								{{#each data}}
-								<tr title="{{this.path}}">
-									<td>{{this.speedLevel}}
-									<td>{{this.distanceLevel}}
-									<td>{{this.weightLevel}}
-									<td>{{this.batteryLevel}}
-									<td>{{this.calculated.totalDistance}}
-									<td>{{this.calculated.dailyCount}}
-									<td>{{this.calculated.dailyRemaining}}
-									<td>{{this.calculated.dailyGross}}
-									<td>{{this.grossRatio}}
-									<td>{{this.calculated.dailyNet}}
-									<td>{{this.netRatio}}
+								<tr>
+									<td title="{{this.speed}}">{{this.speedLevel}}级
+									<td title="{{this.distance}}">{{this.distanceLevel}}级
+									<td title="{{this.weight}}">{{this.weightLevel}}级
+									<td title="{{this.battery}}">{{this.batteryLevel}}级
+									<td title="{{this.path}}">{{this.calculated.totalDistance}}
+									<td title="剩余电量：{{this.calculated.dailyRemaining}}">{{this.calculated.dailyCount}}
+									<td title="与基准值比：{{this.grossRatio}}">{{this.calculated.dailyGross}}
+									<td title="与基准值比：{{this.netRatio}}">{{this.calculated.dailyNet}}
 									<td>{{this.cost}}
 									<td>{{this.func}}
 								{{/each}}
