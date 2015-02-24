@@ -140,8 +140,9 @@ var calculate = function( train, stations, useStations, wayPoints, insert, penal
 	var runningTime = Math.floor( totalDistance * 450 / train.speed ); // In seconds
 	var batteryConsumed = Math.floor( runningTime / 60 );
 	var priceCoins = priceDistance + 50;
-	var costCoins = Math.floor( train.speed * train.weight * totalDistance / 400000 );
-	var totalGross = train.loads < 0 ? NaN : ( train.loads * Math.floor( priceCoins * ( train.loads > 1 ? 1.25 : 1 ) ) );
+	var costCoins = Math.floor( train.speed * train.weight * totalDistance / 400000 ) + 1;
+	// real total gross income is NOT the sum of all prices labeled due to rounding issues
+	var totalGross = train.loads < 0 ? NaN : Math.floor( train.loads * priceCoins * ( train.loads > 1 ? 1.25 : 1 ) );
 	var totalNet = train.loads < 0 ? NaN : ( totalGross - costCoins );
 	var dailyCount = Math.floor( train.battery / batteryConsumed );
 	var dailyRemaining = train.battery - dailyCount * batteryConsumed;
