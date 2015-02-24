@@ -280,8 +280,7 @@
 			</div>
 			<div id=optimization class="panel-collapse" role=tabpanel aria-labelledby=optimization-heading>
 				<div class=panel-body>
-					<p>本功能根据指定的参数最大化以下公式的值：
-					<p class=text-center>收入系数 &times; 全日总金币收入 / 基准日金币收入 + 利润系数 &times; 全日总金币利润 / 基准日利润收入 - 预期点卷消耗
+					<p>本功能尝试不同升级等级组合以最大化指定公式的值。
 					<p>由于升级成功概率难以确定，下面的概率表填入了参考值（万分比），可适当更改：
 					<table id=optimization-chance-table class=table>
 						<thead>
@@ -337,15 +336,10 @@
 							</div>
 						</div>
 						<div class=form-group>
-							<label class="col-md-2 control-label" for=optimization-factor-gross>收入系数：</label>
+							<label class="col-md-2 control-label" for=optimization-expr>公式：</label>
 							<div class=col-md-10>
-								<input class=form-control type=number value=600 id=optimization-factor-gross>
-							</div>
-						</div>
-						<div class=form-group>
-							<label class="col-md-2 control-label" for=optimization-factor-net>利润系数：</label>
-							<div class=col-md-10>
-								<input class=form-control type=number value=600 id=optimization-factor-net>
+								<input class=form-control type=text id=optimization-expr>
+								<p class=help-block>接受的变量：速度、速度等级、距离、距离等级、重量、重量等级、电量、电量等级、基准收入、基准利润、收入、利润、单程里程、行车次数、剩余电量、点卷消耗，均为字面含义
 							</div>
 						</div>
 						<div class=form-group>
@@ -411,7 +405,7 @@
 									<th class=text-center>重量
 									<th class=text-center>电量
 									<th class=text-center>里程
-									<th class=text-center>行车
+									<th class=text-center>行车次数
 									<th class=text-center>收入
 									<th class=text-center>利润
 									<th class=text-center>点卷

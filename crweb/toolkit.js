@@ -659,14 +659,76 @@ jQuery( function( $, undefined ) {
 			var useStationsV = useStations();
 			var fromStation = $( '#optimization-from' ).val();
 			var toStation = $( '#optimization-to' ).val();
-			var factorGross = parseFloat( $( '#optimization-factor-gross' ).val() );
-			var factorNet = parseFloat( $( '#optimization-factor-net' ).val() );
+			var exprInput = $( '#optimization-expr' ).val();
 			var penalty = parseInt( $( '#optimization-penalty' ).val() ) || 0;
 
-			if ( !train || !stations[fromStation] || !stations[toStation] || isNaN( factorGross ) || isNaN( factorNet ) ) {
+			if ( !train || !stations[fromStation] || !stations[toStation] ) {
 				$( '#optimization-result' ).append( optimizationAlertTemplate( {
 					type: 'danger',
-					message: '请选择火车、发到站和相关系数'
+					message: '请选择火车和发到站'
+				} ) );
+				return;
+			}
+
+			var evalExpr = function( attribs, baseData, calculated, cost ) {
+				with ( {
+					速度: attribs.speed,
+					速度等级: attribs.speedLevel,
+					距离: attribs.distance,
+					距离等级: attribs.distanceLevel,
+					重量: attribs.weight,
+					重量等级: attribs.weightLevel,
+					电量: attribs.battery,
+					电量等级: attribs.batteryLevel,
+					基准收入: baseData.dailyGross,
+					基准利润: baseData.dailyNet,
+					收入: calculated.dailyGross,
+					利润: calculated.dailyNet,
+					单程里程: calculated.totalDistance,
+					行车次数: calculated.dailyCount,
+					剩余电量: calculated.dailyRemaining,
+					点卷消耗: cost
+				} ) {
+					return eval( exprInput );
+				}
+			};
+
+			var fakeAttribs = {
+				speed: 1,
+				speedLevel: 1,
+				distance: 1,
+				distanceLevel: 1,
+				weight: 1,
+				weightLevel: 1,
+				battery: 1,
+				batteryLevel: 1
+			};
+
+			var fakeCalculatorOutput = {
+				ok: true,
+				path: [1],
+				distances: [],
+				totalDistance: 1,
+				runningTime: 1,
+				batteryConsumed: 1,
+				priceDistance: 1,
+				priceCoins: 1,
+				pricePoints: 1,
+				costCoins: 1,
+				totalGross: 1,
+				totalNet: 1,
+				dailyCount: 1,
+				dailyRemaining: 1,
+				dailyGross: 1,
+				dailyNet: 1
+			};
+
+			try {
+				evalExpr( fakeAttribs, fakeCalculatorOutput, fakeCalculatorOutput, 0 );
+			} catch ( e ) {
+				$( '#optimization-result' ).append( optimizationAlertTemplate( {
+					type: 'danger',
+					message: '公式错误：' + e.toString()
 				} ) );
 				return;
 			}
@@ -820,12 +882,10 @@ jQuery( function( $, undefined ) {
 					worker.onmessage = function( e ) {
 						var calculated = e.data;
 						if ( calculated.ok ) {
-							var gross = calculated.dailyGross;
-							var grossRatio = gross / baseData.dailyGross;
-							var net = calculated.dailyNet;
-							var netRatio = net / baseData.dailyNet;
+							var grossRatio = calculated.dailyGross / baseData.dailyGross;
+							var netRatio = calculated.dailyNet / baseData.dailyNet;
 							var cost = estimateCost( pairs[pairIdx] );
-							var func = factorGross * grossRatio + factorNet * netRatio - cost;
+							var func = evalExpr( pairs[pairIdx], baseData, calculated, cost );
 							optimizationData.push( $.extend( {}, pairs[pairIdx], {
 								calculated: calculated,
 								grossRatio: grossRatio,
