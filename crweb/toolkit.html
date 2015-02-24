@@ -165,7 +165,7 @@
 						<div class=form-group>
 							<label class="col-md-2 control-label" for=route-train>使用火车：</label>
 							<div class=col-md-10>
-								<select class=form-control id=route-train multiple>
+								<select class="form-control train-list-select" id=route-train multiple data-negative=true>
 								</select>
 							</div>
 						</div>
@@ -177,7 +177,7 @@
 							</div>
 						</div>
 						<div class=form-group id=route-penalty-group>
-							<label class="col-md-2 control-label" for=route-train>中转罚分（里程）：</label>
+							<label class="col-md-2 control-label" for=route-penalty>中转罚分（里程）：</label>
 							<div class=col-md-10>
 								<input class=form-control type=number min=0 value=1 id=route-penalty>
 							</div>
@@ -278,9 +278,168 @@
 					<a class=collapsed data-toggle=collapse data-parent=#mainAccordion href=#optimization aria-expanded=false aria-controls=optimization>优化</a>
 				</h2>
 			</div>
-			<div id=optimization class="panel-collapse collapse" role=tabpanel aria-labelledby=optimization-heading>
+			<div id=optimization class="panel-collapse" role=tabpanel aria-labelledby=optimization-heading>
 				<div class=panel-body>
-					优化
+					<p>本功能根据指定的参数最大化以下公式的值：
+					<p class=text-center>收入系数 &times; 全日总金币收入 / 基准日金币收入 + 利润系数 &times; 全日总金币利润 / 基准日利润收入 - 预期点卷消耗
+					<p>由于升级成功概率难以确定，下面的概率表填入了参考值（万分比），可适当更改：
+					<table id=optimization-chance-table class=table>
+						<thead>
+							<tr>
+								<th>等级
+								<th>速度
+								<th>距离
+								<th>重量
+								<th>电量
+						</thead>
+						<tbody>
+							<script id=optimization-chance-template type=text/x-handlebars-template>
+								<tr>
+									<th>{{level}}
+									<td><input type=number min=1 size=10000 value="{{speed}}" class="optimization-chance optimization-chance-speed optimization-chance-level{{level}} form-control">
+									<td><input type=number min=1 size=10000 value="{{distance}}" class="optimization-chance optimization-chance-distance optimization-chance-level{{level}} form-control">
+									<td><input type=number min=1 size=10000 value="{{weight}}" class="optimization-chance optimization-chance-weight optimization-chance-level{{level}} form-control">
+									<td><input type=number min=1 size=10000 value="{{battery}}" class="optimization-chance optimization-chance-battery optimization-chance-level{{level}} form-control">
+							</script>
+						</tbody>
+					</table>
+					<form class=form-horizontal role=form>
+						<div class=form-group>
+							<label class="col-md-2 control-label" for=optimization-train>使用火车：</label>
+							<div class=col-md-10>
+								<select class="form-control train-list-select" id=optimization-train data-negative=false>
+								</select>
+							</div>
+						</div>
+						<div id=optimization-base>
+						</div>
+						<script id=optimization-base-template type=text/x-handlebars-template>
+							<div class="col-md-offset-2 col-md-10">
+								<dl class=dl-horizontal>
+									<dt>基准日金币收入
+									<dd>{{gross}}金币
+									<dt>基准日金币利润
+									<dd>{{net}}金币
+								</dl>
+						</script>
+						<div class=form-group>
+							<label class="col-md-2 control-label" for=optimization-from>始发站：</label>
+							<div class=col-md-10>
+								<select class="form-control station-list-select" id=optimization-from>
+								</select>
+							</div>
+						</div>
+						<div class=form-group>
+							<label class="col-md-2 control-label" for=optimization-to>终到站：</label>
+							<div class=col-md-10>
+								<select class="form-control station-list-select" id=optimization-to>
+								</select>
+							</div>
+						</div>
+						<div class=form-group>
+							<label class="col-md-2 control-label" for=optimization-factor-gross>收入系数：</label>
+							<div class=col-md-10>
+								<input class=form-control type=number value=400 id=optimization-factor-gross>
+							</div>
+						</div>
+						<div class=form-group>
+							<label class="col-md-2 control-label" for=optimization-factor-net>利润系数：</label>
+							<div class=col-md-10>
+								<input class=form-control type=number value=400 id=optimization-factor-net>
+							</div>
+						</div>
+						<div class=form-group>
+							<label class="col-md-2 control-label" for=optimization-penalty>中转罚分（里程）：</label>
+							<div class=col-md-10>
+								<input class=form-control type=number min=0 value=1 id=optimization-penalty>
+							</div>
+						</div>
+						<div class=form-group>
+							<label class="col-md-2 control-label" for=optimization-slider-speed>速度范围：</label>
+							<div class=col-md-8>
+								<div class=optimization-slider id=optimization-slider-speed></div>
+							</div>
+							<div class=col-md-2 id=optimization-slider-speed-values>1 - 20</div>
+						</div>
+						<div class=form-group>
+							<label class="col-md-2 control-label" for=optimization-slider-distance>距离范围：</label>
+							<div class=col-md-8>
+								<div class=optimization-slider id=optimization-slider-distance></div>
+							</div>
+							<div class=col-md-2 id=optimization-slider-distance-values>1 - 20</div>
+						</div>
+						<div class=form-group>
+							<label class="col-md-2 control-label" for=optimization-slider-weight>重量范围：</label>
+							<div class=col-md-8>
+								<div class=optimization-slider id=optimization-slider-weight></div>
+							</div>
+							<div class=col-md-2 id=optimization-slider-weight-values>1 - 20</div>
+						</div>
+						<div class=form-group>
+							<label class="col-md-2 control-label" for=optimization-slider-battery>电量范围：</label>
+							<div class=col-md-8>
+								<div class=optimization-slider id=optimization-slider-battery></div>
+							</div>
+							<div class=col-md-2 id=optimization-slider-battery-values>1 - 20</div>
+						</div>
+						<div class=form-group>
+							<div class=col-md-12>
+								<button type=button id=optimization-calculate class="btn btn-primary btn-block" disabled>计算</button>
+							</div>
+						</div>
+					</form>
+					<div id=optimization-result>
+					</div>
+					<script id=optimization-alert-template type=text/x-handlebars-template>
+						<div class=row>
+							<div class=col-md-12>
+								<div class="alert alert-{{type}} alert-dismissible" role=alert>
+									<button type=button class=close data-dismiss=alert aria-label=Close>
+										<span aria-hidden=true>&times;</span>
+									</button>
+									{{message}}
+								</div>
+							</div>
+						</div>
+					</script>
+					<script id=optimization-result-template type=text/x-handlebars-template>
+						<table class=table>
+							<thead>
+								<tr>
+									<th>速度等级
+									<th>距离等级
+									<th>重量等级
+									<th>电量等级
+									<th>总里程
+									<th>行车次数
+									<th>剩余电量
+									<th>日收入
+									<th>收入比
+									<th>日利润
+									<th>利润比
+									<th>预期点卷
+									<th>优化值
+							</thead>
+							<tbody>
+								{{#each data}}
+								<tr title="{{this.path}}">
+									<td>{{this.speedLevel}}
+									<td>{{this.distanceLevel}}
+									<td>{{this.weightLevel}}
+									<td>{{this.batteryLevel}}
+									<td>{{this.calculated.totalDistance}}
+									<td>{{this.calculated.dailyCount}}
+									<td>{{this.calculated.dailyRemaining}}
+									<td>{{this.calculated.dailyGross}}
+									<td>{{this.grossRatio}}
+									<td>{{this.calculated.dailyNet}}
+									<td>{{this.netRatio}}
+									<td>{{this.cost}}
+									<td>{{this.func}}
+								{{/each}}
+							</tbody>
+						</table>
+					</script>
 				</div>
 			</div>
 		</div>
