@@ -767,7 +767,7 @@ jQuery( function( $, undefined ) {
 					if ( paths.length == 0 ) {
 						$( '#optimization-result' ).html( optimizationAlertTemplate( {
 							type: 'danger',
-							message: '此车的基础距离过低，无法升级至足以行车的数值'
+							message: '此车初始距离过低，无法升级至可行走指定发到站的数值'
 						} ) );
 					} else {
 						calculatePaths();
