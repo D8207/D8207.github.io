@@ -5,9 +5,17 @@ jQuery( function( $, undefined ) {
 	var hash = location.hash;
 	if ( /^#dataset=/.test( hash ) ) {
 		dataset = hash.substring( 9 );
-		localStorage.crwebDataset = dataset;
+		localStorage.crwebToolkitDataset = dataset;
 	} else {
-		dataset = localStorage.crwebDataset || 'web';
+		dataset = localStorage.crwebToolkitDataset || 'web';
+	}
+	if ( localStorage.crwebToolkitTrains ) {
+		localStorage.crwebToolkitTrains_web = localStorage.crwebToolkitTrains;
+		delete localStorage.crwebToolkitTrains;
+	}
+	if ( localStorage.crwebToolkitStations ) {
+		localStorage.crwebToolkitStations_web = localStorage.crwebToolkitStations;
+		delete localStorage.crwebToolkitStations;
 	}
 	document.title += ' - ' + dataset;
 
@@ -82,14 +90,14 @@ jQuery( function( $, undefined ) {
 		var inTrainsBatch = false;
 		var trainsUpdated = function() {
 			if ( !inTrainsBatch ) {
-				localStorage.crwebToolkitTrains = JSON.stringify( serializeTrains() );
+				localStorage['crwebToolkitTrains_' + dataset] = JSON.stringify( serializeTrains() );
 				$( '.train-list-select' ).trigger( 'do-update' );
 			}
 		};
 		var inStationsBatch = false;
 		var stationsUpdated = function() {
 			if ( !inStationsBatch ) {
-				localStorage.crwebToolkitStations = JSON.stringify( serializeStations() );
+				localStorage['crwebToolkitStations_' + dataset] = JSON.stringify( serializeStations() );
 				$( '.station-list-select' ).trigger( 'do-update' );
 			}
 		};
@@ -268,7 +276,7 @@ jQuery( function( $, undefined ) {
 			} );
 		} );
 		trainsBatchBegin();
-		$.each( JSON.parse( localStorage.crwebToolkitTrains || '[]' ), function() {
+		$.each( JSON.parse( localStorage['crwebToolkitTrains_' + dataset] || '[]' ), function() {
 			var data = this, trainId = trainNextId;
 			$( '#trains-new' ).trigger( 'click' );
 			var $train = $( '#train-' + trainId );
@@ -366,7 +374,7 @@ jQuery( function( $, undefined ) {
 			stationsUpdated();
 		};
 		stationsBatchBegin();
-		$.each( JSON.parse( localStorage.crwebToolkitStations || '[]' ), function() {
+		$.each( JSON.parse( localStorage['crwebToolkitStations_' + dataset] || '[]' ), function() {
 			stationsBodyInsert( this );
 		} );
 		stationsBatchEnd();
