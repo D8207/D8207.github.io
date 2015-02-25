@@ -885,7 +885,11 @@ jQuery( function( $, undefined ) {
 							var grossRatio = calculated.dailyGross / baseData.dailyGross;
 							var netRatio = calculated.dailyNet / baseData.dailyNet;
 							var cost = estimateCost( pairs[pairIdx] );
-							var func = evalExpr( pairs[pairIdx], baseData, calculated, cost );
+							var func = null;
+							try {
+								func = evalExpr( pairs[pairIdx], baseData, calculated, cost );
+							} catch ( e ) {
+							}
 							optimizationData.push( $.extend( {}, pairs[pairIdx], {
 								calculated: calculated,
 								grossRatio: grossRatio,
