@@ -9,6 +9,7 @@ jQuery( function( $, undefined ) {
 	} else {
 		dataset = localStorage.crwebDataset || 'web';
 	}
+	document.title += ' - ' + dataset;
 
 	var staticData = {};
 
