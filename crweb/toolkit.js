@@ -269,14 +269,59 @@ jQuery( function( $, undefined ) {
 
 		// Stations
 		var stations = {};
-		var stationsSelect = [];
+		var stationsSelect = [], stationsSelectShort = [];
 		var $stationsBody = $( '#stations-table tbody' );
 		var stationTemplate = Handlebars.compile( $( '#station-template' ).html() );
+		var stationCountryById = {
+			0: '中国',
+			1: '英国',
+			2: '意大利',
+			3: '印度',
+			4: '伊朗',
+			5: '伊拉克',
+			6: '叙利亚',
+			7: '匈牙利',
+			8: '希腊',
+			9: '西班牙',
+			10: '乌兹别克斯坦',
+			11: '乌克兰',
+			12: '阿尔及利亚',
+			13: '阿富汗',
+			14: '埃及',
+			15: '奥地利',
+			16: '巴基斯坦',
+			17: '波兰',
+			18: '德国',
+			19: '俄罗斯',
+			20: '法国',
+			21: '哈萨克斯坦',
+			22: '荷兰',
+			23: '利比亚',
+			24: '罗马尼亚',
+			25: '蒙古',
+			26: '孟加拉国',
+			27: '突尼西亚',
+			28: '土耳其',
+			29: '韩国',
+			30: '日本',
+			31: '朝鲜',
+			32: '美国',
+			33: '加拿大'
+		};
+		var stationTypeById = {
+			0: '国内',
+			1: '欧亚',
+			2: '美洲'
+		};
 		$.each( staticData.station, function() {
 			stations[this[0]] = this;
 			stationsSelect.push( {
 				id: this[0],
 				text: this[1] + ' | ' + this[4] + '星'
+			} );
+			stationsSelectShort.push( {
+				id: this[0],
+				text: this[1]
 			} );
 		} );
 		var stationsBodyInsert = function( id ) {
@@ -293,7 +338,9 @@ jQuery( function( $, undefined ) {
 				X: station[5],
 				Y: station[6],
 				pop: station[7],
-				admin: station[9]
+				admin: station[9],
+				country: stationCountryById[( station[8] || 'q_0' ).replace( 'q_', '' )],
+				type: stationTypeById[station[10]]
 			} ) );
 			$( '#route-stations' ).append(
 				$( '<li/>' ).addClass( 'ui-state-default station-' + id )
@@ -315,7 +362,7 @@ jQuery( function( $, undefined ) {
 		} );
 		stationsBatchEnd();
 		$( '#stations-picker' ).select2( {
-			placeholder: '选择一个车站',
+			placeholder: '选择一个车站以加入列表',
 			data: stationsSelect
 		} ).change( function() {
 			var $this = $( this ), val = $this.val();
@@ -332,21 +379,64 @@ jQuery( function( $, undefined ) {
 			$row.remove();
 			stationsUpdated();
 		} );
-		$( '#stations-select a' ).click( function( e ) {
+		$( '#stations-country' ).select2( {
+			data: $.map( stationCountryById, function( country, id ) {
+				return {
+					id: id,
+					text: country
+				};
+			} )
+		} );
+		$( '#stations-vector-base, #stations-vector-ref' ).select2( {
+			data: stationsSelectShort
+		} );
+		var stationsSelectedList = function() {
+			var stars = parseInt( $( 'input[name=stations-stars]:checked' ).val() );
+			var type = parseInt( $( 'input[name=stations-type]:checked' ).val() );
+			var country = $( '#stations-country' ).val();
+			var vectorBaseStation = $( '#stations-vector-base' ).val();
+			var vectorRefStation = $( '#stations-vector-ref' ).val();
+			var vectorDir = parseInt( $( '#stations-vector-dir' ).val() );
+			var baseX = stations[vectorBaseStation][5];
+			var baseY = stations[vectorBaseStation][6];
+			var refX = stations[vectorRefStation][5];
+			var refY = stations[vectorRefStation][6];
+			var vectorX = refX - baseX, vectorY = refY - baseY;
+			var selectedList = [];
+			$.each( stations, function() {
+				if ( stars > 0 && stars != this[4] ) {
+					return;
+				}
+				if ( type >= 0 && type != this[10] ) {
+					return;
+				}
+				if ( country !== '' && ( 'q_' + country ) !== ( this[8] || 'q_0' ) ) {
+					return;
+				}
+				var stationX = this[5] - baseX, stationY = this[6] - baseY;
+				var cross = stationX * vectorY - vectorX * stationY;
+				if ( cross * vectorDir < 0 ) {
+					return;
+				}
+				selectedList.push( this );
+			} );
+			return selectedList;
+		};
+		$( '#stations-select' ).prop( 'disabled', false ).click( function( e ) {
 			e.preventDefault();
 			var $this = $( this ), stars = $this.data( 'stars' );
 			stationsBatchBegin();
-			$.each( stations, function() {
-				if ( this[4] === stars ) {
-					stationsBodyInsert( this[0] );
-				}
+			$.each( stationsSelectedList(), function() {
+				stationsBodyInsert( this[0] );
 			} );
 			stationsBatchEnd();
 		} );
-		$( '#stations-unselect a' ).click( function( e ) {
+		$( '#stations-unselect' ).prop( 'disabled', false ).click( function( e ) {
 			e.preventDefault();
 			stationsBatchBegin();
-			$( '.station-row.stars-' + $( this ).data( 'stars' ) ).find( '.station-delete' ).trigger( 'click' );
+			$.each( stationsSelectedList(), function() {
+				$( '#station-' + this[0] ).find( '.station-delete' ).trigger( 'click' );
+			} );
 			stationsBatchEnd();
 		} );
 		var useStations = function() {
