@@ -1,6 +1,16 @@
 jQuery( function( $, undefined ) {
+	var localStorage = window.localStorage || {};
+
+	var dataset;
+	var hash = location.hash;
+	if ( /^#dataset=/.test( hash ) ) {
+		dataset = hash.substring( 9 );
+		localStorage.crwebDataset = dataset;
+	} else {
+		dataset = localStorage.crwebDataset || 'web';
+	}
+
 	var staticData = {};
-	var userData = {};
 
 	var staticDataFiles = [ 'station', 'train', 'trainLevel', 'part' ];
 	var readStaticData = function( idx ) {
@@ -9,7 +19,7 @@ jQuery( function( $, undefined ) {
 		} else {
 			var staticDataKey = staticDataFiles[idx];
 			$.ajax( {
-				url: cloudServer + '/crweb/static_data/callback/Static'
+				url: cloudServer + '/crweb/static_data/' + dataset + '/callback/Static'
 					+ staticDataKey.charAt(0).toUpperCase() + staticDataKey.slice(1) + '.js',
 				dataType: 'jsonp',
 				jsonp: false,
@@ -20,8 +30,6 @@ jQuery( function( $, undefined ) {
 			} );
 		}
 	};
-
-	var localStorage = window.localStorage || {};
 
 	var init = function() {
 		var attribNames = [ 'speed', 'distance', 'weight', 'battery' ];
@@ -188,7 +196,7 @@ jQuery( function( $, undefined ) {
 
 				$train.find( '.train-img' ).attr( 'src', '' );
 				if ( img ) {
-					$train.find( '.train-img' ).attr( 'src', cloudServer + '/crweb/train_image/' + img );
+					$train.find( '.train-img' ).attr( 'src', cloudServer + '/crweb/train_image/' + dataset + '/' + img );
 				}
 				$train.find( '.train-info' ).html(
 					new Array( stars + 1 ).join( '<span class="glyphicon glyphicon-star" aria-hidden=true></span>' )
