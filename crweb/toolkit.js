@@ -20,6 +20,7 @@ jQuery( function( $, undefined ) {
 	document.title += ' - ' + dataset;
 
 	var staticData = {};
+	var localData = {};
 
 	var staticDataFiles = [ 'station', 'train', 'trainLevel', 'part' ];
 	var readStaticData = function( idx ) {
@@ -625,6 +626,10 @@ jQuery( function( $, undefined ) {
 							summaryNet[trainId] = [ trainId, calculated.dailyNet ];
 							dailyNet += calculated.dailyNet;
 						}
+						var runningTimeReverseRef = new Date( localData.runningTimeReverse );
+						var runningTimeReverse = new Date(
+							runningTimeReverseRef.getTime() - calculated.runningTime * 1000
+						);
 						$result.append( routeResultTemplate( {
 							hasLoads: train.loads >= 0,
 							path: makePathText( calculated ),
@@ -633,6 +638,8 @@ jQuery( function( $, undefined ) {
 							runningHours: Math.floor( calculated.runningTime / 3600 ),
 							runningMinutes: Math.floor( calculated.runningTime / 60 ) % 60,
 							runningSeconds: calculated.runningTime % 60,
+							runningTimeReverseRef: runningTimeReverseRef.toTimeString(),
+							runningTimeReverse: runningTimeReverse.toTimeString(),
 							batteryConsumed: calculated.batteryConsumed,
 							priceDistance: calculated.priceDistance,
 							priceCoins: calculated.priceCoins,
@@ -1135,5 +1142,8 @@ jQuery( function( $, undefined ) {
 		} ).trigger( 'do-update' );
 	};
 
-	readStaticData( 0 );
+	$.getJSON( 'data/' + dataset + '.json', function( data ) {
+		localData = data;
+		readStaticData( 0 );
+	} );
 } );
