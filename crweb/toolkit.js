@@ -32,6 +32,7 @@ jQuery( function( $, undefined ) {
 				url: cloudServer + '/crweb/static_data/' + dataset + '/callback/Static'
 					+ staticDataKey.charAt(0).toUpperCase() + staticDataKey.slice(1) + '.js',
 				dataType: 'jsonp',
+				cache: true,
 				jsonp: false,
 				jsonpCallback: 'callback',
 			} ).done( function( data ) {
