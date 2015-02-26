@@ -281,6 +281,9 @@ jQuery( function( $, undefined ) {
 		trainsBatchBegin();
 		$.each( JSON.parse( localStorage['crwebToolkitTrains_' + dataset] || '[]' ), function() {
 			var data = this, trainId = trainNextId;
+			if ( !trains[data.type] ) {
+				return;
+			}
 			$( '#trains-new' ).trigger( 'click' );
 			var $train = $( '#train-' + trainId );
 			unserializeTrain( data, $train );
@@ -391,6 +394,9 @@ jQuery( function( $, undefined ) {
 		};
 		stationsBatchBegin();
 		$.each( JSON.parse( localStorage['crwebToolkitStations_' + dataset] || '[]' ), function() {
+			if ( !stations[this] ) {
+				return;
+			}
 			stationsBodyInsert( this );
 		} );
 		stationsBatchEnd();
