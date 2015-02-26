@@ -774,6 +774,7 @@ jQuery( function( $, undefined ) {
 			var fromStation = $( '#optimization-from' ).val();
 			var toStation = $( '#optimization-to' ).val();
 			var exprInput = $( '#optimization-expr' ).val();
+			var numRows = parseInt( $( '#optimization-numrows' ).val() );
 			var penalty = parseInt( $( '#optimization-penalty' ).val() ) || 0;
 
 			if ( !train || !stations[fromStation] || !stations[toStation] ) {
@@ -1024,7 +1025,9 @@ jQuery( function( $, undefined ) {
 				optimizationData.sort( function( a, b ) {
 					return b.func - a.func;
 				} );
-				optimizationData.splice( 100, Number.MAX_VALUE );
+				if ( !isNaN( numRows ) ) {
+					optimizationData.splice( numRows, Number.MAX_VALUE );
+				}
 				$.each( optimizationData, function() {
 					this.path = makePathText( this.calculated ) || '';
 				} );
