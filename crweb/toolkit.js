@@ -441,6 +441,9 @@ jQuery( function( $, undefined ) {
 			var refX = stations[vectorRefStation][5];
 			var refY = stations[vectorRefStation][6];
 			var vectorX = refX - baseX, vectorY = refY - baseY;
+			var userList = $.map( $( '#stations-list' ).val().split( ' ' ), function( v ) {
+				return v || null;
+			} );
 			var selectedList = [];
 			$.each( stations, function() {
 				if ( stars > 0 && stars != this[4] ) {
@@ -455,6 +458,9 @@ jQuery( function( $, undefined ) {
 				var stationX = this[5] - baseX, stationY = this[6] - baseY;
 				var cross = stationX * vectorY - vectorX * stationY;
 				if ( cross * vectorDir < 0 ) {
+					return;
+				}
+				if ( userList.length > 0 && $.inArray( this[1], userList ) < 0 ) {
 					return;
 				}
 				selectedList.push( this );
