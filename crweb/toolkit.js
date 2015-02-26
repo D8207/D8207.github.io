@@ -795,7 +795,8 @@ jQuery( function( $, undefined ) {
 					单程里程: calculated.totalDistance,
 					行车次数: calculated.dailyCount,
 					剩余电量: calculated.dailyRemaining,
-					点卷消耗: cost
+					点卷消耗: cost,
+					点券消耗: cost
 				} ) {
 					return eval( exprInput );
 				}
