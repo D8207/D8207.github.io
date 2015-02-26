@@ -767,6 +767,12 @@ jQuery( function( $, undefined ) {
 			};
 			worker.postMessage( [ train, stations, [], [], false, 0 ] );
 		} );
+		$( '#optimization-expr-vars a' ).click( function( e ) {
+			e.preventDefault();
+			$( '#optimization-expr' ).selection( 'replace', {
+				text: $( this ).text()
+			} );
+		} );
 		$( '.optimization-slider' ).slider( {
 			range: true,
 			min: 1,
