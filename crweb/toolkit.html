@@ -489,7 +489,7 @@
 						</div>
 					</script>
 					<script id=optimization-result-template type=text/x-handlebars-template>
-						<table class="table text-center">
+						<table id=optimization-result-table class="table text-center">
 							<thead>
 								<tr>
 									<th class=text-center>速度
@@ -502,10 +502,16 @@
 									<th class=text-center>利润
 									<th class=text-center>点卷
 									<th class=text-center>优化值
+									<th>&nbsp;
 							</thead>
 							<tbody>
 								{{#each data}}
-								<tr>
+								<tr class=optimization-result-row
+									data-speed="{{this.speedLevel}}"
+									data-distance="{{this.distanceLevel}}"
+									data-weight="{{this.weightLevel}}"
+									data-battery="{{this.batteryLevel}}"
+								>
 									<td title="{{this.speed}}">{{this.speedLevel}}级
 									<td title="{{this.distance}}">{{this.distanceLevel}}级
 									<td title="{{this.weight}}">{{this.weightLevel}}级
@@ -516,6 +522,9 @@
 									<td title="与基准值比：{{this.netRatio}}">{{this.calculated.dailyNet}}
 									<td>{{this.cost}}
 									<td>{{this.func}}
+									<td><button type=button class="btn btn-xs optimization-transfer">
+										<span class="glyphicon glyphicon-transfer" aria-hidden=true></span> 写回火车
+									</button>
 								{{/each}}
 							</tbody>
 						</table>

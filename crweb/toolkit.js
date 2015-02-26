@@ -760,6 +760,7 @@ jQuery( function( $, undefined ) {
 			$( '#optimization-result' ).empty();
 
 			// Step 0, collect data
+			var trainId = $( '#optimization-train' ).val();
 			var train = optimizationTrain();
 			var initialTrain = optimizationTrain( 'initial' );
 			var levelTrain = optimizationTrain( 'level' );
@@ -1022,7 +1023,17 @@ jQuery( function( $, undefined ) {
 				} );
 				$( '#optimization-result' ).html( optimizationResultTemplate( {
 					data: optimizationData
-				} ) );
+				} ) ).find( '#optimization-result-table' ).on( 'click', '.optimization-transfer', function( e ) {
+					var $row = $( this ).parents( '.optimization-result-row' );
+					var $train = $( '#train-' + trainId );
+					trainsBatchBegin();
+					$train.find( '.train-attrib-level.train-attrib-speed' ).val( $row.data( 'speed' ) );
+					$train.find( '.train-attrib-level.train-attrib-distance' ).val( $row.data( 'distance' ) );
+					$train.find( '.train-attrib-level.train-attrib-weight' ).val( $row.data( 'weight' ) );
+					$train.find( '.train-attrib-level.train-attrib-battery' ).val( $row.data( 'battery' ) );
+					$train.find( '.train-attrib-value' ).trigger( 'do-update' );
+					trainsBatchEnd();
+				} );
 			};
 
 			// Helper: calculate level cost
