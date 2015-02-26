@@ -683,6 +683,11 @@ jQuery( function( $, undefined ) {
 		$( '.station-list-select' ).on( 'do-update', function() {
 			var $select = $( this );
 			var val = $select.val();
+			try {
+				$select.select2( 'destory' );
+			} catch ( e ) {
+				// before select2 gets initialized
+			}
 			$select.empty();
 
 			$( '.station-row' ).each( function() {
@@ -697,6 +702,7 @@ jQuery( function( $, undefined ) {
 			} );
 
 			$select.val( val );
+			$select.select2();
 		} ).trigger( 'do-update' );
 		var optimizationBaseTemplate = Handlebars.compile( $( '#optimization-base-template' ).html() );
 		var optimizationTrain = function( group ) {
