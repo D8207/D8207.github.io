@@ -9,6 +9,8 @@ jQuery( function( $, undefined ) {
 	} else {
 		dataset = localStorage.crwebToolkitDataset || 'web';
 	}
+	document.title += ' - ' + dataset;
+	ga( 'send', 'pageview', location.pathname + '#dataset=' + dataset );
 	if ( localStorage.crwebToolkitTrains ) {
 		localStorage.crwebToolkitTrains_web = localStorage.crwebToolkitTrains;
 		delete localStorage.crwebToolkitTrains;
@@ -17,7 +19,6 @@ jQuery( function( $, undefined ) {
 		localStorage.crwebToolkitStations_web = localStorage.crwebToolkitStations;
 		delete localStorage.crwebToolkitStations;
 	}
-	document.title += ' - ' + dataset;
 
 	var staticData = {};
 	var localData = {};
