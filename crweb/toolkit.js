@@ -676,23 +676,6 @@ jQuery( function( $, undefined ) {
 		} );
 
 		// Optimization
-		var trainLevelChanceIdx = {
-			speed: 6,
-			distance: 6,
-			weight: 6,
-			battery: 6
-		};
-		var optimizationChanceTemplate = Handlebars.compile( $( '#optimization-chance-template' ).html() );
-		var $optimizationChanceBody = $( '#optimization-chance-table tbody' );
-		$.each( trainLevels, function() {
-			$optimizationChanceBody.append( optimizationChanceTemplate( {
-				level: this[0],
-				speed: this[trainLevelChanceIdx.speed],
-				distance: this[trainLevelChanceIdx.speed],
-				weight: this[trainLevelChanceIdx.weight],
-				battery: this[trainLevelChanceIdx.battery]
-			} ) );
-		} );
 		$( '.station-list-select' ).on( 'do-update', function() {
 			var $select = $( this );
 			var val = $select.val();
@@ -1080,9 +1063,7 @@ jQuery( function( $, undefined ) {
 				var accum = 0;
 				levelCost[this][1] = 0;
 				for ( var i = 1; i <= 100; i++ ) {
-					accum += Math.floor( 4 * 10000 / ( $(
-						'.optimization-chance-' + this + '.optimization-chance-level' + i
-					).val() || 1 ) );
+					accum += Math.floor( 4 * 10000 / trainLevels[i][train.stars + 4] );
 					levelCost[this][i + 1] = accum;
 				}
 			} );
