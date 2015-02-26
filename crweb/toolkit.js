@@ -882,7 +882,7 @@ jQuery( function( $, undefined ) {
 					if ( paths.length == 0 ) {
 						$result.html( optimizationAlertTemplate( {
 							type: 'danger',
-							message: '此车初始距离过低，无法升级至可行走指定发到站的数值'
+							message: '此车初始距离过低或星级过高，无法行走指定发到站'
 						} ) );
 					} else {
 						calculatePaths();
