@@ -373,27 +373,30 @@
 			<div id=optimization class=panel-collapse role=tabpanel aria-labelledby=optimization-heading>
 				<div class=panel-body>
 					<p>本功能尝试不同升级等级组合以最大化指定公式的值。
-					<p>由于升级成功概率难以确定，下面的概率表填入了参考值（万分比），可适当更改：
-					<table id=optimization-chance-table class=table>
-						<thead>
-							<tr>
-								<th>等级
-								<th>速度
-								<th>距离
-								<th>重量
-								<th>电量
-						</thead>
-						<tbody>
-							<script id=optimization-chance-template type=text/x-handlebars-template>
+					<p>预计点卷消耗的升级成功概率表以万分比表示：<a data-toggle=collapse href=#optimization-chance aria-expanded=false aria-controls=optimization-chance>显示/隐藏概率表</a>
+					<div id=optimization-chance class=collapse>
+						<table id=optimization-chance-table class=table>
+							<thead>
 								<tr>
-									<th>{{level}}
-									<td><input type=number min=1 size=10000 value="{{speed}}" class="optimization-chance optimization-chance-speed optimization-chance-level{{level}} form-control">
-									<td><input type=number min=1 size=10000 value="{{distance}}" class="optimization-chance optimization-chance-distance optimization-chance-level{{level}} form-control">
-									<td><input type=number min=1 size=10000 value="{{weight}}" class="optimization-chance optimization-chance-weight optimization-chance-level{{level}} form-control">
-									<td><input type=number min=1 size=10000 value="{{battery}}" class="optimization-chance optimization-chance-battery optimization-chance-level{{level}} form-control">
-							</script>
-						</tbody>
-					</table>
+									<th>等级
+									<th>速度
+									<th>距离
+									<th>重量
+									<th>电量
+							</thead>
+							<tbody>
+								<script id=optimization-chance-template type=text/x-handlebars-template>
+									<tr>
+										<th>{{level}}
+										<td><input type=number min=1 size=10000 value="{{speed}}" class="optimization-chance optimization-chance-speed optimization-chance-level{{level}} form-control">
+										<td><input type=number min=1 size=10000 value="{{distance}}" class="optimization-chance optimization-chance-distance optimization-chance-level{{level}} form-control">
+										<td><input type=number min=1 size=10000 value="{{weight}}" class="optimization-chance optimization-chance-weight optimization-chance-level{{level}} form-control">
+										<td><input type=number min=1 size=10000 value="{{battery}}" class="optimization-chance optimization-chance-battery optimization-chance-level{{level}} form-control">
+								</script>
+							</tbody>
+						</table>
+					</div>
+					<hr>
 					<form class=form-horizontal role=form>
 						<div class=form-group>
 							<label class="col-md-2 control-label" for=optimization-train>使用火车：</label>
