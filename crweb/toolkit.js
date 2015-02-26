@@ -757,7 +757,7 @@ jQuery( function( $, undefined ) {
 		var optimizationAlertTemplate = Handlebars.compile( $( '#optimization-alert-template' ).html() );
 		var optimizationResultTemplate = Handlebars.compile( $( '#optimization-result-template' ).html() );
 		$( '#optimization-calculate' ).prop( 'disabled', false ).click( function() {
-			$( '#optimization-result' ).empty();
+			var $result = $( '<div/>' ).appendTo( $( '#optimization-result' ).empty() );
 
 			// Step 0, collect data
 			var trainId = $( '#optimization-train' ).val();
@@ -771,7 +771,7 @@ jQuery( function( $, undefined ) {
 			var penalty = parseInt( $( '#optimization-penalty' ).val() ) || 0;
 
 			if ( !train || !stations[fromStation] || !stations[toStation] ) {
-				$( '#optimization-result' ).append( optimizationAlertTemplate( {
+				$result.append( optimizationAlertTemplate( {
 					type: 'danger',
 					message: '请选择火车和发到站'
 				} ) );
@@ -835,7 +835,7 @@ jQuery( function( $, undefined ) {
 			try {
 				evalExpr( fakeAttribs, fakeCalculatorOutput, fakeCalculatorOutput, 0 );
 			} catch ( e ) {
-				$( '#optimization-result' ).append( optimizationAlertTemplate( {
+				$result.append( optimizationAlertTemplate( {
 					type: 'danger',
 					message: '公式错误：' + e.toString()
 				} ) );
@@ -859,7 +859,7 @@ jQuery( function( $, undefined ) {
 			batteryMin = Math.max( batteryMin, levelTrain.battery );
 			batteryMax = Math.max( batteryMin, batteryMax )
 
-			$( '#optimization-result' ).append( optimizationAlertTemplate( {
+			$result.append( optimizationAlertTemplate( {
 				type: 'info',
 				message: '正在计算，请稍候'
 			} ) );
@@ -874,7 +874,7 @@ jQuery( function( $, undefined ) {
 				if ( distanceLevel > distanceMax ) {
 					worker.terminate();
 					if ( paths.length == 0 ) {
-						$( '#optimization-result' ).html( optimizationAlertTemplate( {
+						$result.html( optimizationAlertTemplate( {
 							type: 'danger',
 							message: '此车初始距离过低，无法升级至可行走指定发到站的数值'
 						} ) );
@@ -1022,7 +1022,7 @@ jQuery( function( $, undefined ) {
 				$.each( optimizationData, function() {
 					this.path = makePathText( this.calculated ) || '';
 				} );
-				$( '#optimization-result' ).html( optimizationResultTemplate( {
+				$result.html( optimizationResultTemplate( {
 					data: optimizationData
 				} ) ).find( '#optimization-result-table' ).on( 'click', '.optimization-transfer', function( e ) {
 					var $row = $( this ).parents( '.optimization-result-row' );
@@ -1074,7 +1074,7 @@ jQuery( function( $, undefined ) {
 					calculateDistanceLevel( distanceMin );
 				} else {
 					// Why?
-					$( '#optimization-result' ).html( optimizationAlertTemplate( {
+					$result.html( optimizationAlertTemplate( {
 						type: 'danger',
 						message: calculated.message
 					} ) );
