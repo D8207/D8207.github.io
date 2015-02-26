@@ -18,3 +18,7 @@
 	width: auto !important;
 	height: auto !important;
 }
+
+.route-station-list li.ui-state-default {
+	cursor: default;
+}
