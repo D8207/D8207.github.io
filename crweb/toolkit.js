@@ -341,6 +341,18 @@ jQuery( function( $, undefined ) {
 				text: this[1]
 			} );
 		} );
+		var stationPrice = function( station ) {
+			var type = station[10], stars = station[4], pop = station[7];
+			if ( type == 0 && stars < 3 ) {
+				return 100 * pop + 1000;
+			} else if ( type == 0 && stars == 3 ) {
+				return 300 * pop + 3000;
+			} else if ( type > 0 && stars < 3 ) {
+				return 600 * pop + 6000;
+			} else if ( type > 0 && stars == 3 ) {
+				return 1800 * pop + 18000;
+			}
+		};
 		var stationsBodyInsert = function( id ) {
 			if ( $stationsBody.find( '#station-' + id ).length > 0 ) {
 				return;
@@ -357,7 +369,8 @@ jQuery( function( $, undefined ) {
 				pop: station[7],
 				admin: station[9],
 				country: stationCountryById[( station[8] || 'q_0' ).replace( 'q_', '' )],
-				type: stationTypeById[station[10]]
+				type: stationTypeById[station[10]],
+				price: stationPrice( station )
 			} ) );
 			$( '#route-stations' ).append(
 				$( '<li/>' ).addClass( 'ui-state-default station-' + id )
