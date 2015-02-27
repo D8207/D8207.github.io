@@ -657,6 +657,7 @@ jQuery( function( $, undefined ) {
 							runningTimeReverseRef: runningTimeReverseRef.toTimeString(),
 							runningTimeReverse: runningTimeReverse.toTimeString(),
 							batteryConsumed: calculated.batteryConsumed,
+							accelerationCost: calculated.accelerationCost,
 							priceDistance: calculated.priceDistance,
 							priceCoins: calculated.priceCoins,
 							pricePoints: calculated.pricePoints,
