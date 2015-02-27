@@ -530,7 +530,7 @@ jQuery( function( $, undefined ) {
 				} ) );
 			}
 			var summaryGross = new Array( trainCount ), summaryNet = new Array( trainCount );
-			var dailyGross = 0, dailyNet = 0;
+			var dailyGross = 0, dailyNet = 0, onewayCost = 0;
 			var trainTextById = {};
 			var trainColorById = {};
 			var drawPie = function( $dom, data, title ) {
@@ -577,7 +577,8 @@ jQuery( function( $, undefined ) {
 				} else {
 					$summary.append( Handlebars.compile( $( '#route-summary-template' ).html() )( {
 						dailyGross: dailyGross,
-						dailyNet: dailyNet
+						dailyNet: dailyNet,
+						onewayCost: onewayCost
 					} ) );
 				}
 			};
@@ -639,6 +640,7 @@ jQuery( function( $, undefined ) {
 							dailyGross += calculated.dailyGross;
 							summaryNet[trainId] = [ trainId, calculated.dailyNet ];
 							dailyNet += calculated.dailyNet;
+							onewayCost += calculated.costCoins;
 						}
 						var runningTimeReverseRef = new Date( localData.runningTimeReverse );
 						var runningTimeReverse = new Date(
