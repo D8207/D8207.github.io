@@ -141,6 +141,13 @@ jQuery( function( $, undefined ) {
 				text: this[1] + ' | ' + this[3] + '星'
 			} );
 		} );
+		var trainNameByType = function( type ) {
+			if ( type < 0 ) {
+				return '自定义' + -type + '星级火车';
+			} else {
+				return trains[type][1];
+			}
+		};
 		var trainNextId = 0;
 		var trainTemplate = Handlebars.compile( $( '#train-template' ).html() );
 
@@ -597,7 +604,7 @@ jQuery( function( $, undefined ) {
 
 				// trainText is too long.
 				if ( type < 0 ) {
-					trainTextById[trainId] = '自定义' + -type + '星级火车';
+					trainTextById[trainId] = trainNameByType( type );
 				} else {
 					trainTextById[trainId] = trains[type][1];
 				}
@@ -1126,16 +1133,11 @@ jQuery( function( $, undefined ) {
 				var $this = $( this );
 
 				var id = $this.data( 'id' );
-				var type = parseInt( $this.find( '.train-select' ).val() ), typeText;
-				if ( type < 0 ) {
-					if ( $select.data( 'negative' ) ) {
-						typeText = '自定义' + -type + '星级火车';
-					} else {
-						return;
-					}
-				} else {
-					typeText = trains[type][1];
+				var type = parseInt( $this.find( '.train-select' ).val() );
+				if ( type < 0 && !$select.data( 'negative' ) ) {
+					return;
 				}
+				var typeText = trainNameByType( type );
 				var speed = parseInt( $this.find( '.train-attrib-value.train-attrib-speed' ).val() );
 				var distance = parseInt( $this.find( '.train-attrib-value.train-attrib-distance' ).val() );
 				var weight = parseInt( $this.find( '.train-attrib-value.train-attrib-weight' ).val() );
