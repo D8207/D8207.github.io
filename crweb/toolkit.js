@@ -795,7 +795,15 @@ jQuery( function( $, undefined ) {
 
 		$( '#route-insert' ).change( function() {
 			$( '#route-penalty-group' ).toggle( $( this ).is( ':checked' ) );
-		} );
+		} ).trigger( 'change' );
+		$( '#route-train' ).change( function() {
+			var val = $( this ).val();
+			if ( val && val.length > 1 ) {
+				$( '#route-draw-group' ).show();
+			} else {
+				$( '#route-draw-group' ).hide();
+			}
+		} ).trigger( 'change' );
 
 		// Optimization
 		$( '.station-list-select' ).on( 'do-update', function() {
