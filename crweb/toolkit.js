@@ -273,13 +273,24 @@ jQuery( function( $, undefined ) {
 			// Values
 			$train.find( '.train-attrib-value' ).on( 'do-update', function() {
 				var $this = $( this ), attrib = $this.data( 'attrib' );
+				var $diff = $train.find( '.train-attrib-diff.train-attrib-' + attrib );
 				var initial = parseInt( $train.find( '.train-attrib-initial.train-attrib-' + attrib ).val() );
 				var level = parseInt( $train.find( '.train-attrib-level.train-attrib-' + attrib ).val() );
 				if ( isNaN( initial ) || isNaN( level ) || !trainLevels[level] ) {
 					$this.val( '' );
+					$diff.text( '' );
 				} else {
 					var value = Math.floor( initial * trainLevels[level][trainLevelAttribIdx[attrib]] / 1000 );
 					$this.val( value );
+					var diff = value - initial;
+					var diffPercent = ( ( trainLevels[level][trainLevelAttribIdx[attrib]] - 1000 ) / 10 ).toFixed( 1 );
+					if ( diff == 0 ) {
+						$diff.text( '' );
+					} else if ( diff < 0 ) {
+						$diff.text( diff + ' / ' + diffPercent + '%' );
+					} else {
+						$diff.text( '+' + diff + ' / +' + diffPercent + '%' );
+					}
 				}
 				trainsUpdated();
 			} ).trigger( 'do-update' );
