@@ -582,12 +582,13 @@ jQuery( function( $, undefined ) {
 					}
 				} );
 			};
-			var drawScattered = function( $dom, xLabel, xData, yLabel, yData ) {
-				var mixedData = [], xs = {};
+			var drawScatter = function( $dom, xLabel, xData, yLabel, yData, tooltipTitle, tooltipText ) {
+				var mixedData = [], xs = {}, xDataMap = {};
 				for ( var i = 0; i < Math.min( xData.length, yData.length ); i++ ) {
 					mixedData.push( [ xData[i][0] + '_x', xData[i][1] ] );
 					mixedData.push( yData[i] );
 					xs[yData[i][0]] = xData[i][0] + '_x';
+					xDataMap[xData[i][0]] = xData[i][1];
 				}
 				return c3.generate( {
 					bindto: $dom.get( 0 ),
@@ -616,9 +617,22 @@ jQuery( function( $, undefined ) {
 					size: {
 						width: $dom.width(),
 						height: $dom.width() // Make it square
+					},
+					tooltip: {
+						format: {
+							title: function( d ) {
+								return tooltipTitle;
+							},
+							value: function( value, ratio, id, index ) {
+								return tooltipText( xDataMap[id], value );
+							}
+						}
 					}
 				} );
 			};
+
+			var showScatter = $( '#route-draw-scatter:checked' ).length > 0;
+			var showPie = $( '#route-draw-pie:checked' ).length > 0;
 			var showSummary = function() {
 				if ( trainCount <= 1 ) {
 					return;
@@ -633,28 +647,42 @@ jQuery( function( $, undefined ) {
 					} ) );
 					return;
 				}
-				var $scattered = $( '<div/>' ).appendTo(
-					$( '<div/>' ).addClass( 'col-md-12 text-center' ).appendTo( $summary )
-				);
-				var $grossPie = $( '<div/>' ).appendTo(
-					$( '<div/>' ).addClass( 'col-md-12 text-center' ).append(
-						$( '<h4/>' ).text( '全日收入' )
-					).appendTo( $summary )
-				);
-				var $netPie = $( '<div/>' ).appendTo(
-					$( '<div/>' ).addClass( 'col-md-12 text-center' ).append(
-						$( '<h4/>' ).text( '全日利润' )
-					).appendTo( $summary )
-				);
-				drawScattered( $scattered, '全日收入', summaryGrossF, '全日利润', summaryNetF );
-				drawPie( $grossPie, summaryGrossF );
-				drawPie( $netPie, summaryNetF );
+				if ( showScatter ) {
+					var $scatter = $( '<div/>' ).appendTo(
+						$( '<div/>' ).addClass( 'col-md-12 text-center' ).appendTo( $summary )
+					);
+					drawScatter( $scatter,
+						'全日收入', summaryGrossF, '全日利润', summaryNetF, '全日收入和利润',
+						function( gross, net ) {
+							return '收入：' + gross + '；利润：' + net;
+					} );
+				}
+				if ( showPie ) {
+					var $grossPie = $( '<div/>' ).appendTo(
+						$( '<div/>' ).addClass( 'col-md-12 text-center' ).append(
+							$( '<h4/>' ).text( '全日收入' )
+						).appendTo( $summary )
+					);
+					var $netPie = $( '<div/>' ).appendTo(
+						$( '<div/>' ).addClass( 'col-md-12 text-center' ).append(
+							$( '<h4/>' ).text( '全日利润' )
+						).appendTo( $summary )
+					);
+					drawPie( $grossPie, summaryGrossF );
+					drawPie( $netPie, summaryNetF );
+				}
 				$summary.append( Handlebars.compile( $( '#route-summary-template' ).html() )( {
 					dailyGross: dailyGross,
 					dailyNet: dailyNet,
 					onewayCost: onewayCost
 				} ) );
 			};
+
+			var wayPoints = $( '#route-waypoints li.ui-state-default' ).map( function() {
+				return $( this ).data( 'id' );
+			} ).get();
+			var insert = $( '#route-insert:checked' ).length > 0;
+			var penalty = parseInt( $( '#route-penalty' ).val() ) || 0;
 			$.each( trainIds, function() {
 				var trainId = this, trainText = $( '#route-train option[value=' + trainId + ']' ).text();
 				var trainColor = randomColor();
@@ -692,10 +720,6 @@ jQuery( function( $, undefined ) {
 					stars: type < 0 ? -type : trains[type][3],
 					loads: type < 0 ? -1 : ( trains[type][8] + trains[type][9] )
 				};
-
-				var wayPoints = $( '#route-waypoints li.ui-state-default' ).map( function() {
-					return $( this ).data( 'id' );
-				} ).get();
 
 				$result.append( routeAlertTemplate( {
 					type: 'info',
@@ -764,7 +788,7 @@ jQuery( function( $, undefined ) {
 				};
 				worker.postMessage( [
 					train, stations, useStations(), wayPoints,
-					$( '#route-insert:checked' ).length > 0, parseInt( $( '#route-penalty' ).val() ) || 0
+					insert, penalty
 				] );
 			} );
 		} );
