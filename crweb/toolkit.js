@@ -184,7 +184,7 @@ jQuery( function( $, undefined ) {
 				data: trainsSelect
 			} ).change( function() {
 				var trainType = parseInt( $( this ).val() );
-				var desc, img, pc, cc;
+				var name = trainNameByType( trainType ), desc, img, pc, cc;
 
 				if ( trainType > 0 ) {
 					desc = trains[trainType][2];
@@ -213,9 +213,11 @@ jQuery( function( $, undefined ) {
 						.prop( 'readOnly', false );
 				}
 
-				$train.find( '.train-img' ).attr( 'src', '' );
+				$train.find( '.train-img' ).attr( 'src', '' ).attr( 'alt', '' );
 				if ( img ) {
-					$train.find( '.train-img' ).attr( 'src', cloudServer + '/crweb/train_image/' + dataset + '/' + img );
+					$train.find( '.train-img' )
+						.attr( 'src', cloudServer + '/crweb/train_image/' + dataset + '/' + img )
+						.attr( 'alt', name );
 				}
 				$train.find( '.train-info' ).html(
 					new Array( stars + 1 ).join( '<span class="glyphicon glyphicon-star" aria-hidden=true></span>' )
