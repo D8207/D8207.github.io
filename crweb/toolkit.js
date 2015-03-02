@@ -837,8 +837,16 @@ jQuery( function( $, undefined ) {
 					单程里程: calculated.totalDistance,
 					行车次数: calculated.dailyCount,
 					剩余电量: calculated.dailyRemaining,
-					点卷消耗: cost,
-					点券消耗: cost
+					点卷消耗: cost.total,
+					速度点卷消耗: cost.speed,
+					距离点卷消耗: cost.distance,
+					重量点卷消耗: cost.weight,
+					电量点卷消耗: cost.battery,
+					点券消耗: cost.total,
+					速度点券消耗: cost.speed,
+					距离点券消耗: cost.distance,
+					重量点券消耗: cost.weight,
+					电量点券消耗: cost.battery
 				} ) {
 					return eval( exprInput );
 				}
@@ -1089,11 +1097,18 @@ jQuery( function( $, undefined ) {
 				battery: new Array( 102 )
 			};
 			var estimateCost = function( levels ) {
-				var cost = 0;
+				var cost = {
+					speed: 0,
+					distance: 0,
+					weight: 0,
+					battery: 0,
+					total: 0
+				};
 				$.each( attribNames, function() {
 					var curLevel = levels[this + 'Level'], trainLevel = levelTrain[this];
 					if ( curLevel > trainLevel ) {
-						cost += levelCost[this][curLevel] - levelCost[this][trainLevel];
+						cost[this] = levelCost[this][curLevel] - levelCost[this][trainLevel];
+						cost.total += cost[this];
 					}
 				} );
 				return cost;

@@ -427,7 +427,7 @@
 							<label class="col-md-2 control-label" for=optimization-expr>公式：</label>
 							<div class=col-md-10>
 								<input class=form-control type=text id=optimization-expr>
-								<p class=help-block id=optimization-expr-vars>点选以插入公式：<a href=###>速度</a></a>、<a href=###><a href=###>速度等级</a>、<a href=###>距离</a>、<a href=###>距离等级</a>、<a href=###>重量</a>、<a href=###>重量等级</a>、<a href=###>电量</a>、<a href=###>电量等级</a>、<a href=###>基准收入</a>、<a href=###>基准利润</a>、<a href=###>收入</a>、<a href=###>利润</a>、<a href=###>单程里程</a>、<a href=###>行车次数</a>、<a href=###>剩余电量</a>、<a href=###>点卷消耗</a>、<a href=###>点券消耗</a>
+								<p class=help-block id=optimization-expr-vars>点选以插入公式：<a href=###>速度</a></a>、<a href=###><a href=###>速度等级</a>、<a href=###>距离</a>、<a href=###>距离等级</a>、<a href=###>重量</a>、<a href=###>重量等级</a>、<a href=###>电量</a>、<a href=###>电量等级</a>、<a href=###>基准收入</a>、<a href=###>基准利润</a>、<a href=###>收入</a>、<a href=###>利润</a>、<a href=###>单程里程</a>、<a href=###>行车次数</a>、<a href=###>剩余电量</a>、<a href=###>点卷消耗</a>、<a href=###>速度点卷消耗</a>、<a href=###>距离点卷消耗</a>、<a href=###>重量点卷消耗</a>、<a href=###>电量点卷消耗</a>、<a href=###>点券消耗</a>、<a href=###>速度点券消耗</a>、<a href=###>距离点券消耗</a>、<a href=###>重量点券消耗</a>、<a href=###>电量点券消耗</a>
 							</div>
 						</div>
 						<div class=form-group>
@@ -522,7 +522,7 @@
 									<td title="剩余电量：{{this.calculated.dailyRemaining}}">{{this.calculated.dailyCount}}
 									<td title="与基准值比：{{this.grossRatio}}">{{this.calculated.dailyGross}}
 									<td title="与基准值比：{{this.netRatio}}">{{this.calculated.dailyNet}}
-									<td>{{this.cost}}
+									<td title="速度 + 距离 + 重量 + 电量 = 总和">{{this.cost.speed}} + {{this.cost.distance}} + {{this.cost.weight}} + {{this.cost.battery}} = {{this.cost.total}}
 									<td>{{this.func}}
 									<td><button type=button class="btn btn-xs optimization-transfer">
 										<span class="glyphicon glyphicon-transfer" aria-hidden=true></span> 写回火车
