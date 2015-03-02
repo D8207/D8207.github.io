@@ -553,20 +553,20 @@ jQuery( function( $, undefined ) {
 			var dailyGross = 0, dailyNet = 0, onewayCost = 0;
 			var trainTextById = {};
 			var trainColorById = {};
-			var drawPie = function( $dom, data ) {
-				var pieData = [];
+			var filterData = function( data ) {
+				var ret = [];
 				$.each( data, function() {
 					if ( $.isArray( this ) ) {
-						pieData.push( this );
+						ret.push( this );
 					}
 				} );
-				if ( pieData.length == 0 ) {
-					return false;
-				}
+				return ret;
+			};
+			var drawPie = function( $dom, data ) {
 				return c3.generate( {
 					bindto: $dom.get( 0 ),
 					data: {
-						columns: pieData,
+						columns: data,
 						type: 'pie',
 						colors: trainColorById,
 						names: trainTextById,
@@ -576,6 +576,46 @@ jQuery( function( $, undefined ) {
 								scrollTop: $resultHeading.offset().top
 							}, 1000 );
 						}
+					},
+					legend: {
+						hide: true
+					}
+				} );
+			};
+			var drawScattered = function( $dom, xLabel, xData, yLabel, yData ) {
+				var mixedData = [], xs = {};
+				for ( var i = 0; i < Math.min( xData.length, yData.length ); i++ ) {
+					mixedData.push( [ xData[i][0] + '_x', xData[i][1] ] );
+					mixedData.push( yData[i] );
+					xs[yData[i][0]] = xData[i][0] + '_x';
+				}
+				return c3.generate( {
+					bindto: $dom.get( 0 ),
+					data: {
+						xs: xs,
+						columns: mixedData,
+						type: 'scatter',
+						colors: trainColorById,
+						names: trainTextById,
+					},
+					axis: {
+						x: {
+							label: xLabel,
+							tick: {
+								fit: false
+							}
+						},
+						y: {
+							label: yLabel,
+							inner: true
+						}
+					},
+					point: {
+						r: 8
+					},
+					size: {
+						width: $dom.width(),
+						height: $dom.width() // Make it square
 					}
 				} );
 			};
@@ -584,6 +624,18 @@ jQuery( function( $, undefined ) {
 					return;
 				}
 				$summary.empty();
+				var summaryGrossF = filterData( summaryGross );
+				var summaryNetF = filterData( summaryNet );
+				if ( summaryGrossF.length == 0 || summaryNetF.length == 0 ) {
+					$summary.html( routeAlertTemplate( {
+						type: 'warning',
+						message: '计算结果中没有数据'
+					} ) );
+					return;
+				}
+				var $scattered = $( '<div/>' ).appendTo(
+					$( '<div/>' ).addClass( 'col-md-12 text-center' ).appendTo( $summary )
+				);
 				var $grossPie = $( '<div/>' ).appendTo(
 					$( '<div/>' ).addClass( 'col-md-12 text-center' ).append(
 						$( '<h4/>' ).text( '全日收入' )
@@ -594,18 +646,14 @@ jQuery( function( $, undefined ) {
 						$( '<h4/>' ).text( '全日利润' )
 					).appendTo( $summary )
 				);
-				if ( !drawPie( $grossPie, summaryGross ) || !drawPie( $netPie, summaryNet ) ) {
-					$summary.html( routeAlertTemplate( {
-						type: 'warning',
-						message: '计算结果中没有数据'
-					} ) );
-				} else {
-					$summary.append( Handlebars.compile( $( '#route-summary-template' ).html() )( {
-						dailyGross: dailyGross,
-						dailyNet: dailyNet,
-						onewayCost: onewayCost
-					} ) );
-				}
+				drawScattered( $scattered, '全日收入', summaryGrossF, '全日利润', summaryNetF );
+				drawPie( $grossPie, summaryGrossF );
+				drawPie( $netPie, summaryNetF );
+				$summary.append( Handlebars.compile( $( '#route-summary-template' ).html() )( {
+					dailyGross: dailyGross,
+					dailyNet: dailyNet,
+					onewayCost: onewayCost
+				} ) );
 			};
 			$.each( trainIds, function() {
 				var trainId = this, trainText = $( '#route-train option[value=' + trainId + ']' ).text();
