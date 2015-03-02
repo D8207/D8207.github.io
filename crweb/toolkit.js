@@ -569,7 +569,13 @@ jQuery( function( $, undefined ) {
 						columns: pieData,
 						type: 'pie',
 						colors: trainColorById,
-						names: trainTextById
+						names: trainTextById,
+						onclick: function( d ) {
+							var $resultHeading = $( '#route-result-heading-train-' + d.id );
+							$( 'html, body' ).animate( {
+								scrollTop: $resultHeading.offset().top
+							}, 1000 );
+						}
 					}
 				} );
 			};
@@ -604,7 +610,8 @@ jQuery( function( $, undefined ) {
 			$.each( trainIds, function() {
 				var trainId = this, trainText = $( '#route-train option[value=' + trainId + ']' ).text();
 				var trainColor = randomColor();
-				$( '<h3/>' ).text( trainText ).css( 'color', trainColor ).appendTo( '#route-result' );
+				$( '<h3/>' ).attr( 'id', 'route-result-heading-train-' + trainId )
+					.text( trainText ).css( 'color', trainColor ).appendTo( '#route-result' );
 				var $result = $( '<div/>' ).addClass( 'row' ).appendTo( '#route-result' );
 				var $train = $( '#train-' + trainId );
 
