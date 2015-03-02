@@ -553,32 +553,23 @@ jQuery( function( $, undefined ) {
 			var dailyGross = 0, dailyNet = 0, onewayCost = 0;
 			var trainTextById = {};
 			var trainColorById = {};
-			var drawPie = function( $dom, data, title ) {
+			var drawPie = function( $dom, data ) {
 				var pieData = [];
 				$.each( data, function() {
-					if ( !$.isArray( this ) ) {
-						return;
+					if ( $.isArray( this ) ) {
+						pieData.push( this );
 					}
-					pieData.push( {
-						label: trainTextById[this[0]],
-						value: this[1],
-						color: trainColorById[this[0]]
-					} );
 				} );
 				if ( pieData.length == 0 ) {
 					return false;
 				}
-				return new d3pie( $dom.get( 0 ), {
-					header: {
-						title: {
-							text: title
-						}
-					},
-					size: {
-						canvasWidth: $dom.width()
-					},
+				return c3.generate( {
+					bindto: $dom.get( 0 ),
 					data: {
-						content: pieData
+						columns: pieData,
+						type: 'pie',
+						colors: trainColorById,
+						names: trainTextById
 					}
 				} );
 			};
@@ -587,9 +578,17 @@ jQuery( function( $, undefined ) {
 					return;
 				}
 				$summary.empty();
-				var $grossPie = $( '<div/>' ).addClass( 'col-md-12 text-center' ).appendTo( $summary );
-				var $netPie = $( '<div/>' ).addClass( 'col-md-12 text-center' ).appendTo( $summary );
-				if ( !drawPie( $grossPie, summaryGross, '全日收入' ) || !drawPie( $netPie, summaryNet, '全日利润' ) ) {
+				var $grossPie = $( '<div/>' ).appendTo(
+					$( '<div/>' ).addClass( 'col-md-12 text-center' ).append(
+						$( '<h4/>' ).text( '全日收入' )
+					).appendTo( $summary )
+				);
+				var $netPie = $( '<div/>' ).appendTo(
+					$( '<div/>' ).addClass( 'col-md-12 text-center' ).append(
+						$( '<h4/>' ).text( '全日利润' )
+					).appendTo( $summary )
+				);
+				if ( !drawPie( $grossPie, summaryGross ) || !drawPie( $netPie, summaryNet ) ) {
 					$summary.html( routeAlertTemplate( {
 						type: 'warning',
 						message: '计算结果中没有数据'
