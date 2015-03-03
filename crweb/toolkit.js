@@ -1237,6 +1237,47 @@ jQuery( function( $, undefined ) {
 			worker.postMessage( [ train, stations, [], [], false, 0 ] );
 		} );
 
+		// Dump
+		var dumpCSV = function( jsArray, filename ) {
+			var csv = Papa.unparse( jsArray );
+			var blob = new Blob( [ csv ], { type: 'text/csv;charset=utf-8' } );
+			saveAs( blob, filename );
+		};
+		var dumpItems = {
+			trains: function() {
+				var data = [
+					['名称', '描述', '星级', '客运仓位', '货运仓位', '速度', '距离', '重量', '电量', '图片' ]
+				];
+				$.each( trains, function() {
+					data.push( [
+						this[1], this[2], this[3], this[8], this[9], this[5], this[4], this[6], this[7],
+						this[10] ? 'http://app100679516.imgcache.qzoneapp.com/app100679516/crweb/pic20130606/' + this[10] : ''
+					] );
+				} );
+				return dumpCSV( data, 'trains.csv' );
+			},
+			stations: function() {
+				var data = [
+					['名称', '描述', '下辖', '星级', 'X坐标', 'Y坐标', '人口', '国家', '类型' ]
+				];
+				$.each( stations, function() {
+					data.push( [
+						this[1], this[2], this[9], this[4], this[5], this[6], this[7],
+						stationCountryById[this[8] ? this[8].replace( 'q_', '' ) : 0],
+						stationTypeById[this[10]]
+					] );
+				} );
+				return dumpCSV( data, 'stations.csv' );
+			}
+		};
+		$( '#dump-exec' ).prop( 'disabled', false ).click( function() {
+			var item = $( '#dump-select' ).val();
+			var exec = dumpItems[item];
+			if ( $.isFunction( exec ) ) {
+				exec();
+			}
+		} );
+
 		// Shared
 		$( '.train-list-select' ).on( 'do-update', function() {
 			var $select = $( this );

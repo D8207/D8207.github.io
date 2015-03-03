@@ -23,6 +23,8 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/randomcolor/0.1.1/randomColor.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/c3/0.4.9/c3.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/PapaParse/4.1.0/papaparse.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2014-11-29/FileSaver.min.js"></script>
 <script src="/cloud.js"></script>
 <script src="toolkit.js"></script>
 <div class=container>
@@ -550,6 +552,33 @@
 							</tbody>
 						</table>
 					</script>
+				</div>
+			</div>
+		</div>
+		<div class="panel panel-default">
+			<div class=panel-heading role=tab id=dump-heading>
+				<h2 class=panel-title>
+					<a data-toggle=collapse data-parent=#mainAccordion href=#dump aria-expanded=false aria-controls=dump>输出</a>
+				</h2>
+			</div>
+			<div id=dump class="panel-collapse collapse in" role=tabpanel aria-labelledby=dump-heading>
+				<div class=panel-body>
+					<form class=form-horizontal role=form>
+						<div class=form-group>
+							<label class="col-md-2 control-label" for=dump-select>项目：</label>
+							<div class=col-md-10>
+								<select class=form-control id=dump-select>
+									<option value=trains>输出所有火车</option>
+									<option value=stations>输出所有车站</option>
+								</select>
+							</div>
+						</div>
+						<div class=form-group>
+							<div class=col-md-12>
+								<button type=button id=dump-exec class="btn btn-primary btn-block" disabled>执行</button>
+							</div>
+						</div>
+					</form>
 				</div>
 			</div>
 		</div>
