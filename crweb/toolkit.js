@@ -221,6 +221,16 @@ jQuery( function( $, undefined ) {
 				).append( cc >= 0 ? ' | <span class="glyphicon glyphicon-briefcase" aria-hidden=true></span> ' + cc + '货运仓位' : '' );
 				if ( trainType > 0 ) {
 					var trainPriceText = [], part;
+					if ( trains[trainType][12] > 0 || trains[trainType][13] > 0) {
+						var trainPriceAlt = [];
+						if ( trains[trainType][12] > 0 ) {
+							trainPriceAlt.push( trains[trainType][12] + '点券' );
+						}
+						if ( trains[trainType][13] > 0 ) {
+							trainPriceAlt.push( trains[trainType][13] + localData.currencyName );
+						}
+						trainPriceText.push( '整车：' + trainPriceAlt.join( ' 或 ' ) );
+					}
 					$.each( [ 2, 0, 1, 3 ], function() {
 						part = trainParts[trains[trainType][this + 26]];
 						trainPriceText.push(
