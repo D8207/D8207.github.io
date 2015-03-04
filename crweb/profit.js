@@ -1,52 +1,102 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function (process){
+var pcap_tcp_tracker = require( 'pcap/tcp_tracker' );
+var pcap_decode = require( 'pcap/decode' );
 var pcapp = require( 'pcap-parser' );
 var FileReadStream = require('filestream/read');
 
-onmessage = function( e ) {
-	var stream = new FileReadStream( e.data );
-	var parser = pcapp.parse( stream );
+var sendError = function( message ) {
+	if ( process.title == 'browser' ) {
+		postMessage( {
+			ok: false,
+			message: message
+		} );
+	} else {
+		console.log( 'ERROR: ' + message );
+		process.exit();
+	}
+};
 
-	var data = [];
-
-	parser.on( 'globalHeader', function( header ) {
-		if ( header.linkLayerType != 1 ) {
-			postMessage( {
-				ok: false,
-				message: '不支持的网络类型：' + header.linkLayerType
-			} );
-		}
-	} );
-
-	parser.on( 'packet', function( packet ) {
-		if ( packet.data.readUInt16BE( 0x0c ) == 0x0800 // IPv4
-			&& packet.data.readUInt8( 0x0e ) >> 4 == 0x4 // IPv4
-			&& packet.data.readUInt8( 0x17 ) == 0x06 // TCP
-			&& ( packet.data.readUInt8( 0x2f ) & 0x08 ) // TCP PSH
-			&& packet.data.readUInt8( 0x36 ) == 0x2e // game packet type
-		) {
-			var myProfit = packet.data.readInt32BE( 0x3f );
-			var opProfit = packet.data.readInt32BE( 0x53 );
-			var date = new Date( packet.header.timestampSeconds * 1000 + packet.header.timestampMicroseconds / 1000 );
-			data.push( [ date, myProfit, opProfit ] );
-		}
-	} );
-
-	parser.on( 'end', function() {
+var sendData = function( data ) {
+	if ( process.title == 'browser' ) {
 		postMessage( {
 			ok: true,
 			data: data
 		} );
+	} else {
+		console.log( 'Data:' );
+		console.log( data );
+	}
+};
+
+var parsePcap = function( input ) {
+	var parser = pcapp.parse( input );
+	var tcp_tracker = new pcap_tcp_tracker.TCPTracker();
+
+	var profitData = [];
+
+	parser.on( 'globalHeader', function( header ) {
+		if ( header.linkLayerType != 1 ) {
+			sendError( '不支持的网络类型：' + header.linkLayerType );
+		}
+	} );
+
+	var onData = function( session, data ) {
+		if ( data.readUInt8( 0x0 ) != 0x2e ) {
+			return;
+		}
+
+		var date = new Date( session.current_cap_time * 1000 );
+		var myProfit = data.readInt32BE( 0x9 );
+		var opProfit = data.readInt32BE( 0x1d );
+		profitData.push( [ date, myProfit, opProfit ] );
+	};
+
+	tcp_tracker.on( 'session', function( session ) {
+		// TODO - filter out non-game sessions?
+
+		// since we're listening from the middle of a session, send/recv may be reversed.
+		session.on( 'data send', onData );
+		session.on( 'data recv', onData );
+	} );
+
+	parser.on( 'packet', function( packet ) {
+		var pcapPacket = new pcap_decode.PcapPacket();
+		pcapPacket.link_type = 'LINKTYPE_ETHERNET';
+		pcapPacket.pcap_header = {
+			tv_sec: packet.header.timestampSeconds,
+			tv_usec: packet.header.timestampMicroseconds,
+			caplen: packet.header.capturedLength,
+			len: packet.header.originalLength
+		};
+		pcapPacket.payload = new pcap_decode.EthernetPacket().decode( packet.data, 0 );
+		tcp_tracker.track_packet( pcapPacket );
+	} );
+
+	parser.on( 'end', function() {
+		sendData( profitData );
 	} );
 
 	parser.on( 'error', function( e ) {
-		postMessage( {
-			ok: false,
-			message: e.message
-		} );
+		sendError( e.message );
 	} );
 };
 
-},{"filestream/read":5,"pcap-parser":6}],2:[function(require,module,exports){
+if ( process.title == 'browser' ) {
+	onmessage = function( e ) {
+		var stream = new FileReadStream( e.data );
+		parsePcap( stream );
+	};
+} else {
+	if ( process.argv.length < 3 ) {
+		console.log( 'usage: ' + process.argv.join( ' ' ) + ' pcap_file' );
+	} else {
+		parsePcap( process.argv[2] );
+	}
+}
+
+}).call(this,require('_process'))
+},{"_process":40,"filestream/read":5,"pcap-parser":6,"pcap/decode":13,"pcap/tcp_tracker":29}],2:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -106,7 +156,7 @@ module.exports = function (arr) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":9,"is-typedarray":4}],4:[function(require,module,exports){
+},{"buffer":33,"is-typedarray":4}],4:[function(require,module,exports){
 module.exports      = isTypedArray
 isTypedArray.strict = isStrictTypedArray
 isTypedArray.loose  = isLooseTypedArray
@@ -239,7 +289,7 @@ FileReadStream.prototype._handleProgress = function(evt) {
   this.emit('readable');
 };
 
-},{"inherits":2,"stream":28,"typedarray-to-buffer":3}],6:[function(require,module,exports){
+},{"inherits":2,"stream":52,"typedarray-to-buffer":3}],6:[function(require,module,exports){
 (function (process,Buffer){
 var util = require('util');
 var events = require('events');
@@ -394,11 +444,2025 @@ exports.parse = function (input) {
 }
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":16,"buffer":9,"events":13,"fs":7,"util":31}],7:[function(require,module,exports){
+},{"_process":40,"buffer":33,"events":37,"fs":31,"util":55}],7:[function(require,module,exports){
+var EthernetAddr = require("./ethernet_addr");
+var IPv4Addr = require("./ipv4_addr");
 
-},{}],8:[function(require,module,exports){
-arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],9:[function(require,module,exports){
+function Arp() {
+    this.htype = null;
+    this.ptype = null;
+    this.heln = null;
+    this.plen = null;
+    this.operation = null;
+    this.sender_ha = null;
+    this.sender_pa = null;
+    this.target_ha = null;
+    this.target_pa = null;
+}
+
+// http://en.wikipedia.org/wiki/Address_Resolution_Protocol
+Arp.prototype.decode = function (raw_packet, offset) {
+    this.htype = raw_packet.readUInt16BE(offset);
+    this.ptype = raw_packet.readUInt16BE(offset + 2);
+    this.hlen = raw_packet[offset + 4];
+    this.plen = raw_packet[offset + 5];
+    this.operation = raw_packet.readUInt16BE(offset + 6); // 6, 7
+    if (this.hlen === 6 && this.plen === 4) { // ethernet + IPv4
+        this.sender_ha = new EthernetAddr(raw_packet, offset + 8); // 8, 9, 10, 11, 12, 13
+        this.sender_pa = new IPv4Addr(raw_packet, offset + 14); // 14, 15, 16, 17
+        this.target_ha = new EthernetAddr(raw_packet, offset + 18); // 18, 19, 20, 21, 22, 23
+        this.target_pa = new IPv4Addr(raw_packet, offset + 24); // 24, 25, 26, 27
+    }
+    // don't know how to decode more exotic ARP types yet, but please add them
+
+    return this;
+};
+
+Arp.prototype.toString = function () {
+    var ret = "";
+    if (this.operation === 1) {
+        ret += "request";
+    } else if (this.operation === 2) {
+        ret += "reply";
+    } else {
+        ret += "unknown";
+    }
+
+    if (this.sender_ha && this.sender_pa) {
+        ret += " sender " + this.sender_ha + " " + this.sender_pa + " target " + this.target_ha +
+            " " + this.target_pa;
+    }
+
+    return ret;
+};
+
+module.exports = Arp;
+
+},{"./ethernet_addr":9,"./ipv4_addr":15}],8:[function(require,module,exports){
+var IPv4Addr = require("./ipv4_addr");
+var IPv6Addr = require("./ipv6_addr");
+
+function DNSHeader(raw_packet, offset) {
+    this.id = raw_packet.readUInt16BE(offset); // 0, 1
+    this.qr = (raw_packet[offset + 2] & 128) >> 7;
+    this.opcode = (raw_packet[offset + 2] & 120) >> 3;
+    this.aa = (raw_packet[offset + 2] & 4) >> 2;
+    this.tc = (raw_packet[offset + 2] & 2) >> 1;
+    this.rd = raw_packet[offset + 2] & 1;
+    this.ra = (raw_packet[offset + 3] & 128) >> 7;
+    this.z = 0; // spec says this MUST always be 0
+    this.rcode = raw_packet[offset + 3] & 15;
+    this.qdcount = raw_packet.readUInt16BE(offset + 4); // 4, 5
+    this.ancount = raw_packet.readUInt16BE(offset + 6); // 6, 7
+    this.nscount = raw_packet.readUInt16BE(offset + 8); // 8, 9
+    this.arcount = raw_packet.readUInt16BE(offset + 10); // 10, 11
+}
+
+DNSHeader.prototype.toString = function () {
+    return "{" +
+        " id:" + this.id +
+        " qr:" + this.qr +
+        " op:" + this.opcode +
+        " aa:" + this.aa +
+        " tc:" + this.tc +
+        " rd:" + this.rd +
+        " ra:" + this.ra +
+        " rc:" + this.rcode +
+        " qd:" + this.qdcount +
+        " an:" + this.ancount +
+        " ns:" + this.nscount +
+        " ar:" + this.arcount +
+        " }";
+};
+
+function DNS() {
+    this.header = null;
+    this.question = null;
+    this.answer = null;
+    this.authority = null;
+    this.additional = null;
+
+    // not part of DNS, but handy so we don't have to pass these around all over the place
+    this.raw_packet = null;
+    this.offset = null;
+    this.packet_start = null;
+    this.packet_len = null;
+}
+
+function DNSRRSet(count) {
+    this.rrs = new Array(count);
+}
+
+DNSRRSet.prototype.toString = function () {
+    return this.rrs.join(", ");
+};
+
+// http://tools.ietf.org/html/rfc1035
+DNS.prototype.decode = function (raw_packet, offset, caplen) {
+    this.raw_packet = raw_packet;
+    this.packet_start = offset;
+    this.offset = offset;
+    this.packet_len = caplen;
+
+    this.header = new DNSHeader(raw_packet, this.offset);
+    this.offset += 12;
+
+    this.question = this.decode_RRs(this.header.qdcount, true);
+    this.answer = this.decode_RRs(this.header.ancount, false);
+    this.authority = this.decode_RRs(this.header.nscount, false);
+    this.additional = this.decode_RRs(this.header.arcount, false);
+
+    return this;
+};
+
+DNS.prototype.decode_RRs = function (count, is_question) {
+    if (count > 100) {
+        throw new Error("Malformed DNS packet: too many RRs at offset " + this.offset);
+    }
+
+    var ret = new DNSRRSet(count);
+    for (var i = 0; i < count; i++) {
+        ret.rrs[i] = this.decode_RR(is_question);
+    }
+    return ret;
+};
+
+function DNSRR(is_question) {
+    this.name = "";
+    this.type = null;
+    this.class = null;
+    this.ttl = null;
+    this.rdlength = null;
+    this.rdata = null;
+    this.is_question = is_question;
+}
+
+DNSRR.prototype.toString = function () {
+    var ret = this.name + " ";
+    if (this.is_question) {
+        ret += qtype_to_string(this.type) + " " + qclass_to_string(this.class);
+    } else {
+        ret += type_to_string(this.type) + " " + class_to_string(this.class) + " " + this.ttl + " " + this.rdata;
+    }
+    return ret;
+};
+
+DNS.prototype.read_name = function () {
+    var result = "";
+    var len_or_ptr;
+    var pointer_follows = 0;
+    var pos = this.offset;
+
+    while ((len_or_ptr = this.raw_packet[pos]) !== 0x00) {
+        if ((len_or_ptr & 0xC0) === 0xC0) {
+            // pointer is bottom 6 bits of current byte, plus all 8 bits of next byte
+            pos = ((len_or_ptr & ~0xC0) << 8) | this.raw_packet[pos + 1];
+            pointer_follows++;
+            if (pointer_follows === 1) {
+                this.offset += 2;
+            }
+            if (pointer_follows > 5) {
+                throw new Error("invalid DNS RR: too many compression pointers found at offset " + pos);
+            }
+        } else {
+            if (result.length > 0) {
+                result += ".";
+            }
+            if (len_or_ptr > 63) {
+                throw new Error("invalid DNS RR: length is too large at offset " + pos);
+            }
+            pos++;
+            for (var i = pos; i < (pos + len_or_ptr) && i < this.packet_len ; i++) {
+                if (i > this.packet_len) {
+                    throw new Error("invalid DNS RR: read beyond end of packet at offset " + i);
+                }
+                var ch = this.raw_packet[i];
+                result += String.fromCharCode(ch);
+            }
+            pos += len_or_ptr;
+
+            if (pointer_follows === 0) {
+                this.offset = pos;
+            }
+        }
+    }
+
+    if (pointer_follows === 0) {
+        this.offset++;
+    }
+
+    return result;
+};
+
+DNS.prototype.decode_RR = function (is_question) {
+    if (this.offset > this.packet_len) {
+        throw new Error("Malformed DNS RR. Offset is beyond packet len (decode_RR) :" + this.offset + " packet_len:" + this.packet_len);
+    }
+
+    var rr = new DNSRR(is_question);
+
+    rr.name = this.read_name();
+
+    rr.type = this.raw_packet.readUInt16BE(this.offset);
+    this.offset += 2;
+    rr.class = this.raw_packet.readUInt16BE(this.offset);
+    this.offset += 2;
+    if (is_question) {
+        return rr;
+    }
+
+    rr.ttl = this.raw_packet.readUInt32BE(this.offset);
+    this.offset += 4;
+    rr.rdlength = this.raw_packet.readUInt16BE(this.offset);
+    this.offset += 2;
+
+    if (rr.type === 1 && rr.class === 1 && rr.rdlength) { // A, IN
+        rr.rdata = new IPv4Addr(this.raw_packet, this.offset);
+    } else if (rr.type === 2 && rr.class === 1) { // NS, IN
+        rr.rdata = this.read_name();
+        this.offset -= rr.rdlength; // read_name moves offset
+    } else if (rr.type === 28 && rr.class === 1 && rr.rdlength === 16) {
+        rr.data = new IPv6Addr(this.raw_packet, this.offset);
+    }
+    // TODO - decode other rr types
+
+    this.offset += rr.rdlength;
+
+    return rr;
+};
+
+DNS.prototype.toString = function () {
+    var ret = " DNS ";
+
+    ret += this.header.toString();
+    if (this.header.qdcount > 0) {
+        ret += "\n  question:" + this.question.rrs[0];
+    }
+    if (this.header.ancount > 0) {
+        ret += "\n  answer:" + this.answer;
+    }
+    if (this.header.nscount > 0) {
+        ret += "\n  authority:" + this.authority;
+    }
+    if (this.header.arcount > 0) {
+        ret += "\n  additional:" + this.additional;
+    }
+
+    return ret;
+};
+
+function type_to_string(type_num) {
+    switch (type_num) {
+    case 1:
+        return "A";
+    case 2:
+        return "NS";
+    case 3:
+        return "MD";
+    case 4:
+        return "MF";
+    case 5:
+        return "CNAME";
+    case 6:
+        return "SOA";
+    case 7:
+        return "MB";
+    case 8:
+        return "MG";
+    case 9:
+        return "MR";
+    case 10:
+        return "NULL";
+    case 11:
+        return "WKS";
+    case 12:
+        return "PTR";
+    case 13:
+        return "HINFO";
+    case 14:
+        return "MINFO";
+    case 15:
+        return "MX";
+    case 16:
+        return "TXT";
+    case 28:
+        return "AAAA";
+    default:
+        return ("Unknown (" + type_num + ")");
+    }
+}
+
+function qtype_to_string(qtype_num) {
+    switch (qtype_num) {
+    case 252:
+        return "AXFR";
+    case 253:
+        return "MAILB";
+    case 254:
+        return "MAILA";
+    case 255:
+        return "*";
+    default:
+        return type_to_string(qtype_num);
+    }
+}
+
+function class_to_string(class_num) {
+    switch (class_num) {
+    case 1:
+        return "IN";
+    case 2:
+        return "CS";
+    case 3:
+        return "CH";
+    case 4:
+        return "HS";
+    default:
+        return "Unknown (" + class_num + ")";
+    }
+}
+
+function qclass_to_string(qclass_num) {
+    if (qclass_num === 255) {
+        return "*";
+    } else {
+        return class_to_string(qclass_num);
+    }
+}
+
+module.exports = DNS;
+
+},{"./ipv4_addr":15,"./ipv6_addr":17}],9:[function(require,module,exports){
+var util = require("../util");
+
+function EthernetAddr(raw_packet, offset) {
+	this.addr = new Array(6);
+	this.addr[0] = raw_packet[offset];
+	this.addr[1] = raw_packet[offset + 1];
+	this.addr[2] = raw_packet[offset + 2];
+	this.addr[3] = raw_packet[offset + 3];
+	this.addr[4] = raw_packet[offset + 4];
+	this.addr[5] = raw_packet[offset + 5];
+}
+
+EthernetAddr.prototype.toString = function () {
+	return util.int8_to_hex[this.addr[0]] + ":" +
+		util.int8_to_hex[this.addr[1]] + ":" +
+		util.int8_to_hex[this.addr[2]] + ":" +
+		util.int8_to_hex[this.addr[3]] + ":" +
+		util.int8_to_hex[this.addr[4]] + ":" +
+		util.int8_to_hex[this.addr[5]];
+};
+
+module.exports = EthernetAddr;
+
+},{"../util":30}],10:[function(require,module,exports){
+var EthernetAddr = require("./ethernet_addr");
+var IPv4 = require("./ipv4");
+var IPv6 = require("./ipv6");
+var Arp = require("./arp");
+var Vlan = require("./vlan");
+
+function EthernetPacket() {
+    this.dhost = null;
+    this.shost = null;
+    this.ethertype = null;
+    this.vlan = null;
+    this.payload = null;
+}
+
+EthernetPacket.prototype.decode = function (raw_packet, offset) {
+    this.dhost = new EthernetAddr(raw_packet, offset);
+    offset += 6;
+    this.shost = new EthernetAddr(raw_packet, offset);
+    offset += 6;
+    this.ethertype = raw_packet.readUInt16BE(offset, true);
+    offset += 2;
+
+    if (this.ethertype === 0x8100) { // VLAN-tagged (802.1Q)
+        this.vlan = new Vlan().decode(raw_packet, offset);
+        offset += 2;
+
+        // Update the ethertype
+        this.ethertype = raw_packet.readUInt16BE(offset, true);
+        offset += 2;
+    }
+
+    if (this.ethertype < 1536) {
+        // this packet is actually some 802.3 type without an ethertype
+        this.ethertype = 0;
+    } else {
+        // http://en.wikipedia.org/wiki/EtherType
+        switch (this.ethertype) {
+        case 0x800: // IPv4
+            this.payload = new IPv4().decode(raw_packet, offset);
+            break;
+        case 0x806: // ARP
+            this.payload = new Arp().decode(raw_packet, offset);
+            break;
+        case 0x86dd: // IPv6 - http://en.wikipedia.org/wiki/IPv6
+            this.payload = new IPv6().decode(raw_packet, offset);
+            break;
+        case 0x88cc: // LLDP - http://en.wikipedia.org/wiki/Link_Layer_Discovery_Protocol
+            this.payload = "need to implement LLDP";
+            break;
+        default:
+            console.log("node_pcap: EthernetFrame() - Don't know how to decode ethertype " + this.ethertype);
+        }
+    }
+
+    return this;
+};
+
+EthernetPacket.prototype.toString = function () {
+    var ret = this.shost + " -> " + this.dhost;
+    if (this.vlan) {
+        ret += " vlan " + this.vlan;
+    }
+    switch (this.ethertype) {
+    case 0x800:
+        ret += " IPv4";
+        break;
+    case 0x806:
+        ret += " ARP";
+        break;
+    case 0x86dd:
+        ret += " IPv6";
+        break;
+    case 0x88cc:
+        ret += " LLDP";
+        break;
+    default:
+        ret += " ethertype " + this.ethertype;
+    }
+    return ret + " " + this.payload.toString();
+};
+
+module.exports = EthernetPacket;
+
+},{"./arp":7,"./ethernet_addr":9,"./ipv4":14,"./ipv6":16,"./vlan":28}],11:[function(require,module,exports){
+function ICMP() {
+    this.type = null;
+    this.code = null;
+    this.checksum = null;
+    this.id = null;
+    this.sequence = null;
+}
+
+// http://en.wikipedia.org/wiki/Internet_Control_Message_Protocol
+ICMP.prototype.decode = function (raw_packet, offset) {
+    this.type = raw_packet[offset];
+    this.code = raw_packet[offset + 1];
+    this.checksum = raw_packet.readUInt16BE(offset + 2); // 2, 3
+    this.id = raw_packet.readUInt16BE(offset + 4); // 4, 5
+    this.sequence = raw_packet.readUInt16BE(offset + 6); // 6, 7
+
+    return this;
+};
+
+ICMP.prototype.toString = function () {
+    var ret = "";
+
+    switch (this.type) {
+    case 0:
+        ret += "Echo Reply";
+        break;
+    case 1:
+    case 2:
+        ret += "Reserved";
+        break;
+    case 3: // destination unreachable
+        switch (this.code) {
+        case 0:
+            ret += "Destination Network Unreachable";
+            break;
+        case 1:
+            ret += "Destination Host Unreachable";
+            break;
+        case 2:
+            ret += "Destination Protocol Unreachable";
+            break;
+        case 3:
+            ret += "Destination Port Unreachable";
+            break;
+        case 4:
+            ret += "Fragmentation required, and DF flag set";
+            break;
+        case 5:
+            ret += "Source route failed";
+            break;
+        case 6:
+            ret += "Destination network unknown";
+            break;
+        case 7:
+            ret += "Destination host unknown";
+            break;
+        case 8:
+            ret += "Source host isolated";
+            break;
+        case 9:
+            ret += "Network administratively prohibited";
+            break;
+        case 10:
+            ret += "Host administratively prohibited";
+            break;
+        case 11:
+            ret += "Network unreachable for TOS";
+            break;
+        case 12:
+            ret += "Host unreachable for TOS";
+            break;
+        case 13:
+            ret += "Communication administratively prohibited";
+            break;
+        default:
+            ret += "Destination Unreachable (unknown code " + this.code + ")";
+        }
+        break;
+    case 4:
+        ret += "Source Quench";
+        break;
+    case 5: // redirect
+        switch (ret.code) {
+        case 0:
+            ret += "Redirect Network";
+            break;
+        case 1:
+            ret += "Redirect Host";
+            break;
+        case 2:
+            ret += "Redirect TOS and Network";
+            break;
+        case 3:
+            ret += "Redirect TOS and Host";
+            break;
+        default:
+            ret += "Redirect (unknown code " + ret.code + ")";
+            break;
+        }
+        break;
+    case 6:
+        ret += "Alternate Host Address";
+        break;
+    case 7:
+        ret += "Reserved";
+        break;
+    case 8:
+        ret += "Echo Request";
+        break;
+    case 9:
+        ret += "Router Advertisement";
+        break;
+    case 10:
+        ret += "Router Solicitation";
+        break;
+    case 11:
+        switch (this.code) {
+        case 0:
+            ret += "TTL expired in transit";
+            break;
+        case 1:
+            ret += "Fragment reassembly time exceeded";
+            break;
+        default:
+            ret += "Time Exceeded (unknown code " + this.code + ")";
+        }
+        break;
+        // TODO - decode the rest of the well-known ICMP messages, even though they are deprecated
+    default:
+        ret += "type " + this.type + " code " + this.code;
+    }
+
+    // TODO - there are often more exciting things hiding in ICMP packets after the headers
+    return ret;
+};
+
+module.exports = ICMP;
+
+},{}],12:[function(require,module,exports){
+function IGMP() {
+    this.type = null;
+    this.version = null;
+    this.max_response_time = null;
+    this.checksum = null;
+    this.group_address = null;
+}
+
+var IPV4Addr = require("./ipv4_addr");
+
+// http://en.wikipedia.org/wiki/Internet_Group_Management_Protocol
+IGMP.prototype.decode = function (raw_packet, offset) {
+    this.type = raw_packet[offset];
+    this.max_response_time = raw_packet[offset + 1];
+    this.checksum = raw_packet.readUInt16BE(offset + 2); // 2, 3
+    this.group_address = new IPV4Addr(raw_packet, offset + 4); // 4, 5, 6, 7
+
+    switch (this.type) {
+    case 0x11:
+        this.version = this.max_response_time > 0 ? 2 : 1;
+        break;
+    case 0x12:
+        this.version = 1;
+        break;
+    case 0x16:
+        this.version = 2;
+        break;
+    case 0x17:
+        this.version = 2;
+        break;
+    case 0x22:
+        this.version = 3;
+        break;
+    default:
+        break;
+    }
+
+    return this;
+};
+
+IGMP.prototype.toString = function () {
+    var ret;
+
+    switch (this.type) {
+    case 0x11:
+        ret = "Membership Query";
+        break;
+    case 0x12:
+        ret = "Membership Report";
+        break;
+    case 0x16:
+        ret = "Membership Report";
+        break;
+    case 0x17:
+        ret = "Leave Group";
+        break;
+    case 0x22:
+        ret = "Membership Report";
+        // TODO: Decode v3 message
+        break;
+    default:
+        ret = "type " + this.type;
+        break;
+    }
+
+    return ret;
+};
+
+module.exports = IGMP;
+
+},{"./ipv4_addr":15}],13:[function(require,module,exports){
+// convert binary capture data into objects with friendly names
+
+exports.EthernetPacket = require("./ethernet_packet");
+exports.IPv4Packet = require("./ipv4");
+exports.IPv6Packet = require("./ipv6");
+exports.ArpPacket = require("./arp");
+exports.PcapPacket = require("./pcap_packet");
+var PcapPacket = exports.PcapPacket;
+
+function decode(packet) {
+    return new PcapPacket().decode(packet);
+}
+
+exports.decode = decode;
+exports.decode.packet = decode;
+
+},{"./arp":7,"./ethernet_packet":10,"./ipv4":14,"./ipv6":16,"./pcap_packet":20}],14:[function(require,module,exports){
+var ICMP = require("./icmp");
+var IGMP = require("./igmp");
+var TCP = require("./tcp");
+var UDP = require("./udp");
+var IPv6 = require("./ipv6");
+var IPv4Addr = require("./ipv4_addr");
+
+function IPFlags() {
+    this.reserved = null;
+    this.df = null;
+    this.mf = null;
+}
+
+IPFlags.prototype.toString = function () {
+    var ret = "[";
+    if (this.reserved) {
+        ret += "r";
+    }
+    if (this.df) {
+        ret += "d";
+    }
+    if (this.mf) {
+        ret += "m";
+    }
+    ret += "]";
+    return ret;
+};
+
+function IPv4() {
+    this.version = null;
+    this.header_length = null;
+    this.header_bytes = null; // not part of packet, but handy
+    this.diffserv = null;
+    this.total_length = null;
+    this.identification = null;
+    this.flags = new IPFlags();
+    this.fragment_offset = null;
+    this.ttl = null;
+    this.protocol = null;
+    this.header_checksum = null;
+    this.saddr = null;
+    this.daddr = null;
+    this.protocol_name = null;
+    this.payload = null;
+}
+
+// http://en.wikipedia.org/wiki/IPv4
+IPv4.prototype.decode = function (raw_packet, offset) {
+    var orig_offset = offset;
+
+    this.version = (raw_packet[offset] & 240) >> 4; // first 4 bits
+    this.header_length = raw_packet[offset] & 15; // second 4 bits
+    this.header_bytes = this.header_length * 4;
+    offset += 1;
+    this.diffserv = raw_packet[offset];
+    offset += 1;
+    this.total_length = raw_packet.readUInt16BE(offset, true);
+    offset += 2;
+    this.identification = raw_packet.readUInt16BE(offset, true);
+    offset += 2;
+    this.flags.reserved = (raw_packet[offset] & 128) >> 7;
+    this.flags.df = (raw_packet[offset] & 64) >> 6;
+    this.flags.mf = (raw_packet[offset] & 32) >> 5;
+    this.fragment_offset = ((raw_packet[offset] & 31) * 256) + raw_packet[offset + 1]; // 13-bits from 6, 7
+    offset += 2;
+    this.ttl = raw_packet[offset];
+    offset += 1;
+    this.protocol = raw_packet[offset];
+    offset += 1;
+    this.header_checksum = raw_packet.readUInt16BE(offset, true);
+    offset += 2;
+    this.saddr = new IPv4Addr(raw_packet, offset);
+    offset += 4;
+    this.daddr = new IPv4Addr(raw_packet, offset);
+    offset += 4;
+
+    // TODO - parse IP "options" if header_length > 5
+
+    offset = orig_offset + (this.header_length * 4);
+
+    switch (this.protocol) {
+    case 1:
+        this.payload = new ICMP();
+        this.payload.decode(raw_packet, offset);
+        break;
+    case 2:
+        this.payload = new IGMP().decode(raw_packet, offset);
+        break;
+    case 4:
+        this.payload = new IPv4().decode(raw_packet, offset);
+        break;
+    case 6:
+        this.payload = new TCP().decode(raw_packet, offset, this.total_length - this.header_bytes);
+        break;
+    case 17:
+        this.payload = new UDP().decode(raw_packet, offset);
+        break;
+    case 41:
+        this.payload = new IPv6().decode(raw_packet, offset);
+        break;
+    default:
+        this.protocol_name = "Unknown";
+    }
+
+    return this;
+};
+
+IPv4.prototype.toString = function () {
+    var ret = this.saddr + " -> " + this.daddr;
+    var flags = this.flags.toString();
+    if (flags.length > 2) {
+        ret += " flags " + flags;
+    }
+
+    switch (this.protocol) {
+    case 1:
+        ret += " ICMP";
+        break;
+    case 2:
+        ret += " IGMP";
+        break;
+    case 4:
+        ret += " IPv4_in_IPv4"; // IPv4 encapsulation, RFC2003
+        break;
+    case 6:
+        ret += " TCP";
+        break;
+    case 17:
+        ret += " UDP";
+        break;
+    case 41:
+        ret += " IPv6_in_IP4"; // IPv6 encapsulation, RFC2473
+        break;
+    default:
+        ret += " proto " + this.protocol;
+    }
+
+    return ret + " " + this.payload;
+};
+
+module.exports = IPv4;
+
+},{"./icmp":11,"./igmp":12,"./ipv4_addr":15,"./ipv6":16,"./tcp":26,"./udp":27}],15:[function(require,module,exports){
+var map = require("../util").int8_to_dec;
+
+function IPv4Addr(raw_packet, offset) {
+	this.o1	= raw_packet[offset];
+	this.o2	= raw_packet[offset + 1];
+	this.o3	= raw_packet[offset + 2];
+	this.o4	= raw_packet[offset + 3];
+}
+
+// Don't use Array.prototype.join here, because string concat is much faster
+IPv4Addr.prototype.toString = function () {
+    return map[this.o1] + "." + map[this.o2] + "." + map[this.o3] + "." + map[this.o4];
+};
+
+module.exports = IPv4Addr;
+
+},{"../util":30}],16:[function(require,module,exports){
+var ICMP = require("./icmp");
+var IGMP = require("./igmp");
+var TCP = require("./tcp");
+var UDP = require("./udp");
+var IPv4 = require("./ipv4");
+var IPv6Addr = require("./ipv6_addr");
+
+function IPv6Header() {
+
+}
+
+IPv6Header.prototype.decode = function (raw_packet, next_header, ip, offset) {
+    switch (next_header) {
+    case 1:
+        ip.payload = new ICMP().decode(raw_packet, offset);
+        break;
+    case 2:
+        ip.payload = new IGMP().decode(raw_packet, offset);
+        break;
+    case 4:
+        ip.payload = new IPv4().decode(raw_packet, offset); // IPv4 encapsulation, RFC2003
+        break;
+    case 6:
+        ip.payload = new TCP().decode(raw_packet, offset, ip);
+        break;
+    case 17:
+        ip.payload = new UDP().decode(raw_packet, offset);
+        break;
+    case 41:
+        ip.payload = new IPv6().decode(raw_packet, offset); // IPv6 encapsulation, RFC2473
+        break;
+    /* Please follow numbers and RFC in http://www.iana.org/assignments/ipv6-parameters/ipv6-parameters.xhtml#extension-header
+     * Not all next protocols follow this rule (and we can have unsuported upper protocols here too).
+     *  */
+    case 0: //Hop-by-Hop
+    case 60: //Destination Options
+    case 43: //Routing
+    case 135: //Mobility
+    case 139: //Host Identity Protocol. //Discussion: rfc5201 support only No Next Header/trailing data, but future documents May do.
+    case 140: //Shim6 Protocol
+        new IPv6Header().decode(raw_packet, raw_packet[offset], ip, offset + 8*raw_packet[offset+1] + 8);
+        break;
+    case 51: //Authentication Header
+        new IPv6Header().decode(raw_packet, raw_packet[offset], ip, offset + 4*raw_packet[offset+1] + 8);
+        break;
+    default:
+        // 59 - No next Header, and unknowed upper layer protocols, do nothing.
+    }
+};
+
+function IPv6() {
+
+}
+
+IPv6.prototype.decode = function (raw_packet, offset) {
+
+    // http://en.wikipedia.org/wiki/IPv6
+    this.version = (raw_packet[offset] & 240) >> 4; // first 4 bits
+    this.traffic_class = ((raw_packet[offset] & 15) << 4) + ((raw_packet[offset+1] & 240) >> 4);
+    this.flow_label = ((raw_packet[offset + 1] & 15) << 16) +
+        (raw_packet[offset + 2] << 8) +
+        raw_packet[offset + 3];
+    this.payload_length = raw_packet.readUInt16BE(offset+4, true);
+    this.total_length = this.payload_length + 40;
+    this.next_header = raw_packet[offset+6];
+    this.hop_limit = raw_packet[offset+7];
+    this.saddr = new IPv6Addr().decode(raw_packet, offset+8);
+    this.daddr = new IPv6Addr().decode(raw_packet, offset+24);
+    this.header_bytes = 40;
+
+    new IPv6Header().decode(raw_packet, this.next_header, this, offset+40);
+    return this;
+};
+
+IPv6.prototype.toString = function () {
+    var ret = this.saddr + " -> " + this.daddr;
+
+    switch (this.next_header) {
+    case 1:
+        ret += " ICMP";
+        break;
+    case 2:
+        ret += " IGMP";
+        break;
+    case 4:
+        ret += " IPv4_in_IPv6"; // IPv4 encapsulation, RFC2003
+        break;
+    case 6:
+        ret += " TCP";
+        break;
+    case 17:
+        ret += " UDP";
+        break;
+    case 41:
+        ret += " IPv6_in_IPv6"; // IPv6 encapsulation, RFC2473
+        break;
+    default:
+        ret += " proto " + this.next_header;
+    }
+
+    return ret + " " + this.payload;
+};
+
+module.exports = IPv6;
+
+},{"./icmp":11,"./igmp":12,"./ipv4":14,"./ipv6_addr":17,"./tcp":26,"./udp":27}],17:[function(require,module,exports){
+var map = require("../util").int8_to_hex_nopad;
+
+function IPv6Addr() {
+    this.o1 = null;
+    this.o2 = null;
+    this.o3 = null;
+    this.o4 = null;
+    this.o5 = null;
+    this.o6 = null;
+    this.o7 = null;
+    this.o8 = null;
+}
+
+IPv6Addr.prototype.decode = function (raw_packet, offset) {
+    this.o1 = raw_packet.readUInt16LE[offset];
+    this.o2 = raw_packet.readUInt16LE[offset + 2];
+    this.o3 = raw_packet.readUInt16LE[offset + 4];
+    this.o4 = raw_packet.readUInt16LE[offset + 6];
+    this.o5 = raw_packet.readUInt16LE[offset + 8];
+    this.o6 = raw_packet.readUInt16LE[offset + 10];
+    this.o7 = raw_packet.readUInt16LE[offset + 12];
+    this.o8 = raw_packet.readUInt16LE[offset + 14];
+
+    return this;
+};
+
+function format(num) {
+    var p1 = (num & 0xff00) >> 8;
+    var p2 = num & 0x00ff;
+    if (p1 === 0) {
+        return map[p2];
+    } else {
+        return map[p1] + map[p2];
+    }
+}
+
+IPv6Addr.prototype.toString = function () {
+    return format(this.o1) + ":" + format(this.o2) + ":" + format(this.o3) + ":" + format(this.o4) + ":" +
+        format(this.o5) + ":" + format(this.o6) + ":" + format(this.o7) + ":" + format(this.o8);
+};
+
+module.exports = IPv6Addr;
+
+},{"../util":30}],18:[function(require,module,exports){
+var IPv4 = require("./ipv4");
+
+function LogicalLinkControl() {
+    this.dsap = null;
+    this.ssap = null;
+    this.control_field = null;
+    this.org_code = null;
+    this.type = null;
+}
+
+LogicalLinkControl.prototype.decode = function (raw_packet, offset) {
+    this.dsap = raw_packet[offset++];
+    this.ssap = raw_packet[offset++];
+
+    if (((this.dsap === 0xaa) && (this.ssap === 0xaa)) || ((this.dsap === 0x00) && (this.ssap === 0x00))) {
+        this.control_field = raw_packet[offset++];
+        this.org_code = [
+            raw_packet[offset++],
+            raw_packet[offset++],
+            raw_packet[offset++]
+        ];
+        this.type = raw_packet.readUInt16BE(raw_packet, offset);
+        offset += 2;
+
+        switch (this.type) {
+        case 0x0800: // IPv4
+            this.payload = new IPv4().decode(raw_packet, offset);
+            break;
+        }
+    } else {
+        throw new Error("Unknown LLC types: DSAP: " + this.dsap + ", SSAP: " + this.ssap);
+    }
+
+    return this;
+};
+
+},{"./ipv4":14}],19:[function(require,module,exports){
+var IPv4 = require("./ipv4");
+var IPv6 = require("./ipv6");
+
+function NullPacket() {
+    this.pftype = null;
+    this.payload = null;
+}
+
+// an oddity about nulltype is that it starts with a 4 byte header, but I can't find a
+// way to tell which byte order is used.  The good news is that all address family
+// values are 8 bits or less.
+NullPacket.prototype.decode = function (raw_packet, offset) {
+    if (raw_packet[offset] === 0 && raw_packet[offset + 1] === 0) { // must be one of the endians
+        this.pftype = raw_packet[offset + 3];
+    } else {                                          // and this is the other one
+        this.pftype = raw_packet[offset];
+    }
+
+    if (this.pftype === 2) {         // AF_INET, at least on my Linux and OSX machines right now
+        this.payload = new IPv4().decode(raw_packet, offset + 4);
+    } else if (this.pftype === 30) { // AF_INET6, often
+        this.payload = new IPv6().decode(raw_packet, offset + 4);
+    } else {
+        console.log("pcap.js: decode.nulltype() - Don't know how to decode protocol family " + this.pftype);
+    }
+
+    return this;
+};
+
+NullPacket.prototype.toString = function () {
+    return this.pftype + " " + this.payload;
+};
+
+module.exports = NullPacket;
+
+},{"./ipv4":14,"./ipv6":16}],20:[function(require,module,exports){
+var EthernetPacket = require("./ethernet_packet");
+var NullPacket = require("./null_packet");
+var RawPacket = require("./raw_packet");
+var RadioPacket = require("./radio_packet");
+var SLLPacket = require("./sll_packet");
+
+// Setting properties from the C++ side is very slow, so we send in a shared Buffer.
+// The C++ side does this:
+//   memcpy(session->header_data, &(pkthdr->ts.tv_sec), 4);
+//   memcpy(session->header_data + 4, &(pkthdr->ts.tv_usec), 4);
+//   memcpy(session->header_data + 8, &(pkthdr->caplen), 4);
+//   memcpy(session->header_data + 12, &(pkthdr->len), 4);
+// And here we unpack those 4 ints from the buffer.
+
+function PcapHeader(raw_header) {
+    this.tv_sec = raw_header.readUInt32LE(0, true);
+    this.tv_usec = raw_header.readUInt32LE(4, true);
+    this.caplen = raw_header.readUInt32LE(8, true);
+    this.len = raw_header.readUInt32LE(12, true);
+}
+
+function PcapPacket() {
+    this.link_type = null;
+    this.pcap_header = null;
+    this.payload = null;
+}
+
+PcapPacket.prototype.decode = function (packet_with_header) {
+    this.link_type = packet_with_header.link_type;
+    this.pcap_header = new PcapHeader(packet_with_header.header);
+
+    var buf = packet_with_header.buf;
+
+    switch (this.link_type) {
+    case "LINKTYPE_ETHERNET":
+        this.payload = new EthernetPacket().decode(buf, 0);
+        break;
+    case "LINKTYPE_NULL":
+        this.payload = new NullPacket().decode(buf, 0);
+        break;
+    case "LINKTYPE_RAW":
+        this.payload = new RawPacket().decode(buf, 0);
+        break;
+    case "LINKTYPE_IEEE802_11_RADIO":
+        this.payload = new RadioPacket.decode(buf, 0);
+        break;
+    case "LINKTYPE_LINUX_SLL":
+        this.payload = new SLLPacket().decode(buf, 0);
+        break;
+    default:
+        console.log("node_pcap: PcapPacket.decode - Don't yet know how to decode link type " + this.link_type);
+    }
+
+    return this;
+};
+
+PcapPacket.prototype.toString = function () {
+    return this.link_type + " " + this.payload;
+};
+
+module.exports = PcapPacket;
+
+},{"./ethernet_packet":10,"./null_packet":19,"./radio_packet":22,"./raw_packet":23,"./sll_packet":25}],21:[function(require,module,exports){
+var EthernetAddr = require('./ethernet_addr');
+var LogicalLinkControl = require('./llc_packet');
+
+function RadioFrame() {
+
+}
+
+RadioFrame.prototype.decode = function (raw_packet, offset) {
+    var ret = {};
+
+    ret.frameControl = raw_packet.readUInt16BE(offset, true);
+    offset += 2;
+    ret.type = (ret.frameControl >> 2) & 0x0003;
+    ret.subType = (ret.frameControl >> 4) & 0x000f;
+    ret.flags = (ret.frameControl >> 8) & 0xff;
+    ret.duration = raw_packet.readUInt16BE(offset, true); offset += 2;
+    ret.bssid = new EthernetAddr(raw_packet, offset); offset += 6;
+    ret.shost = new EthernetAddr(raw_packet, offset); offset += 6;
+    ret.dhost = new EthernetAddr(raw_packet, offset); offset += 6;
+    ret.fragSeq = raw_packet.readUInt16BE(offset, true); offset += 2;
+
+    var strength = raw_packet[22];
+    ret.strength = -Math.abs(265 - strength);
+
+
+    switch(ret.subType) {
+        case 8: // QoS Data
+            ret.qosPriority = raw_packet[offset++];
+            ret.txop = raw_packet[offset++];
+            break;
+    }
+
+    if (ret.type == 2 && ret.subType == 4) {
+        // skip this is Null function (No data)
+    } else if (ret.type == 2 && ret.subType == 12) {
+        // skip this is QoS Null function (No data)
+    } else if (ret.type == 2 && ret.subType == 7) {
+        // skip this is CF-Ack/Poll
+    } else if (ret.type == 2 && ret.subType == 6) {
+        // skip this is CF-Poll (No data)
+    } else if (ret.type == 2) { // data
+        ret.llc = new LogicalLinkControl.decode(raw_packet, offset);
+    }
+
+    return ret;
+};
+
+module.exports = RadioFrame;
+
+},{"./ethernet_addr":9,"./llc_packet":18}],22:[function(require,module,exports){
+var RadioFrame = require('./radio_frame');
+
+function RadioPacket() {
+
+}
+
+RadioPacket.prototype.decode = function (raw_packet, offset) {
+    var ret = {};
+    var original_offset = offset;
+
+    ret.headerRevision = raw_packet[offset++];
+    ret.headerPad = raw_packet[offset++];
+    ret.headerLength = raw_packet.readUInt16BE(offset, true); offset += 2;
+
+    offset = original_offset + ret.headerLength;
+
+    ret.ieee802_11Frame = new RadioFrame().decode(raw_packet, offset);
+
+    if(ret.ieee802_11Frame && ret.ieee802_11Frame.llc && ret.ieee802_11Frame.llc.ip) {
+        ret.ip = ret.ieee802_11Frame.llc.ip;
+        delete ret.ieee802_11Frame.llc.ip;
+        ret.shost = ret.ieee802_11Frame.shost;
+        delete ret.ieee802_11Frame.shost;
+        ret.dhost = ret.ieee802_11Frame.dhost;
+        delete ret.ieee802_11Frame.dhost;
+    }
+
+    return ret;
+};
+
+module.exports = RadioPacket;
+
+},{"./radio_frame":21}],23:[function(require,module,exports){
+var IPv4 = require("./ipv4");
+
+function RawPacket() {
+	this.payload = null;
+}
+
+RawPacket.prototype.decode = function (raw_packet, offset) {
+	this.payload = new IPv4().decode(raw_packet, offset);
+	return this;
+};
+
+module.exports = RawPacket;
+
+},{"./ipv4":14}],24:[function(require,module,exports){
+var util = require("../util");
+
+function SLLAddr(raw_packet, offset, len) {
+	this.addr = new Array(len);
+    for (var i = 0; i < len; i++) {
+    	this.addr[i] = raw_packet[offset + i];
+    }
+}
+
+SLLAddr.prototype.toString = function () {
+	var ret = "";
+	for (var i = 0; i < this.addr.length - 1; i++) {
+		ret += util.int8_to_hex[this.addr[i]] + ":";
+	}
+	ret += util.int8_to_hex[this.addr[i + 1]];
+	return ret;
+};
+
+module.exports = SLLAddr;
+
+},{"../util":30}],25:[function(require,module,exports){
+// Synthetic Link Layer used by Linux to support the "any" pseudo device
+// http://www.tcpdump.org/linktypes/LINKTYPE_LINUX_SLL.html
+
+var SLLAddr = require("./sll_addr");
+var IPv4 = require("./ipv4");
+var IPv6 = require("./ipv6");
+var Arp = require("./arp");
+
+function SLLPacket () {
+    this.packet_type = null;
+    this.address_type = null;
+    this.address_len = null;
+    this.address = null;
+    this.ethertype = null;
+    this.payload = null;
+}
+
+SLLPacket.prototype.decode = function (raw_packet, offset) {
+    this.packet_type = raw_packet.readUInt16BE(offset);
+    offset += 2;
+    this.address_type = raw_packet.readUInt16BE(offset);
+    offset += 2;
+    this.address_len = raw_packet.readUInt16BE(offset);
+    offset += 2;
+    this.address = new SLLAddr(raw_packet, offset, this.address_len);
+    offset += 8; // address uses 8 bytes in frame, but only address_len bytes are significant
+    this.ethertype = raw_packet.readUInt16BE(offset);
+    offset += 2;
+
+    if (this.ethertype < 1536) {
+        // this packet is actually some 802.3 type without an ethertype
+        this.ethertype = 0;
+    } else {
+        // http://en.wikipedia.org/wiki/EtherType
+        switch (this.ethertype) {
+        case 0x800: // IPv4
+            this.payload = new IPv4().decode(raw_packet, offset);
+            break;
+        case 0x806: // ARP
+            this.payload = new Arp().decode(raw_packet, offset);
+            break;
+        case 0x86dd: // IPv6 - http://en.wikipedia.org/wiki/IPv6
+            this.payload = new IPv6().decode(raw_packet, offset);
+            break;
+        case 0x88cc: // LLDP - http://en.wikipedia.org/wiki/Link_Layer_Discovery_Protocol
+            this.payload = "need to implement LLDP";
+            break;
+        default:
+            console.log("node_pcap: SLLPacket() - Don't know how to decode ethertype " + this.ethertype);
+        }
+    }
+
+    return this;
+};
+
+SLLPacket.prototype.toString = function () {
+    var ret = "";
+
+    switch (this.packet_type) {
+    case 0:
+        ret += "recv_us";
+        break;
+    case 1:
+        ret += "broadcast";
+        break;
+    case 2:
+        ret += "multicast";
+        break;
+    case 3:
+        ret += "remote_remote";
+        break;
+    case 4:
+        ret += "sent_us";
+        break;
+    }
+
+    ret += " addrtype " + this.address_type;
+
+    ret += " " + this.address;
+
+    switch (this.ethertype) {
+    case 0x800:
+        ret += " IPv4";
+        break;
+    case 0x806:
+        ret += " ARP";
+        break;
+    case 0x86dd:
+        ret += " IPv6";
+        break;
+    case 0x88cc:
+        ret += " LLDP";
+        break;
+    default:
+        ret += " ethertype " + this.ethertype;
+    }
+
+    return ret + " " + this.payload.toString();
+};
+
+module.exports = SLLPacket;
+
+},{"./arp":7,"./ipv4":14,"./ipv6":16,"./sll_addr":24}],26:[function(require,module,exports){
+
+function TCPFlags() {
+    this.cwr = null;
+    this.ece = null;
+    this.urg = null;
+    this.ack = null;
+    this.psh = null;
+    this.rst = null;
+    this.syn = null;
+    this.fin = null;
+}
+
+TCPFlags.prototype.toString = function () {
+    var ret = "[";
+
+    if (this.cwr) {
+        ret += "c";
+    }
+    if (this.ece) {
+        ret += "e";
+    }
+    if (this.urg) {
+        ret += "u";
+    }
+    if (this.ack) {
+        ret += "a";
+    }
+    if (this.psh) {
+        ret += "p";
+    }
+    if (this.rst) {
+        ret += "r";
+    }
+    if (this.syn) {
+        ret += "s";
+    }
+    if (this.fin) {
+        ret += "f";
+    }
+    ret += "]";
+
+    return ret;
+};
+
+function TCPOptions() {
+    this.mss = null;
+    this.window_scale = null;
+    this.sack_ok = null;
+    this.sack = null;
+    this.timestamp = null;
+    this.echo = null;
+}
+
+TCPOptions.prototype.decode = function (raw_packet, offset, len) {
+    var end_offset = offset + len;
+
+    while (offset < end_offset) {
+        switch (raw_packet[offset]) {
+        case 0: // end of options list
+            offset = end_offset;
+            break;
+        case 1: // NOP / padding
+            offset += 1;
+            break;
+        case 2:
+            offset += 2;
+            this.mss = raw_packet.readUInt16BE(offset);
+            offset += 2;
+            break;
+        case 3:
+            offset += 2;
+            this.window_scale = raw_packet[offset];
+            offset += 1;
+            break;
+        case 4:
+            this.sack_ok = true;
+            offset += 2;
+            break;
+        case 5:
+            this.sack = [];
+            offset += 1;
+            switch (raw_packet[offset]) {
+            case 10:
+                offset += 1;
+                this.sack.push([raw_packet.readUInt32BE(offset), raw_packet.readUInt32BE(offset + 4)]);
+                offset += 8;
+                break;
+            case 18:
+                offset += 1;
+                this.sack.push([raw_packet.readUInt32BE(offset), raw_packet.readUInt32BE(offset + 4)]);
+                offset += 8;
+                this.sack.push([raw_packet.readUInt32BE(offset), raw_packet.readUInt32BE(offset + 4)]);
+                offset += 8;
+                break;
+            case 26:
+                offset += 1;
+                this.sack.push([raw_packet.readUInt32BE(offset), raw_packet.readUInt32BE(offset + 4)]);
+                offset += 8;
+                this.sack.push([raw_packet.readUInt32BE(offset), raw_packet.readUInt32BE(offset + 4)]);
+                offset += 8;
+                this.sack.push([raw_packet.readUInt32BE(offset), raw_packet.readUInt32BE(offset + 4)]);
+                offset += 8;
+                break;
+            case 34:
+                offset += 1;
+                this.sack.push([raw_packet.readUInt32BE(offset), raw_packet.readUInt32BE(offset + 4)]);
+                offset += 8;
+                this.sack.push([raw_packet.readUInt32BE(offset), raw_packet.readUInt32BE(offset + 4)]);
+                offset += 8;
+                this.sack.push([raw_packet.readUInt32BE(offset), raw_packet.readUInt32BE(offset + 4)]);
+                offset += 8;
+                this.sack.push([raw_packet.readUInt32BE(offset), raw_packet.readUInt32BE(offset + 4)]);
+                offset += 8;
+                break;
+            default:
+                console.log("Invalid TCP SACK option length " + raw_packet[offset + 1]);
+                offset = end_offset;
+            }
+            break;
+        case 8:
+            offset += 2;
+            this.timestamp = raw_packet.readUInt32BE(offset);
+            offset += 4;
+            this.echo = raw_packet.readUInt32BE(offset);
+            offset += 4;
+            break;
+        default:
+            throw new Error("Don't know how to process TCP option " + raw_packet[offset]);
+        }
+    }
+
+    return this;
+};
+
+TCPOptions.prototype.toString = function () {
+    var ret = "";
+    if (this.mss !== null) {
+        ret += "mss:" + this.mss + " ";
+    }
+    if (this.window_scale !== null) {
+        ret += "scale:" + this.window_scale + "(" + Math.pow(2, (this.window_scale)) + ") ";
+    }
+    if (this.sack_ok !== null) {
+        ret += "sack_ok" + " ";
+    }
+    if (this.sack !== null) {
+        ret += "sack:" + this.sack.join(",") + " ";
+    }
+
+    if (ret.length === 0) {
+        ret = ". ";
+    }
+
+    return "[" + ret.slice(0, -1) + "]";
+};
+
+function TCP() {
+    this.sport          = null;
+    this.dport          = null;
+    this.seqno          = null;
+    this.ackno          = null;
+    this.data_offset    = null;
+    this.header_bytes   = null; // not part of packet but handy
+    this.reserved       = null;
+    this.flags          = new TCPFlags();
+    this.window_size    = null;
+    this.checksum       = null;
+    this.urgent_pointer = null;
+    this.options        = null;
+    this.data           = null;
+    this.data_bytes     = null;
+}
+
+// If you get stuck trying to decode or understand the offset math, stick this block in to dump the contents:
+// for (var i = orig_offset; i < orig_offset + len ; i++) {
+//     console.log((i - orig_offset) + " / " + i + ": " + raw_packet[i] + " " + String.fromCharCode(raw_packet[i]));
+// }
+
+// http://en.wikipedia.org/wiki/Transmission_Control_Protocol
+TCP.prototype.decode = function (raw_packet, offset, len) {
+    var orig_offset = offset;
+
+    this.sport          = raw_packet.readUInt16BE(offset, true); // 0, 1
+    offset += 2;
+    this.dport          = raw_packet.readUInt16BE(offset, true); // 2, 3
+    offset += 2;
+    this.seqno          = raw_packet.readUInt32BE(offset, true); // 4, 5, 6, 7
+    offset += 4;
+    this.ackno          = raw_packet.readUInt32BE(offset, true); // 8, 9, 10, 11
+    offset += 4;
+    this.data_offset    = (raw_packet[offset] & 0xf0) >> 4; // first 4 bits of 12
+    if (this.data_offset < 5 || this.data_offset > 15) {
+        throw new Error("invalid data_offset: " + this.data_offset);
+    }
+    this.header_bytes   = this.data_offset * 4; // convenience for using data_offset
+    this.reserved       = raw_packet[offset] & 15; // second 4 bits of 12
+    offset += 1;
+    var all_flags = raw_packet[offset];
+    this.flags.cwr      = (all_flags & 128) >> 7; // all flags packed into 13
+    this.flags.ece      = (all_flags & 64) >> 6;
+    this.flags.urg      = (all_flags & 32) >> 5;
+    this.flags.ack      = (all_flags & 16) >> 4;
+    this.flags.psh      = (all_flags & 8) >> 3;
+    this.flags.rst      = (all_flags & 4) >> 2;
+    this.flags.syn      = (all_flags & 2) >> 1;
+    this.flags.fin      = all_flags & 1;
+    offset += 1;
+    this.window_size    = raw_packet.readUInt16BE(offset, true); // 14, 15
+    offset += 2;
+    this.checksum       = raw_packet.readUInt16BE(offset, true); // 16, 17
+    offset += 2;
+    this.urgent_pointer = raw_packet.readUInt16BE(offset, true); // 18, 19
+    offset += 2;
+
+    this.options = new TCPOptions();
+    var options_len = this.header_bytes - (offset - orig_offset);
+    if (options_len > 0) {
+        this.options.decode(raw_packet, offset, options_len);
+        offset += options_len;
+    }
+
+    this.data_bytes = len - this.header_bytes;
+    if (this.data_bytes > 0) {
+        // add a buffer slice pointing to the data area of this TCP packet.
+        // Note that this does not make a copy, so ret.data is only valid for this current
+        // trip through the capture loop.
+        this.data = raw_packet.slice(offset, offset + this.data_bytes);
+    }
+
+    return this;
+};
+
+TCP.prototype.toString = function () {
+    var ret = this.sport + "->" + this.dport + " seq " + this.seqno + " ack " + this.ackno + " flags " + this.flags + " " +
+        "win " + this.window_size + " csum " + this.checksum;
+    if (this.urgent_pointer) {
+        ret += " urg " + this.urgent_pointer;
+    }
+    ret += " " + this.options.toString();
+    ret += " len " + this.data_bytes;
+    return ret;
+};
+
+// automatic protocol decode ends here.  Higher level protocols can be decoded by using payload.
+
+module.exports = TCP;
+
+},{}],27:[function(require,module,exports){
+var DNS = require("./dns");
+
+function UDP() {
+    this.sport = null;
+    this.dport = null;
+    this.length = null;
+    this.checksum = null;
+    this.data = null;
+}
+
+// http://en.wikipedia.org/wiki/User_Datagram_Protocol
+UDP.prototype.decode = function (raw_packet, offset) {
+    this.sport = raw_packet.readUInt16BE(offset, true);
+    offset += 2;
+    this.dport = raw_packet.readUInt16BE(offset, true);
+    offset += 2;
+    this.length = raw_packet.readUInt16BE(offset, true);
+    offset += 2;
+    this.checksum = raw_packet.readUInt16BE(offset, true);
+    offset += 2;
+
+    this.data = raw_packet.slice(offset, offset + (this.length - 8));
+
+    return this;
+};
+
+UDP.prototype.toString = function () {
+    var ret = "UDP " + this.sport + "->" + this.dport + " len " + this.length;
+    if (this.sport === 53 || this.dport === 53) {
+        ret += (new DNS().decode(this.data, 0, this.data.length).toString());
+    }
+    return ret;
+};
+
+module.exports = UDP;
+
+},{"./dns":8}],28:[function(require,module,exports){
+function Vlan() {
+	this.priority = null;
+	this.canonical_format = null;
+	this.id = null;
+}
+
+// http://en.wikipedia.org/wiki/IEEE_802.1Q
+Vlan.prototype.decode = function (raw_packet, offset) {
+    this.priority = (raw_packet[offset] & 0xE0) >> 5;
+    this.canonical_format = (raw_packet[offset] & 0x10) >> 4;
+    this.id = ((raw_packet[offset] & 0x0F) << 8) | raw_packet[offset + 1];
+
+    return this;
+};
+
+Vlan.prototype.toString = function () {
+	return this.priority + " " + this.canonical_format + " " + this.id;
+};
+
+module.exports = Vlan;
+
+},{}],29:[function(require,module,exports){
+var EventEmitter = require("events").EventEmitter;
+var inherits = require("util").inherits;
+var IPv4 = require("./decode/ipv4");
+var TCP = require("./decode/tcp");
+
+function TCPTracker() {
+    this.sessions = {};
+    EventEmitter.call(this);
+}
+inherits(TCPTracker, EventEmitter);
+
+TCPTracker.prototype.track_packet = function (packet) {
+    var ip, tcp, src, dst, key, session;
+
+    if (packet.payload.payload instanceof IPv4 && packet.payload.payload.payload instanceof TCP) {
+        ip  = packet.payload.payload;
+        tcp = ip.payload;
+        src = ip.saddr + ":" + tcp.sport;
+        dst = ip.daddr + ":" + tcp.dport;
+
+        if (src < dst) {
+            key = src + "-" + dst;
+        } else {
+            key = dst + "-" + src;
+        }
+
+        var is_new = false;
+        session = this.sessions[key];
+        if (! session) {
+            is_new = true;
+            session = new TCPSession();
+            this.sessions[key] = session;
+        }
+
+        session.track(packet);
+
+        // need to track at least one packet before we emit this new session, otherwise nothing
+        // will be initialized.
+        if (is_new) {
+            this.emit("session", session);
+        }
+    }
+    // silently ignore any non IPv4 TCP packets
+    // user should filter these out with their pcap filter, but oh well.
+};
+
+function TCPSession() {
+    this.src = null;
+    this.src_name = null; // from DNS
+    this.dst = null;
+    this.dst_name = null; // from DNS
+
+    this.state = null;
+    this.current_cap_time = null;
+
+    this.syn_time = null;
+    this.missed_syn = null;
+    this.connect_time = null;
+
+    this.send_isn = null;
+    this.send_window_scale = null;
+    this.send_packets = {}; // send_packets is indexed by the expected ackno: seqno + length
+    this.send_acks = {};
+    this.send_retrans = {};
+    this.send_next_seq = null;
+    this.send_acked_seq = null;
+    this.send_bytes_ip = null;
+    this.send_bytes_tcp = null;
+    this.send_bytes_payload = 0;
+
+    this.recv_isn = null;
+    this.recv_window_scale = null;
+    this.recv_packets = {};
+    this.recv_acks = {};
+    this.recv_retrans = {};
+    this.recv_next_seq = null;
+    this.recv_acked_seq = null;
+    this.recv_bytes_ip = 0;
+    this.recv_bytes_tcp = 0;
+    this.recv_bytes_payload = 0;
+
+    EventEmitter.call(this);
+}
+inherits(TCPSession, EventEmitter);
+
+TCPSession.prototype.track = function (packet) {
+    var ip  = packet.payload.payload;
+    var tcp = ip.payload;
+    var src = ip.saddr + ":" + tcp.sport;
+    var dst = ip.daddr + ":" + tcp.dport;
+
+    this.current_cap_time = packet.pcap_header.tv_sec + (packet.pcap_header.tv_usec / 1000000);
+
+    if (this.state === null) {
+        this.src = src; // the side the sent the first packet we saw
+        this.src_name = src;
+        this.dst = dst; // the side that the first packet we saw was sent to
+        this.dst_name = dst;
+
+        if (tcp.flags.syn && !tcp.flags.ack) { // initial SYN, best case
+            this.state = "SYN_SENT";
+        } else { // joining session already in progress
+            this.missed_syn = true;
+            this.connect_time = this.current_cap_time;
+            this.state = "ESTAB";  // I mean, probably established, right? Unless it isn't.
+        }
+
+        this.syn_time = this.current_cap_time;
+        this.send_isn = tcp.seqno;
+        this.send_window_scale = tcp.options.window_scale || 1; // multipler, not bit shift value
+        this.send_next_seq = tcp.seqno + 1;
+        this.send_bytes_ip = ip.header_bytes;
+        this.send_bytes_tcp = tcp.header_bytes;
+    } else if (tcp.flags.syn && !tcp.flags.ack) {
+        this.emit("syn retry", this);
+    } else { // not a SYN, so run the state machine
+        this[this.state](packet);
+    }
+};
+
+TCPSession.prototype.SYN_SENT = function (packet) {
+    var ip  = packet.payload.payload;
+    var tcp = ip.payload;
+    var src = ip.saddr + ":" + tcp.sport;
+
+    if (src === this.dst && tcp.flags.syn && tcp.flags.ack) {
+        this.recv_bytes_ip += ip.header_bytes;
+        this.recv_bytes_tcp += tcp.header_bytes;
+        this.recv_packets[tcp.seqno + 1] = this.current_cap_time;
+        this.recv_acks[tcp.ackno] = this.current_cap_time;
+        this.recv_isn = tcp.seqno;
+        this.recv_window_scale = tcp.options.window_scale || 1;
+        this.state = "SYN_RCVD";
+    } else if (tcp.flags.rst) {
+        this.state = "CLOSED";
+        this.emit("reset", this, "recv"); // TODO - check which direction did the reset, probably recv
+//    } else {
+//        console.log("Didn't get SYN-ACK packet from dst while handshaking: " + util.inspect(tcp, false, 4));
+    }
+};
+
+TCPSession.prototype.SYN_RCVD = function (packet) {
+    var ip  = packet.payload.payload;
+    var tcp = ip.payload;
+    var src = ip.saddr + ":" + tcp.sport;
+
+    if (src === this.src && tcp.flags.ack) { // TODO - make sure SYN flag isn't set, also match src and dst
+        this.send_bytes_ip += ip.header_bytes;
+        this.send_bytes_tcp += tcp.header_bytes;
+        this.send_acks[tcp.ackno] = this.current_cap_time;
+        this.connect_time = this.current_cap_time;
+        this.emit("start", this);
+        this.state = "ESTAB";
+//    } else {
+//        console.log("Didn't get ACK packet from src while handshaking: " + util.inspect(tcp, false, 4));
+    }
+};
+
+// TODO - actually implement SACK decoding and tracking
+// if (tcp.options.sack) {
+//     console.log("SACK magic, handle this: " + util.inspect(tcp.options.sack));
+//     console.log(util.inspect(ip, false, 5));
+// }
+// TODO - check for tcp.flags.rst and emit reset event
+
+TCPSession.prototype.ESTAB = function (packet) {
+    var ip  = packet.payload.payload;
+    var tcp = ip.payload;
+    var src = ip.saddr + ":" + tcp.sport;
+
+    if (src === this.src) { // this packet came from the active opener / client
+        this.send_bytes_ip += ip.header_bytes;
+        this.send_bytes_tcp += tcp.header_bytes;
+        if (tcp.data_bytes) {
+            if (this.send_packets[tcp.seqno + tcp.data_bytes]) {
+                this.emit("retransmit", this, "send", tcp.seqno + tcp.data_bytes);
+                if (this.send_retrans[tcp.seqno + tcp.data_bytes]) {
+                    this.send_retrans[tcp.seqno + tcp.data_bytes] += 1;
+                } else {
+                    this.send_retrans[tcp.seqno + tcp.data_bytes] = 1;
+                }
+            } else {
+                this.emit("data send", this, tcp.data);
+            }
+            this.send_bytes_payload += tcp.data_bytes;
+            this.send_packets[tcp.seqno + tcp.data_bytes] = this.current_cap_time;
+        }
+        if (this.recv_packets[tcp.ackno]) {
+            this.send_acks[tcp.ackno] = this.current_cap_time;
+        }
+        // console.log("sending ACK for packet we didn't see received: " + tcp.ackno);
+        if (tcp.flags.fin) {
+            this.state = "FIN_WAIT";
+        }
+    } else if (src === this.dst) { // this packet came from the passive opener / server
+        this.recv_bytes_ip += ip.header_bytes;
+        this.recv_bytes_tcp += tcp.header_bytes;
+        if (tcp.data_bytes) {
+            if (this.recv_packets[tcp.seqno + tcp.data_bytes]) {
+                this.emit("retransmit", this, "recv", tcp.seqno + tcp.data_bytes);
+                if (this.recv_retrans[tcp.seqno + tcp.data_bytes]) {
+                    this.recv_retrans[tcp.seqno + tcp.data_bytes] += 1;
+                } else {
+                    this.recv_retrans[tcp.seqno + tcp.data_bytes] = 1;
+                }
+            } else {
+                this.emit("data recv", this, tcp.data);
+            }
+            this.recv_bytes_payload += tcp.data_bytes;
+            this.recv_packets[tcp.seqno + tcp.data_bytes] = this.current_cap_time;
+        }
+        if (this.send_packets[tcp.ackno]) {
+            this.recv_acks[tcp.ackno] = this.current_cap_time;
+        }
+        if (tcp.flags.fin) {
+            this.state = "CLOSE_WAIT";
+        }
+    } else {
+        console.log("non-matching packet in session: " + packet);
+    }
+};
+
+// TODO - need to track half-closed data
+TCPSession.prototype.FIN_WAIT = function (packet) {
+    var ip  = packet.payload.payload;
+    var tcp = ip.payload;
+    var src = ip.saddr + ":" + tcp.sport;
+
+    if (src === this.dst && tcp.flags.fin) {
+        this.state = "CLOSING";
+    }
+};
+
+// TODO - need to track half-closed data
+TCPSession.prototype.CLOSE_WAIT = function (packet) {
+    var ip  = packet.payload.payload;
+    var tcp = ip.payload;
+    var src = ip.saddr + ":" + tcp.sport;
+
+    if (src === this.src && tcp.flags.fin) {
+        this.state = "LAST_ACK";
+    }
+};
+
+// TODO - need to track half-closed data
+TCPSession.prototype.LAST_ACK = function (packet) {
+    var ip  = packet.payload.payload;
+    var tcp = ip.payload;
+    var src = ip.saddr + ":" + tcp.sport;
+
+    if (src === this.dst) {
+        this.close_time = this.current_cap_time;
+        this.state = "CLOSED";
+        this.emit("end", this);
+    }
+};
+
+// TODO - need to track half-closed data
+TCPSession.prototype.CLOSING = function (packet) {
+    var ip  = packet.payload.payload;
+    var tcp = ip.payload;
+    var src = ip.saddr + ":" + tcp.sport;
+
+    if (src === this.src) {
+        this.close_time = this.current_cap_time;
+        this.state = "CLOSED";
+        this.emit("end", this);
+    }
+};
+
+// The states aren't quite right here.  All possible states of FIN and FIN/ACKs aren't handled.
+// So some of the bytes of the session may not be properly accounted for.
+
+TCPSession.prototype.CLOSED = function (packet) {
+    // not sure what to do here. We are closed, so I guess bump some counters or something.
+};
+
+TCPSession.prototype.session_stats = function () {
+    var send_acks = Object.keys(this.send_acks)
+        .map(function (key) { return +key; })
+        .sort(function (a, b) { return a > b; });
+    var recv_acks = Object.keys(this.recv_acks)
+        .map(function (key) { return +key; })
+        .sort(function (a, b) { return a > b; });
+
+    var total_time = this.close_time - this.syn_time;
+    var stats = {};
+    var self = this;
+
+    stats.recv_times = {};
+    send_acks.forEach(function (v) {
+        if (self.recv_packets[v]) {
+            stats.recv_times[v] = self.send_acks[v] - self.recv_packets[v];
+        }
+    });
+
+    stats.send_times = {};
+    recv_acks.forEach(function (v) {
+        if (self.send_packets[v]) {
+            stats.send_times[v] = self.recv_acks[v] - self.send_packets[v];
+        }
+    });
+
+    stats.send_retrans = {};
+    Object.keys(this.send_retrans).forEach(function (v) {
+        stats.send_retrans[v] = self.send_retrans[v];
+    });
+
+    stats.recv_retrans = {};
+    Object.keys(this.recv_retrans).forEach(function (v) {
+        stats.recv_retrans[v] = self.recv_retrans[v];
+    });
+
+    stats.connect_duration = this.connect_time - this.syn_time;
+    stats.total_time = total_time;
+    stats.send_overhead = this.send_bytes_ip + this.send_bytes_tcp;
+    stats.send_payload = this.send_bytes_payload;
+    stats.send_total = stats.send_overhead + stats.send_payload;
+    stats.recv_overhead = this.recv_bytes_ip + this.recv_bytes_tcp;
+    stats.recv_payload = this.recv_bytes_payload;
+    stats.recv_total = stats.recv_overhead + stats.recv_payload;
+
+    return stats;
+};
+
+exports.TCPSession = TCPSession;
+exports.TCPTracker = TCPTracker;
+
+},{"./decode/ipv4":14,"./decode/tcp":26,"events":37,"util":55}],30:[function(require,module,exports){
+function lpad(str, len) {
+    while (str.length < len) {
+        str = "0" + str;
+    }
+    return str;
+}
+
+exports.dump_bytes = function dump_bytes(raw_packet, offset) {
+    for (var i = offset; i < raw_packet.pcap_header.caplen ; i += 1) {
+        console.log(i + ": " + raw_packet[i]);
+    }
+};
+
+var int8_to_hex = [];
+var int8_to_hex_nopad = [];
+var int8_to_dec = [];
+
+for (var i = 0; i <= 255; i++) {
+    int8_to_hex[i] = lpad(i.toString(16), 2);
+    int8_to_hex_nopad[i] = i.toString(16);
+    int8_to_dec[i] = i.toString();
+}
+
+exports.int8_to_dec = int8_to_dec;
+exports.int8_to_hex = int8_to_hex;
+exports.int8_to_hex_nopad = int8_to_hex_nopad;
+
+},{}],31:[function(require,module,exports){
+
+},{}],32:[function(require,module,exports){
+arguments[4][31][0].apply(exports,arguments)
+},{"dup":31}],33:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -1710,7 +3774,7 @@ function decodeUtf8Char (str) {
   }
 }
 
-},{"base64-js":10,"ieee754":11,"is-array":12}],10:[function(require,module,exports){
+},{"base64-js":34,"ieee754":35,"is-array":36}],34:[function(require,module,exports){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 ;(function (exports) {
@@ -1836,7 +3900,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 	exports.fromByteArray = uint8ToBase64
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
-},{}],11:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 exports.read = function(buffer, offset, isLE, mLen, nBytes) {
   var e, m,
       eLen = nBytes * 8 - mLen - 1,
@@ -1922,7 +3986,7 @@ exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128;
 };
 
-},{}],12:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 
 /**
  * isArray
@@ -1957,7 +4021,7 @@ module.exports = isArray || function (val) {
   return !! val && '[object Array]' == str.call(val);
 };
 
-},{}],13:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -2260,14 +4324,14 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],14:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 arguments[4][2][0].apply(exports,arguments)
-},{"dup":2}],15:[function(require,module,exports){
+},{"dup":2}],39:[function(require,module,exports){
 module.exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
 
-},{}],16:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -2326,10 +4390,10 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],17:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 module.exports = require("./lib/_stream_duplex.js")
 
-},{"./lib/_stream_duplex.js":18}],18:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":42}],42:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -2422,7 +4486,7 @@ function forEach (xs, f) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_readable":20,"./_stream_writable":22,"_process":16,"core-util-is":23,"inherits":14}],19:[function(require,module,exports){
+},{"./_stream_readable":44,"./_stream_writable":46,"_process":40,"core-util-is":47,"inherits":38}],43:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -2470,7 +4534,7 @@ PassThrough.prototype._transform = function(chunk, encoding, cb) {
   cb(null, chunk);
 };
 
-},{"./_stream_transform":21,"core-util-is":23,"inherits":14}],20:[function(require,module,exports){
+},{"./_stream_transform":45,"core-util-is":47,"inherits":38}],44:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -3425,7 +5489,7 @@ function indexOf (xs, x) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_duplex":18,"_process":16,"buffer":9,"core-util-is":23,"events":13,"inherits":14,"isarray":15,"stream":28,"string_decoder/":29,"util":8}],21:[function(require,module,exports){
+},{"./_stream_duplex":42,"_process":40,"buffer":33,"core-util-is":47,"events":37,"inherits":38,"isarray":39,"stream":52,"string_decoder/":53,"util":32}],45:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -3636,7 +5700,7 @@ function done(stream, er) {
   return stream.push(null);
 }
 
-},{"./_stream_duplex":18,"core-util-is":23,"inherits":14}],22:[function(require,module,exports){
+},{"./_stream_duplex":42,"core-util-is":47,"inherits":38}],46:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -4117,7 +6181,7 @@ function endWritable(stream, state, cb) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_duplex":18,"_process":16,"buffer":9,"core-util-is":23,"inherits":14,"stream":28}],23:[function(require,module,exports){
+},{"./_stream_duplex":42,"_process":40,"buffer":33,"core-util-is":47,"inherits":38,"stream":52}],47:[function(require,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -4227,10 +6291,10 @@ function objectToString(o) {
   return Object.prototype.toString.call(o);
 }
 }).call(this,require("buffer").Buffer)
-},{"buffer":9}],24:[function(require,module,exports){
+},{"buffer":33}],48:[function(require,module,exports){
 module.exports = require("./lib/_stream_passthrough.js")
 
-},{"./lib/_stream_passthrough.js":19}],25:[function(require,module,exports){
+},{"./lib/_stream_passthrough.js":43}],49:[function(require,module,exports){
 exports = module.exports = require('./lib/_stream_readable.js');
 exports.Stream = require('stream');
 exports.Readable = exports;
@@ -4239,13 +6303,13 @@ exports.Duplex = require('./lib/_stream_duplex.js');
 exports.Transform = require('./lib/_stream_transform.js');
 exports.PassThrough = require('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":18,"./lib/_stream_passthrough.js":19,"./lib/_stream_readable.js":20,"./lib/_stream_transform.js":21,"./lib/_stream_writable.js":22,"stream":28}],26:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":42,"./lib/_stream_passthrough.js":43,"./lib/_stream_readable.js":44,"./lib/_stream_transform.js":45,"./lib/_stream_writable.js":46,"stream":52}],50:[function(require,module,exports){
 module.exports = require("./lib/_stream_transform.js")
 
-},{"./lib/_stream_transform.js":21}],27:[function(require,module,exports){
+},{"./lib/_stream_transform.js":45}],51:[function(require,module,exports){
 module.exports = require("./lib/_stream_writable.js")
 
-},{"./lib/_stream_writable.js":22}],28:[function(require,module,exports){
+},{"./lib/_stream_writable.js":46}],52:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -4374,7 +6438,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":13,"inherits":14,"readable-stream/duplex.js":17,"readable-stream/passthrough.js":24,"readable-stream/readable.js":25,"readable-stream/transform.js":26,"readable-stream/writable.js":27}],29:[function(require,module,exports){
+},{"events":37,"inherits":38,"readable-stream/duplex.js":41,"readable-stream/passthrough.js":48,"readable-stream/readable.js":49,"readable-stream/transform.js":50,"readable-stream/writable.js":51}],53:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -4597,14 +6661,14 @@ function base64DetectIncompleteChar(buffer) {
   this.charLength = this.charReceived ? 3 : 0;
 }
 
-},{"buffer":9}],30:[function(require,module,exports){
+},{"buffer":33}],54:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],31:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -5194,4 +7258,4 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":30,"_process":16,"inherits":14}]},{},[1]);
+},{"./support/isBuffer":54,"_process":40,"inherits":38}]},{},[1]);
