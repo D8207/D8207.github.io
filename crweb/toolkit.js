@@ -1345,6 +1345,13 @@ jQuery( function( $, undefined ) {
 						y: {
 							inner: true
 						}
+					},
+					tooltip: {
+						format: {
+							title: function( d ) {
+								return d.toString();
+							}
+						}
 					}
 				} );
 			};
