@@ -1283,6 +1283,104 @@ jQuery( function( $, undefined ) {
 			}
 		} );
 
+		// Analytics
+		$( '#analytics-profit-exec' ).prop( 'disabled', false ).click( function() {
+			var pcaps = $( '#analytics-profit-pcap' ).prop( 'files' );
+			var alertTemplate = Handlebars.compile( $( '#analytics-profit-alert-template' ).html() );
+			var $result = $( '<div/>' ).appendTo( $( '#analytics-profit-result' ).empty() );
+			if ( pcaps.length == 0 ) {
+				$result.append( alertTemplate( {
+					type: 'danger',
+					message: '请选择文件'
+				} ) );
+				return;
+			}
+
+			$result.append( routeAlertTemplate( {
+				type: 'info',
+				message: '正在分析，请稍候'
+			} ) );
+
+			var drawProfit = function( $dom, data ) {
+				var myData = [ 'my' ], opData = [ 'op' ], dates = [ 'x' ], date = new Date();
+				$.each( data, function() {
+					date = this[0];
+					dates.push( date.getFullYear()
+						+ '-' + ( date.getMonth() + 1 )
+						+ '-' + date.getDate()
+						+ ' ' + date.getHours()
+						+ ':' + date.getMinutes()
+						+ ':' + date.getSeconds()
+					);
+					myData.push( this[1] );
+					opData.push( this[2] );
+				} );
+				var tzOffset = -( date.getTimezoneOffset() / 60 );
+				if ( tzOffset > 0 ) {
+					tzOffset = '+' + tzOffset;
+				} else if ( tzOffset == 0 ) {
+					tzOffset = '';
+				}
+				return c3.generate( {
+					bindto: $dom.get( 0 ),
+					data: {
+						x: 'x',
+						xFormat: '%Y-%m-%d %H:%M:%S',
+						columns: [ dates, myData, opData ],
+						names: {
+							'my': '我的收入',
+							'op': '对手收入'
+						},
+					},
+					axis: {
+						x: {
+							label: 'UTC' + tzOffset,
+							type: 'timeseries',
+							tick: {
+								fit: false,
+								format: '%H:%M:%S'
+							}
+						},
+						y: {
+							inner: true
+						}
+					}
+				} );
+			};
+
+			var pcapCount = pcaps.length, pcapRecv = 0, data = [];
+			$.each( pcaps, function() {
+				var worker = new Worker( 'profit.js' );
+				var file = this;
+				worker.onmessage = function( e ) {
+					worker.terminate();
+					if ( pcapRecv == 0 ) {
+						$result.empty();
+					}
+					pcapRecv++;
+					if ( e.data.ok ) {
+						data = data.concat( e.data.data );
+					} else {
+						$result.append( alertTemplate( {
+							type: 'danger',
+							message: file.name + '读取失败：' + e.data.message,
+						} ) );
+					}
+					if ( pcapCount == pcapRecv ) {
+						if ( data.length > 0 ) {
+							drawProfit( $( '<div/>' ).appendTo( $result ), data );
+						} else {
+							$result.append( alertTemplate( {
+								type: 'warning',
+								message: '文件中没有找到可识别的数据',
+							} ) );
+						}
+					}
+				};
+				worker.postMessage( file );
+			} );
+		} );
+
 		// Shared
 		$( '.train-list-select' ).on( 'do-update', function() {
 			var $select = $( this );
