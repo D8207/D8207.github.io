@@ -42,7 +42,12 @@ var parsePcap = function( input ) {
 	} );
 
 	var onData = function( session, data ) {
-		if ( data.readUInt8( 0x0 ) != 0x2e ) {
+		var length = data.readUInt8( 0x0 );
+		if ( length < 0x22 ) {
+			return;
+		}
+		var magic = data.readUInt16BE( 0x1 );
+		if ( magic != 0x0126 ) {
 			return;
 		}
 
