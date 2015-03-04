@@ -1247,13 +1247,16 @@ jQuery( function( $, undefined ) {
 		};
 		var dumpItems = {
 			trains: function() {
-				var data = [
-					['名称', '描述', '星级', '客运仓位', '货运仓位', '速度', '距离', '重量', '电量', '图片' ]
-				];
+				var data = [ [
+					'名称', '描述', '星级', '客运仓位', '货运仓位', '速度', '距离', '重量', '电量', '图片',
+					'整车点卷', localData.currencyName + '价格', '车头点卷', '车厢点卷', '底盘点卷', '图纸点卷'
+				] ];
 				$.each( trains, function() {
 					data.push( [
 						this[1], this[2], this[3], this[8], this[9], this[5], this[4], this[6], this[7],
-						this[10] ? 'http://app100679516.imgcache.qzoneapp.com/app100679516/crweb/pic20130606/' + this[10] : ''
+						this[10] ? 'http://app100679516.imgcache.qzoneapp.com/app100679516/crweb/pic20130606/' + this[10] : '',
+						this[12] || '', this[13] || '', trainParts[this[28]][6],
+						trainParts[this[26]][6], trainParts[this[27]][6], trainParts[this[29]][6]
 					] );
 				} );
 				return dumpCSV( data, 'trains.csv' );
