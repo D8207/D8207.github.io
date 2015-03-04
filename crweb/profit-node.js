@@ -1,17 +1,8 @@
 var pcapp = require( 'pcap-parser' );
-var createReadStream = require( 'filereader-stream' );
+var FileReadStream = require('filestream/read');
 
 onmessage = function( e ) {
-	var stream = createReadStream( e.data );
-
-	// https://github.com/maxogden/filereader-stream/issues/11
-	stream.reader = stream._FileReader();
-	stream.dest = {
-		write: function( data ) {
-			stream.emit( 'data', data );
-		}
-	};
-
+	var stream = new FileReadStream( e.data );
 	var parser = pcapp.parse( stream );
 
 	var data = [];
