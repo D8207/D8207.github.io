@@ -1285,19 +1285,22 @@ jQuery( function( $, undefined ) {
 		} );
 
 		// Analytics
+		var analyticsProfitAlertTemplate = Handlebars.compile( $( '#analytics-profit-alert-template' ).html() );
 		$( '#analytics-profit-exec' ).prop( 'disabled', false ).click( function() {
 			var pcaps = $( '#analytics-profit-pcap' ).prop( 'files' );
-			var alertTemplate = Handlebars.compile( $( '#analytics-profit-alert-template' ).html() );
 			var $result = $( '<div/>' ).appendTo( $( '#analytics-profit-result' ).empty() );
 			if ( pcaps.length == 0 ) {
-				$result.append( alertTemplate( {
+				$result.append( analyticsProfitAlertTemplate( {
 					type: 'danger',
 					message: '请选择文件'
 				} ) );
 				return;
 			}
 
-			$result.append( routeAlertTemplate( {
+			var $resultMessages = $( '<div/>' ).appendTo( $result );
+			var $resultOutput = $( '<div/>' ).appendTo( $result );
+
+			$resultOutput.append( analyticsProfitAlertTemplate( {
 				type: 'info',
 				message: '正在分析，请稍候'
 			} ) );
@@ -1362,23 +1365,21 @@ jQuery( function( $, undefined ) {
 				var file = this;
 				worker.onmessage = function( e ) {
 					worker.terminate();
-					if ( pcapRecv == 0 ) {
-						$result.empty();
-					}
 					pcapRecv++;
 					if ( e.data.ok ) {
 						data = data.concat( e.data.data );
 					} else {
-						$result.append( alertTemplate( {
+						$resultMessages.append( analyticsProfitAlertTemplate( {
 							type: 'danger',
 							message: file.name + '读取失败：' + e.data.message,
 						} ) );
 					}
 					if ( pcapCount == pcapRecv ) {
+						$resultOutput.empty();
 						if ( data.length > 0 ) {
-							drawProfit( $( '<div/>' ).appendTo( $result ), data );
+							drawProfit( $resultOutput, data );
 						} else {
-							$result.append( alertTemplate( {
+							$resultOutput.append( analyticsProfitAlertTemplate( {
 								type: 'warning',
 								message: '文件中没有找到可识别的数据',
 							} ) );
