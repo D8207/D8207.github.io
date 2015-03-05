@@ -10,7 +10,7 @@ var sendError = function( message ) {
 			message: message
 		} );
 	} else {
-		console.log( 'ERROR: ' + message );
+		console.error( 'ERROR: ' + message );
 		process.exit();
 	}
 };
