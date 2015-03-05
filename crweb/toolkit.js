@@ -1388,7 +1388,22 @@ jQuery( function( $, undefined ) {
 						userInfo: userInfo[userData.user],
 						trainList: userTrainList
 					} ) ) ).find( 'button' ).click( function( e ) {
-						// TODO
+						trainsBatchBegin();
+						if ( $( this ).data( 'clear' ) ) {
+							$( '.train-delete' ).trigger( 'click' );
+						}
+						$.each( userData.trains, function() {
+							var train = trains[this];
+							if ( !train ) {
+								return;
+							}
+							var trainId = trainNextId;
+							$( '#trains-new' ).trigger( 'click' );
+							var $train = $( '#train-' + trainId );
+							// train[0] is primitive but `this` is not.
+							$train.find( '.train-select' ).val( train[0] ).trigger( 'change' );
+						} );
+						trainsBatchEnd();
 					} ).end().appendTo( $ul );
 				} );
 			};

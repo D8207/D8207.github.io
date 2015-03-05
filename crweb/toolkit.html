@@ -631,7 +631,11 @@
 					</script>
 					<script id=analytics-garage-train-template type=text/x-handlebars-template>
 						<li>
-							{{#if userInfo}}<img src="{{userInfo.avatar}}">{{userInfo.name}}（{{/if}}公司{{user}}{{#if userInfo}}）{{/if}}：{{trainCount}}火车，{{stationCount}}座火车站
+							{{#if userInfo}}<img src="{{userInfo.avatar}}">
+							{{userInfo.name}}（{{/if}}公司{{user}}{{#if userInfo}}）{{/if}}<br>
+							{{trainCount}}火车，{{stationCount}}车站 |
+							火车列表：<button type=button class="btn btn-xs" data-clear=true>写入</button>
+							<button type=button class="btn btn-xs" data-clear=false>追加</button>
 							<ul>
 								{{#each trainList}}
 									<li>{{this.name}}：{{this.count}}辆
