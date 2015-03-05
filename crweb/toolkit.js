@@ -686,6 +686,7 @@ jQuery( function( $, undefined ) {
 			} ).get();
 			var insert = $( '#route-insert:checked' ).length > 0;
 			var penalty = parseInt( $( '#route-penalty' ).val() ) || 0;
+			var tasks = [], taskIdx = 0;
 			$.each( trainIds, function() {
 				var trainId = this, trainText = $( '#route-train option[value=' + trainId + ']' ).text();
 				var trainColor = randomColor();
@@ -729,70 +730,88 @@ jQuery( function( $, undefined ) {
 					message: '正在计算，请稍候'
 				} ) );
 
-				var worker = new Worker( 'calculator.js' );
-				worker.onmessage = function( e ) {
-					worker.terminate();
-					$result.empty();
-					trainRecv++;
-					var calculated = e.data;
-					if ( calculated.ok ) {
-						if ( train.loads >= 0 ) {
-							summaryGross[trainId] = [ trainId, calculated.dailyGross ];
-							dailyGross += calculated.dailyGross;
-							summaryNet[trainId] = [ trainId, calculated.dailyNet ];
-							dailyNet += calculated.dailyNet;
-							onewayCost += calculated.costCoins;
-						}
-						var runningTimeReverseRef = new Date( localData.runningTimeReverse );
-						var runningTimeReverse = new Date(
-							runningTimeReverseRef.getTime() - calculated.runningTime * 1000
-						);
-						$result.append( routeResultTemplate( {
-							hasLoads: train.loads >= 0,
-							path: makePathText( calculated ),
-							totalDistance: calculated.totalDistance,
-							runningTime: calculated.runningTime,
-							runningHours: Math.floor( calculated.runningTime / 3600 ),
-							runningMinutes: Math.floor( calculated.runningTime / 60 ) % 60,
-							runningSeconds: calculated.runningTime % 60,
-							runningTimeReverseRef: runningTimeReverseRef.toTimeString(),
-							runningTimeReverse: runningTimeReverse.toTimeString(),
-							batteryConsumed: calculated.batteryConsumed,
-							accelerationCost: calculated.accelerationCost,
-							priceDistance: calculated.priceDistance,
-							priceCoins: calculated.priceCoins,
-							pricePoints: calculated.pricePoints,
-							costCoins: calculated.costCoins,
-							totalGross: calculated.totalGross,
-							totalNet: calculated.totalNet,
-							dailyCount: calculated.dailyCount,
-							dailyRemaining: calculated.dailyRemaining,
-							dailyGross: calculated.dailyGross,
-							dailyNet: calculated.dailyNet
-						} ) );
-						$result.find( '.route-path-transfer' ).click( function() {
-							$( '#route-waypoints li.ui-state-default' ).remove();
-							$.each( calculated.path, function() {
-								$( '<li/>' ).addClass( 'ui-state-default' )
-									.attr( 'data-id', this )
-									.text( stations[this][1] )
-									.appendTo( '#route-waypoints' );
+				tasks.push( {
+					onmessage: function( e ) {
+						$result.empty();
+						trainRecv++;
+						var calculated = e.data;
+						if ( calculated.ok ) {
+							if ( train.loads >= 0 ) {
+								summaryGross[trainId] = [ trainId, calculated.dailyGross ];
+								dailyGross += calculated.dailyGross;
+								summaryNet[trainId] = [ trainId, calculated.dailyNet ];
+								dailyNet += calculated.dailyNet;
+								onewayCost += calculated.costCoins;
+							}
+							var runningTimeReverseRef = new Date( localData.runningTimeReverse );
+							var runningTimeReverse = new Date(
+								runningTimeReverseRef.getTime() - calculated.runningTime * 1000
+							);
+							$result.append( routeResultTemplate( {
+								hasLoads: train.loads >= 0,
+								path: makePathText( calculated ),
+								totalDistance: calculated.totalDistance,
+								runningTime: calculated.runningTime,
+								runningHours: Math.floor( calculated.runningTime / 3600 ),
+								runningMinutes: Math.floor( calculated.runningTime / 60 ) % 60,
+								runningSeconds: calculated.runningTime % 60,
+								runningTimeReverseRef: runningTimeReverseRef.toTimeString(),
+								runningTimeReverse: runningTimeReverse.toTimeString(),
+								batteryConsumed: calculated.batteryConsumed,
+								accelerationCost: calculated.accelerationCost,
+								priceDistance: calculated.priceDistance,
+								priceCoins: calculated.priceCoins,
+								pricePoints: calculated.pricePoints,
+								costCoins: calculated.costCoins,
+								totalGross: calculated.totalGross,
+								totalNet: calculated.totalNet,
+								dailyCount: calculated.dailyCount,
+								dailyRemaining: calculated.dailyRemaining,
+								dailyGross: calculated.dailyGross,
+								dailyNet: calculated.dailyNet
+							} ) );
+							$result.find( '.route-path-transfer' ).click( function() {
+								$( '#route-waypoints li.ui-state-default' ).remove();
+								$.each( calculated.path, function() {
+									$( '<li/>' ).addClass( 'ui-state-default' )
+										.attr( 'data-id', this )
+										.text( stations[this][1] )
+										.appendTo( '#route-waypoints' );
+								} );
 							} );
-						} );
+						} else {
+							$result.append( routeAlertTemplate( {
+								type: 'danger',
+								message: calculated.message
+							} ) );
+						}
+						if ( trainRecv == trainCount ) {
+							showSummary();
+						}
+					},
+					message: [
+						train, stations, useStationsV, wayPoints,
+						insert, penalty
+					]
+				} );
+			} );
+
+			$.each( new Array( 4 ), function( i ) { // 4 workers
+				var worker = new Worker( 'calculator.js' );
+				var fetchedTask = taskIdx++;
+				var next = function() {
+					if ( fetchedTask >= tasks.length ) {
+						worker.terminate();
 					} else {
-						$result.append( routeAlertTemplate( {
-							type: 'danger',
-							message: calculated.message
-						} ) );
-					}
-					if ( trainRecv == trainCount ) {
-						showSummary();
+						worker.postMessage( tasks[fetchedTask].message );
 					}
 				};
-				worker.postMessage( [
-					train, stations, useStationsV, wayPoints,
-					insert, penalty
-				] );
+				worker.onmessage = function( e ) {
+					tasks[fetchedTask].onmessage( e );
+					fetchedTask = taskIdx++;
+					next();
+				};
+				next();
 			} );
 		} );
 
