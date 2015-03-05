@@ -29,11 +29,9 @@ var sendData = function( data ) {
 	}
 };
 
-var parsePcap = function( input ) {
+var parsePcap = function( input, items ) {
 	var parser = pcapp.parse( input );
 	var tcp_tracker = new pcap_tcp_tracker.TCPTracker();
-
-	var profitData = [];
 
 	parser.on( 'globalHeader', function( header ) {
 		if ( header.linkLayerType != 1 ) {
@@ -41,7 +39,9 @@ var parsePcap = function( input ) {
 		}
 	} );
 
-	var onData = function( session, data ) {
+	var profitData = [];
+
+	var onProfitData = function( session, data ) {
 		var length = data.readUInt8( 0x0 );
 		if ( length < 0x22 || data.length < 0x21 ) {
 			return;
@@ -58,12 +58,46 @@ var parsePcap = function( input ) {
 		profitData.push( [ date, myProfit, opProfit ] );
 	};
 
+	var garageData = [];
+
+	var onGarageData = function( session, data ) {
+		var length = data.readUInt8( 0x0 );
+		if ( length < 0xe || data.length < 0xd ) {
+			return;
+		}
+
+		var magic = data.readUInt16BE( 0x1 );
+		if ( magic != 0x00f2 ) {
+			return;
+		}
+
+		var userId = data.readUInt32BE( 0x5 );
+		var userData = {
+			id: userId,
+			stationCount: data.readUInt16BE( 0x9 ),
+			trainCount: data.readUInt16BE( 0xb ),
+			trains: []
+		};
+
+		for ( var i = 0xd; i < data.length - 1; i += 2 ) {
+			userData.trains.push( data.readUInt16BE( i ) );
+		}
+
+		garageData.push( userData );
+	};
+
 	tcp_tracker.on( 'session', function( session ) {
 		// TODO - filter out non-game sessions?
 
 		// since we're listening from the middle of a session, send/recv may be reversed.
-		session.on( 'data send', onData );
-		session.on( 'data recv', onData );
+		if ( items == null || items.profit ) {
+			session.on( 'data send', onProfitData );
+			session.on( 'data recv', onProfitData );
+		}
+		if ( items == null || items.garage ) {
+			session.on( 'data send', onGarageData );
+			session.on( 'data recv', onGarageData );
+		}
 	} );
 
 	parser.on( 'packet', function( packet ) {
@@ -80,7 +114,10 @@ var parsePcap = function( input ) {
 	} );
 
 	parser.on( 'end', function() {
-		sendData( profitData );
+		sendData( {
+			profit: profitData,
+			garage: garageData
+		} );
 	} );
 
 	parser.on( 'error', function( e ) {
@@ -90,8 +127,8 @@ var parsePcap = function( input ) {
 
 if ( process.title == 'browser' ) {
 	onmessage = function( e ) {
-		var stream = new FileReadStream( e.data );
-		parsePcap( stream );
+		var stream = new FileReadStream( e.data.file );
+		parsePcap( stream, e.data.items );
 	};
 } else {
 	if ( process.argv.length < 3 ) {

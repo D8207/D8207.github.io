@@ -1285,12 +1285,17 @@ jQuery( function( $, undefined ) {
 		} );
 
 		// Analytics
-		var analyticsProfitAlertTemplate = Handlebars.compile( $( '#analytics-profit-alert-template' ).html() );
-		$( '#analytics-profit-exec' ).prop( 'disabled', false ).click( function() {
-			var pcaps = $( '#analytics-profit-pcap' ).prop( 'files' );
-			var $result = $( '<div/>' ).appendTo( $( '#analytics-profit-result' ).empty() );
+		var analyticsAlertTemplate = Handlebars.compile( $( '#analytics-alert-template' ).html() );
+		var analyticsGarageTrainTemplate = Handlebars.compile( $( '#analytics-garage-train-template' ).html() );
+		$( '#analytics-exec' ).prop( 'disabled', false ).click( function() {
+			var pcaps = $( '#analytics-pcap' ).prop( 'files' );
+			var items = {};
+			$.each( $( '#analytics-select' ).val(), function() {
+				items[this] = true;
+			} );
+			var $result = $( '<div/>' ).appendTo( $( '#analytics-result' ).empty() );
 			if ( pcaps.length == 0 ) {
-				$result.append( analyticsProfitAlertTemplate( {
+				$result.append( analyticsAlertTemplate( {
 					type: 'danger',
 					message: '请选择文件'
 				} ) );
@@ -1300,7 +1305,7 @@ jQuery( function( $, undefined ) {
 			var $resultMessages = $( '<div/>' ).appendTo( $result );
 			var $resultOutput = $( '<div/>' ).appendTo( $result );
 
-			$resultOutput.append( analyticsProfitAlertTemplate( {
+			$resultOutput.append( analyticsAlertTemplate( {
 				type: 'info',
 				message: '正在分析，请稍候'
 			} ) );
@@ -1359,34 +1364,79 @@ jQuery( function( $, undefined ) {
 				} );
 			};
 
-			var pcapCount = pcaps.length, pcapRecv = 0, data = [];
+			var showGarage = function( $dom, data ) {
+				var $ul = $( '<ul/>' ).appendTo( $dom );
+				$.each( data, function() {
+					var userData = this;
+					var userTrains = {};
+					var userTrainList = [];
+					$.each( userData.trains, function() {
+						if ( userTrains[this] ) {
+							userTrains[this] += 1;
+						} else {
+							userTrains[this] = 1;
+						}
+					} );
+					$.each( userTrains, function( trainType, count ) {
+						userTrainList.push( {
+							name: trains[trainType][1],
+							count: count
+						} );
+					} );
+					$( analyticsGarageTrainTemplate( $.extend( {}, userData, {
+						trainList: userTrainList
+					} ) ) ).find( 'button' ).click( function( e ) {
+						// TODO
+					} ).end().appendTo( $ul );
+				} );
+			};
+
+			var pcapCount = pcaps.length, pcapRecv = 0, data = {
+				profit: [],
+				garage: []
+			}, dataArrays = [ 'profit', 'garage' ];
 			$.each( pcaps, function() {
-				var worker = new Worker( 'profit.js' );
+				var worker = new Worker( 'analytics.js' );
 				var file = this;
 				worker.onmessage = function( e ) {
 					worker.terminate();
 					pcapRecv++;
 					if ( e.data.ok ) {
-						data = data.concat( e.data.data );
+						$.each( dataArrays, function() {
+							if ( items[this] ) {
+								data[this] = data[this].concat( e.data.data[this] );
+							}
+						} );
 					} else {
-						$resultMessages.append( analyticsProfitAlertTemplate( {
+						$resultMessages.append( analyticsAlertTemplate( {
 							type: 'danger',
 							message: file.name + '读取失败：' + e.data.message,
 						} ) );
 					}
 					if ( pcapCount == pcapRecv ) {
 						$resultOutput.empty();
-						if ( data.length > 0 ) {
-							drawProfit( $resultOutput, data );
-						} else {
-							$resultOutput.append( analyticsProfitAlertTemplate( {
+						if ( data.profit.length > 0 ) {
+							drawProfit( $( '<div/>' ).appendTo( $resultOutput ), data.profit );
+						} else if ( items.profit ) {
+							$resultOutput.append( analyticsAlertTemplate( {
 								type: 'warning',
-								message: '文件中没有找到可识别的数据',
+								message: '文件中没有找到可识别的天梯赛收入数据',
+							} ) );
+						}
+						if ( data.garage.length > 0 ) {
+							showGarage( $( '<div/>' ).appendTo( $resultOutput ), data.garage );
+						} else if ( items.garage ) {
+							$resultOutput.append( analyticsAlertTemplate( {
+								type: 'warning',
+								message: '文件中没有找到可识别的车库数据',
 							} ) );
 						}
 					}
 				};
-				worker.postMessage( file );
+				worker.postMessage( {
+					file: file,
+					items: items
+				} );
 			} );
 		} );
 
