@@ -1287,6 +1287,7 @@ jQuery( function( $, undefined ) {
 		// Analytics
 		var analyticsAlertTemplate = Handlebars.compile( $( '#analytics-alert-template' ).html() );
 		var analyticsGarageTrainTemplate = Handlebars.compile( $( '#analytics-garage-train-template' ).html() );
+		var analyticsLootTemplate = Handlebars.compile( $( '#analytics-loot-template' ).html() );
 		$( '#analytics-exec' ).prop( 'disabled', false ).click( function() {
 			var pcaps = $( '#analytics-pcap' ).prop( 'files' );
 			var items = {};
@@ -1392,6 +1393,25 @@ jQuery( function( $, undefined ) {
 				} );
 			};
 
+			var showLoot = function( $dom, data, userInfo ) {
+				var hbData = {
+					hasUserInfo: userInfo,
+					data: []
+				};
+				$.each( data, function() {
+					var userData = this;
+					var userDataInfo = userInfo ? userInfo[userData.user] : null;
+					hbData.data.push( {
+						info: userDataInfo,
+						data: userData
+					} );
+				} );
+				hbData.data.sort( function( a, b ) {
+					return a.data.rank - b.data.rank;
+				} );
+				$dom.append( analyticsLootTemplate( hbData ) );
+			};
+
 			var pcapCount = pcaps.length, pcapRecv = 0, data = {
 				userInfo: {},
 				profit: [],
@@ -1439,6 +1459,16 @@ jQuery( function( $, undefined ) {
 							$resultOutput.append( analyticsAlertTemplate( {
 								type: 'warning',
 								message: '文件中没有找到可识别的车库数据',
+							} ) );
+						}
+						if ( data.loot.length > 0 ) {
+							showLoot( $( '<div/>' ).appendTo( $resultOutput ), data.loot,
+								items.userInfo ? data.userInfo : null
+							);
+						} else if ( items.loot ) {
+							$resultOutput.append( analyticsAlertTemplate( {
+								type: 'warning',
+								message: '文件中没有找到可识别的买路钱数据',
 							} ) );
 						}
 					}

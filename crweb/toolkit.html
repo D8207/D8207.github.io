@@ -638,6 +638,28 @@
 								{{/each}}
 							</ul>
 					</script>
+					<script id=analytics-loot-template type=text/x-handlebars-template>
+						<table class=table>
+							<tr>
+								<th>排名
+								<th>公司号
+								{{#if hasUserInfo}}
+									<th>用户
+								{{/if}}
+								<th>买路钱
+							{{#each data}}
+							<tr>
+								<td>{{this.data.rank}}
+								<td>{{this.data.user}}
+								{{#if ../hasUserInfo}}
+									<td>{{#if this.info}}
+										<img src="{{this.info.avatar}}">
+										{{this.info.name}}
+									{{/if}}
+								{{/if}}
+								<td>{{this.data.loot}}
+							{{/each}}
+					</script>
 				</div>
 			</div>
 		</div>
