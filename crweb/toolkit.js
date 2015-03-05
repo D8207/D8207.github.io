@@ -1364,7 +1364,7 @@ jQuery( function( $, undefined ) {
 				} );
 			};
 
-			var showGarage = function( $dom, data ) {
+			var showGarage = function( $dom, data, userInfo ) {
 				var $ul = $( '<ul/>' ).appendTo( $dom );
 				$.each( data, function() {
 					var userData = this;
@@ -1384,6 +1384,7 @@ jQuery( function( $, undefined ) {
 						} );
 					} );
 					$( analyticsGarageTrainTemplate( $.extend( {}, userData, {
+						userInfo: userInfo[userData.user],
 						trainList: userTrainList
 					} ) ) ).find( 'button' ).click( function( e ) {
 						// TODO
@@ -1392,9 +1393,11 @@ jQuery( function( $, undefined ) {
 			};
 
 			var pcapCount = pcaps.length, pcapRecv = 0, data = {
+				userInfo: {},
 				profit: [],
-				garage: []
-			}, dataArrays = [ 'profit', 'garage' ];
+				garage: [],
+				loot: []
+			}, dataArrays = [ 'profit', 'garage', 'loot' ];
 			$.each( pcaps, function() {
 				var worker = new Worker( 'analytics.js' );
 				var file = this;
@@ -1405,6 +1408,13 @@ jQuery( function( $, undefined ) {
 						$.each( dataArrays, function() {
 							if ( items[this] ) {
 								data[this] = data[this].concat( e.data.data[this] );
+							}
+						} );
+						$.each( e.data.data.userInfo, function( userId, userData ) {
+							if ( !data.userInfo[userId] ||
+								data.userInfo[userId].updated.getTime() < userData.updated.getTime()
+							) {
+								data.userInfo[userId] = userData;
 							}
 						} );
 					} else {
@@ -1424,7 +1434,7 @@ jQuery( function( $, undefined ) {
 							} ) );
 						}
 						if ( data.garage.length > 0 ) {
-							showGarage( $( '<div/>' ).appendTo( $resultOutput ), data.garage );
+							showGarage( $( '<div/>' ).appendTo( $resultOutput ), data.garage, data.userInfo );
 						} else if ( items.garage ) {
 							$resultOutput.append( analyticsAlertTemplate( {
 								type: 'warning',

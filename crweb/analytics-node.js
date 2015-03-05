@@ -37,6 +37,63 @@ var parsePcap = function( input, items ) {
 		}
 	} );
 
+	var userInfoData = {};
+
+	var onUserInfoData = function( session, data ) {
+		var length = data.readUInt8( 0x0 );
+		// this length might be truncated -- do not trust it.
+		if ( data.length < 0x5 ) {
+			return;
+		}
+
+		var magic = data.readUInt16BE( 0x1 );
+		if ( magic != 0x0109 ) {
+			return;
+		}
+
+		var entryCount = data.readUInt16BE( 0x3 );
+		var offset = 0x5;
+		try {
+			for ( var i = 0; i < entryCount; i++ ) {
+				var userData = {
+					updated: new Date( session.current_cap_time * 1000 )
+				};
+
+				userData.id = data.readUInt32BE( offset );
+				offset += 4;
+
+				var nameLength = data.readUInt16BE( offset );
+				offset += 2;
+				userData.name = data.toString( 'utf8', offset, offset + nameLength );
+				offset += nameLength;
+
+				var avatarLength = data.readUInt16BE( offset );
+				offset += 2;
+				userData.avatar = data.toString( 'utf8', offset, offset + avatarLength );
+				offset += avatarLength;
+
+				offset += 6; // unknown bytes; flags such as VIP?
+
+				var keyLength = data.readUInt16BE( offset );
+				offset += 2;
+				userData.key = data.toString( 'utf8', offset, offset + keyLength );
+				offset += keyLength;
+
+				if ( !userInfoData[userData.id] ||
+					userInfoData[userData.id].updated.getTime() < userData.updated.getTime()
+				) {
+					userInfoData[userData.id] = userData;
+				}
+			}
+		} catch ( e ) {
+			// the packet might be a segment
+			if ( !( e instanceof RangeError ) ) {
+				throw e;
+			}
+			throw e;
+		}
+	};
+
 	var profitData = [];
 
 	var onProfitData = function( session, data ) {
@@ -71,7 +128,7 @@ var parsePcap = function( input, items ) {
 
 		var userId = data.readUInt32BE( 0x5 );
 		var userData = {
-			id: userId,
+			user: userId,
 			stationCount: data.readUInt16BE( 0x9 ),
 			trainCount: data.readUInt16BE( 0xb ),
 			trains: []
@@ -84,10 +141,41 @@ var parsePcap = function( input, items ) {
 		garageData.push( userData );
 	};
 
+	var lootData = [];
+
+	var onLootData = function( session, data ) {
+		var length = data.readUInt8( 0x0 );
+		if ( length < 0x8 || data.length < 0x7 ) {
+			return;
+		}
+
+		var magic = data.readUInt16BE( 0x1 );
+		if ( magic != 0x0107 ) {
+			return;
+		}
+
+		var entryCount = data.readUInt16BE( 0x5 );
+		var ENTRY_SIZE = 0xa;
+		for ( var offset = 0x7;
+			offset < Math.min( 0x7 + entryCount * ENTRY_SIZE, data.length - ENTRY_SIZE + 1 );
+			offset += ENTRY_SIZE
+		) {
+			lootData.push( {
+				user: data.readUInt32BE( offset ),
+				rank: data.readUInt16BE( offset + 4 ),
+				loot: data.readUInt32BE( offset + 6 )
+			} );
+		}
+	};
+
 	tcp_tracker.on( 'session', function( session ) {
 		// TODO - filter out non-game sessions?
 
 		// since we're listening from the middle of a session, send/recv may be reversed.
+		if ( items == null || items.userInfo ) {
+			session.on( 'data send', onUserInfoData );
+			session.on( 'data recv', onUserInfoData );
+		}
 		if ( items == null || items.profit ) {
 			session.on( 'data send', onProfitData );
 			session.on( 'data recv', onProfitData );
@@ -95,6 +183,10 @@ var parsePcap = function( input, items ) {
 		if ( items == null || items.garage ) {
 			session.on( 'data send', onGarageData );
 			session.on( 'data recv', onGarageData );
+		}
+		if ( items == null || items.loot ) {
+			session.on( 'data send', onLootData );
+			session.on( 'data recv', onLootData );
 		}
 	} );
 
@@ -113,8 +205,10 @@ var parsePcap = function( input, items ) {
 
 	parser.on( 'end', function() {
 		sendData( {
+			userInfo: userInfoData,
 			profit: profitData,
-			garage: garageData
+			garage: garageData,
+			loot: lootData
 		} );
 	} );
 

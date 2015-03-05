@@ -601,9 +601,11 @@
 						<div class=form-group>
 							<label class="col-md-2 control-label" for=analytics-select>项目：</label>
 							<div class=col-md-10>
-								<select class=form-control id=analytics-select size=2 multiple>
-									<option value=profit>天梯赛收入</option>
+								<select class=form-control id=analytics-select size=4 multiple>
+									<option value=userInfo>用户信息</option>
+									<option value=profit>天梯赛当日收入</option>
 									<option value=garage>他人车库</option>
+									<option value=loot>买路钱</option>
 								</select>
 							</div>
 						</div>
@@ -628,7 +630,8 @@
 						</div>
 					</script>
 					<script id=analytics-garage-train-template type=text/x-handlebars-template>
-						<li>公司{{id}}：{{trainCount}}火车，{{stationCount}}座火车站
+						<li>
+							{{#if userInfo}}<img src="{{userInfo.avatar}}">{{userInfo.name}}（{{/if}}公司{{user}}{{#if userInfo}}）{{/if}}：{{trainCount}}火车，{{stationCount}}座火车站
 							<ul>
 								{{#each trainList}}
 									<li>{{this.name}}：{{this.count}}辆
