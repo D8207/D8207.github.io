@@ -680,6 +680,7 @@ jQuery( function( $, undefined ) {
 				} ) );
 			};
 
+			var useStationsV = useStations();
 			var wayPoints = $( '#route-waypoints li.ui-state-default' ).map( function() {
 				return $( this ).data( 'id' );
 			} ).get();
@@ -789,7 +790,7 @@ jQuery( function( $, undefined ) {
 					}
 				};
 				worker.postMessage( [
-					train, stations, useStations(), wayPoints,
+					train, stations, useStationsV, wayPoints,
 					insert, penalty
 				] );
 			} );
