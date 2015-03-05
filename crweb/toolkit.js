@@ -1379,7 +1379,7 @@ jQuery( function( $, undefined ) {
 					} );
 					$.each( userTrains, function( trainType, count ) {
 						userTrainList.push( {
-							name: trains[trainType][1],
+							name: trains[trainType] ? trains[trainType][1] : '（未知火车' + trainType + '）',
 							count: count
 						} );
 					} );
