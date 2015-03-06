@@ -1,5 +1,5 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-(function (process){
+(function (process,Buffer){
 var pcap_tcp_tracker = require( 'pcap/tcp_tracker' );
 var pcap_decode = require( 'pcap/decode' );
 var pcapp = require( 'pcap-parser' );
@@ -42,17 +42,17 @@ var parsePcap = function( input, items ) {
 	var userInfoData = {};
 
 	var onUserInfoData = function( session, data ) {
-		if ( !data || data.length < 0x5 ) {
+		if ( !data || data.length < 0x4 ) {
 			return;
 		}
 
-		var magic = data.readUInt16BE( 0x1 );
+		var magic = data.readUInt16BE( 0x0 );
 		if ( magic != 0x0109 ) {
 			return;
 		}
 
-		var entryCount = data.readUInt16BE( 0x3 );
-		var offset = 0x5;
+		var entryCount = data.readUInt16BE( 0x2 );
+		var offset = 0x4;
 		try {
 			for ( var i = 0; i < entryCount; i++ ) {
 				var userData = {
@@ -96,11 +96,11 @@ var parsePcap = function( input, items ) {
 	var profitData = [];
 
 	var onProfitData = function( session, data ) {
-		if ( !data || data.length < 0x21 ) {
+		if ( !data || data.length < 0x20 ) {
 			return;
 		}
 
-		var magic = data.readUInt16BE( 0x1 );
+		var magic = data.readUInt16BE( 0x0 );
 		if ( magic != 0x0126 ) {
 			return;
 		}
@@ -108,12 +108,12 @@ var parsePcap = function( input, items ) {
 		profitData.push( {
 			date: new Date( session.current_cap_time * 1000 ),
 			me: {
-				user: data.readUInt32BE( 0x5 ),
-				profit: data.readInt32BE( 0x9 )
+				user: data.readUInt32BE( 0x4 ),
+				profit: data.readInt32BE( 0x8 )
 			},
 			oppo: {
-				user: data.readUInt32BE( 0x19 ),
-				profit: data.readInt32BE( 0x1d )
+				user: data.readUInt32BE( 0x18 ),
+				profit: data.readInt32BE( 0x1c )
 			}
 		} );
 	};
@@ -121,24 +121,24 @@ var parsePcap = function( input, items ) {
 	var garageData = [];
 
 	var onGarageData = function( session, data ) {
-		if ( !data || data.length < 0xd ) {
+		if ( !data || data.length < 0xc ) {
 			return;
 		}
 
-		var magic = data.readUInt16BE( 0x1 );
+		var magic = data.readUInt16BE( 0x0 );
 		if ( magic != 0x00f2 ) {
 			return;
 		}
 
-		var userId = data.readUInt32BE( 0x5 );
+		var userId = data.readUInt32BE( 0x4 );
 		var userData = {
 			user: userId,
-			stationCount: data.readUInt16BE( 0x9 ),
-			trainCount: data.readUInt16BE( 0xb ),
+			stationCount: data.readUInt16BE( 0x8 ),
+			trainCount: data.readUInt16BE( 0xa ),
 			trains: []
 		};
 
-		for ( var i = 0xd; i < data.length - 1; i += 2 ) {
+		for ( var i = 0xc; i < data.length - 1; i += 2 ) {
 			if ( userData.trains.length >= userData.trainCount ) {
 				break;
 			}
@@ -151,19 +151,19 @@ var parsePcap = function( input, items ) {
 	var lootData = [];
 
 	var onLootData = function( session, data ) {
-		if ( !data || data.length < 0x7 ) {
+		if ( !data || data.length < 0x6 ) {
 			return;
 		}
 
-		var magic = data.readUInt16BE( 0x1 );
+		var magic = data.readUInt16BE( 0x0 );
 		if ( magic != 0x0107 ) {
 			return;
 		}
 
-		var entryCount = data.readUInt16BE( 0x5 );
+		var entryCount = data.readUInt16BE( 0x4 );
 		var ENTRY_SIZE = 0xa;
-		for ( var offset = 0x7;
-			offset < Math.min( 0x7 + entryCount * ENTRY_SIZE, data.length - ENTRY_SIZE + 1 );
+		for ( var offset = 0x6;
+			offset < Math.min( 0x6 + entryCount * ENTRY_SIZE, data.length - ENTRY_SIZE + 1 );
 			offset += ENTRY_SIZE
 		) {
 			lootData.push( {
@@ -175,25 +175,97 @@ var parsePcap = function( input, items ) {
 	};
 
 	tcp_tracker.on( 'session', function( session ) {
-		// TODO - filter out non-game sessions?
+		if ( session.missed_syn ) {
+			return; // it's difficult to analyze segments correctly...
+		}
 
-		// since we're listening from the middle of a session, send/recv may be reversed.
-		if ( items == null || items.userInfo ) {
-			session.on( 'data send', onUserInfoData );
-			session.on( 'data recv', onUserInfoData );
-		}
-		if ( items == null || items.profit ) {
-			session.on( 'data send', onProfitData );
-			session.on( 'data recv', onProfitData );
-		}
-		if ( items == null || items.garage ) {
-			session.on( 'data send', onGarageData );
-			session.on( 'data recv', onGarageData );
-		}
-		if ( items == null || items.loot ) {
-			session.on( 'data send', onLootData );
-			session.on( 'data recv', onLootData );
-		}
+		var policyHeader = new Buffer( 0xffff ), policyLength = 0, isCrweb = null;
+		var send = { buffer: new Buffer( 0x1ffff ), length: 0 };
+		var recv = { buffer: new Buffer( 0x1ffff ), length: 0 };
+		var policyTail = '<policy-file-succeed/>', policyHost = '.app100679516.';
+
+		var recycle = function() {
+			policyHeader = null;
+			send = recv = null;
+		};
+
+		var next = function( buffer, data ) {
+			var packets = [];
+			data.copy( buffer.buffer, buffer.length );
+			buffer.length += data.length;
+			while ( buffer.length >= 2 ) {
+				var length = buffer.buffer.readUInt16BE( 0x0 );
+				if ( length < 2 ) {
+					sendError( '无效包长度：' + length );
+					break;
+				}
+				if ( buffer.length < length ) {
+					break;
+				}
+				var packet = new Buffer( length - 2 );
+				buffer.buffer.copy( packet, 0, 2, length );
+				packets.push( packet );
+				buffer.buffer.copy( buffer.buffer, 0, length, buffer.length );
+				buffer.length -= length;
+			}
+			return packets;
+		};
+
+		session.on( 'data send', function( session, data ) {
+			if ( isCrweb === null ) {
+				var copyLength = policyHeader.length - policyLength;
+				if ( copyLength <= 0 ) {
+					// policyHeader is full but still not confirmed as crweb
+					isCrweb = false;
+					return;
+				}
+				if ( copyLength > data.length ) {
+					copyLength = data.length;
+				}
+				data.copy( policyHeader, policyLength, 0, copyLength );
+				policyLength += copyLength;
+				var policyText = policyHeader.toString( 'ascii', 0, policyLength );
+				var policyTailIdx = policyText.indexOf( policyTail );
+				if ( policyTailIdx > 0 ) {
+					if ( policyHeader.toString( 'ascii', 0, policyTailIdx ).indexOf( policyHost ) >= 0 ) {
+						isCrweb = true;
+						data = data.slice( copyLength - ( policyLength - ( policyTailIdx + policyTail.length ) ) );
+					} else {
+						isCrweb = false;
+						recycle();
+						return;
+					}
+				}
+			}
+			if ( !isCrweb ) {
+				return;
+			}
+			var packets = next( send, data );
+		} );
+
+		session.on( 'data recv', function( session, data ) {
+			if ( !isCrweb ) { // null or false
+				// crweb server doesn't send data before policy header is received
+				isCrweb = false;
+				recycle();
+				return;
+			}
+			var packets = next( recv, data );
+			packets.forEach( function( packet ) {
+				if ( items == null || items.userInfo ) {
+					onUserInfoData( session, packet );
+				}
+				if ( items == null || items.profit ) {
+					onProfitData( session, packet );
+				}
+				if ( items == null || items.garage ) {
+					onGarageData( session, packet );
+				}
+				if ( items == null || items.loot ) {
+					onLootData( session, packet );
+				}
+			} );
+		} );
 	} );
 
 	parser.on( 'packet', function( packet ) {
@@ -236,8 +308,8 @@ if ( process.title == 'browser' ) {
 	}
 }
 
-}).call(this,require('_process'))
-},{"_process":40,"filestream/read":5,"pcap-parser":6,"pcap/decode":13,"pcap/tcp_tracker":29}],2:[function(require,module,exports){
+}).call(this,require('_process'),require("buffer").Buffer)
+},{"_process":40,"buffer":33,"filestream/read":5,"pcap-parser":6,"pcap/decode":13,"pcap/tcp_tracker":29}],2:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
