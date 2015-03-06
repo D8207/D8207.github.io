@@ -1485,7 +1485,7 @@ jQuery( function( $, undefined ) {
 						if ( e.data.sessionCount == 0 ) {
 							$resultMessages.append( analyticsAlertTemplate( {
 								type: 'danger',
-								message: file.name + '中没有找到游戏数据流',
+								message: file.name + '中没有找到游戏数据流'
 							} ) );
 						}
 						$.each( dataArrays, function() {
@@ -1503,7 +1503,7 @@ jQuery( function( $, undefined ) {
 					} else {
 						$resultMessages.append( analyticsAlertTemplate( {
 							type: 'danger',
-							message: file.name + '读取失败：' + e.data.message,
+							message: file.name + '读取失败：' + e.data.message
 						} ) );
 					}
 					if ( pcapCount == pcapRecv ) {
@@ -1513,7 +1513,7 @@ jQuery( function( $, undefined ) {
 						} else if ( items.profit ) {
 							$resultOutput.append( analyticsAlertTemplate( {
 								type: 'warning',
-								message: '文件中没有找到可识别的天梯赛收入数据',
+								message: '文件中没有找到可识别的天梯赛收入数据'
 							} ) );
 						}
 						if ( data.garage.length > 0 ) {
@@ -1521,7 +1521,7 @@ jQuery( function( $, undefined ) {
 						} else if ( items.garage ) {
 							$resultOutput.append( analyticsAlertTemplate( {
 								type: 'warning',
-								message: '文件中没有找到可识别的车库数据',
+								message: '文件中没有找到可识别的车库数据'
 							} ) );
 						}
 						if ( data.loot.length > 0 ) {
@@ -1531,7 +1531,7 @@ jQuery( function( $, undefined ) {
 						} else if ( items.loot ) {
 							$resultOutput.append( analyticsAlertTemplate( {
 								type: 'warning',
-								message: '文件中没有找到可识别的买路钱数据',
+								message: '文件中没有找到可识别的买路钱数据'
 							} ) );
 						}
 					}
