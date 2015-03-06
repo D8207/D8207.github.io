@@ -45,6 +45,10 @@ var parsePcap = function( input, items ) {
 	var userInfoData = {};
 
 	var onUserInfoData = function( session, data ) {
+		if ( session.crwebServer != 'desktop' ) {
+			return;
+		}
+
 		if ( !data || data.length < 0x4 ) {
 			return;
 		}
@@ -99,12 +103,18 @@ var parsePcap = function( input, items ) {
 	var profitData = [];
 
 	var onProfitData = function( session, data ) {
-		if ( !data || data.length < 0x20 ) {
+		if ( session.crwebServer != 'desktop' && session.crwebServer != 'mobile' ) {
+			return;
+		}
+
+		var isMobile = ( session.crwebServer == 'mobile' )
+
+		if ( !data || data.length < ( isMobile ? 0x1c : 0x20 ) ) {
 			return;
 		}
 
 		var magic = data.readUInt16BE( 0x0 );
-		if ( magic != 0x0126 ) {
+		if ( magic != ( isMobile ? 0x012a : 0x0126 ) ) {
 			return;
 		}
 
@@ -115,8 +125,8 @@ var parsePcap = function( input, items ) {
 				profit: data.readInt32BE( 0x8 )
 			},
 			oppo: {
-				user: data.readUInt32BE( 0x18 ),
-				profit: data.readInt32BE( 0x1c )
+				user: data.readUInt32BE( isMobile ? 0x14 : 0x18 ),
+				profit: data.readInt32BE( isMobile ? 0x18 : 0x1c )
 			}
 		} );
 	};
@@ -124,6 +134,10 @@ var parsePcap = function( input, items ) {
 	var garageData = [];
 
 	var onGarageData = function( session, data ) {
+		if ( session.crwebServer != 'desktop' ) {
+			return;
+		}
+
 		if ( !data || data.length < 0xc ) {
 			return;
 		}
@@ -156,6 +170,10 @@ var parsePcap = function( input, items ) {
 	var lootData = [];
 
 	var onLootData = function( session, data ) {
+		if ( session.crwebServer != 'desktop' ) {
+			return;
+		}
+
 		if ( !data || data.length < 0x6 ) {
 			return;
 		}
@@ -187,7 +205,11 @@ var parsePcap = function( input, items ) {
 		var policyHeader = new Buffer( 0xffff ), policyLength = 0, isCrweb = null;
 		var send = { buffer: new Buffer( 0x1ffff ), length: 0 };
 		var recv = { buffer: new Buffer( 0x1ffff ), length: 0 };
-		var policyTail = '<policy-file-succeed/>', policyHost = '.app100679516.';
+		var policyTail = '<policy-file-succeed/>';
+		var serverNeedles = [
+			[ 'desktop', '.app100679516.' ],
+			[ 'mobile', 'Host: 121.' ]
+		];
 
 		var recycle = function() {
 			policyHeader = null;
@@ -235,14 +257,20 @@ var parsePcap = function( input, items ) {
 				var policyText = policyHeader.toString( 'ascii', 0, policyLength );
 				var policyTailIdx = policyText.indexOf( policyTail );
 				if ( policyTailIdx > 0 ) {
-					if ( policyHeader.toString( 'ascii', 0, policyTailIdx ).indexOf( policyHost ) >= 0 ) {
-						isCrweb = true;
-						sessionCount++;
-						data = data.slice( copyLength - ( policyLength - ( policyTailIdx + policyTail.length ) ) );
-					} else {
+					if ( serverNeedles.every( function( serverNeedle ) {
+						if ( policyHeader.toString( 'ascii', 0, policyTailIdx ).indexOf( serverNeedle[1] ) >= 0 ) {
+							session.crwebServer = serverNeedle[0];
+							return false;
+						}
+						return true;
+					} ) ) { // no matching server found.
 						isCrweb = false;
 						recycle();
 						return;
+					} else { // server is set in session.crwebServer
+						isCrweb = true;
+						sessionCount++;
+						data = data.slice( copyLength - ( policyLength - ( policyTailIdx + policyTail.length ) ) );
 					}
 				}
 			}
