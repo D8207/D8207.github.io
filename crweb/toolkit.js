@@ -1306,6 +1306,7 @@ jQuery( function( $, undefined ) {
 
 		// Analytics
 		var analyticsAlertTemplate = Handlebars.compile( $( '#analytics-alert-template' ).html() );
+		var analyticsPcapProgressTemplate = Handlebars.compile( $( '#analytics-pcap-progress-template' ).html() );
 		var analyticsGarageTrainTemplate = Handlebars.compile( $( '#analytics-garage-train-template' ).html() );
 		var analyticsLootTemplate = Handlebars.compile( $( '#analytics-loot-template' ).html() );
 		$( '#analytics-exec' ).prop( 'disabled', false ).click( function() {
@@ -1478,14 +1479,25 @@ jQuery( function( $, undefined ) {
 				garage: [],
 				loot: []
 			}, dataArrays = [ 'profit', 'garage', 'loot' ];
-			$.each( pcaps, function() {
+			$.each( pcaps, function( pcapIdx ) {
 				var worker = new Worker( 'analytics.js' );
 				var file = this;
+				var $pcapProgress = $( analyticsAlertTemplate( {
+					type: 'info',
+					'class': 'analytics-executing-pcap-' + pcapIdx,
+					message: file.name + '进度：'
+				} ) ).appendTo( $resultOutput );
+				var $pcapProgressExtra = $( '<span/>' ).appendTo( '.analytics-executing-pcap-' + pcapIdx )
 				worker.onmessage = function( e ) {
+					if ( e.data.progress ) {
+						$pcapProgressExtra.html( analyticsPcapProgressTemplate( e.data.progress ) );
+						return;
+					}
+					$pcapProgress.remove();
 					worker.terminate();
 					pcapRecv++;
 					if ( e.data.ok ) {
-						if ( e.data.sessionCount == 0 ) {
+						if ( e.data.summary.crwebCount == 0 ) {
 							$resultMessages.append( analyticsAlertTemplate( {
 								type: 'warning',
 								message: file.name + '中没有找到游戏数据流'
@@ -1509,7 +1521,7 @@ jQuery( function( $, undefined ) {
 							message: file.name + '读取失败：' + e.data.message
 						} ) );
 					}
-					$analyticsExecutingExtra.text( '（' + pcapRecv + ' / ' + pcapCount + '）' );
+					$analyticsExecutingExtra.text( '（' + pcapRecv + ' / ' + pcapCount + '个文件已完成）' );
 					if ( pcapCount == pcapRecv ) {
 						$resultOutput.empty();
 						if ( data.profit.length > 0 ) {

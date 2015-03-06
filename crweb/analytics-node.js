@@ -15,16 +15,27 @@ var sendError = function( message ) {
 	}
 };
 
-var sendData = function( sessionCount, data ) {
+var sendData = function( summary, data ) {
 	if ( process.title == 'browser' ) {
 		postMessage( {
 			ok: true,
-			sessionCount: sessionCount,
+			summary: summary,
 			data: data
 		} );
 	} else {
-		console.log( 'Data in ' + sessionCount + ' session(s):' );
+		console.log( 'Data in ' + summary.crwebCount + ' game(s):' );
 		console.log( data );
+	}
+};
+
+var sendProgress = function( progress ) {
+	if ( process.title == 'browser' ) {
+		postMessage( {
+			progress: progress,
+		} );
+	} else {
+		console.log( 'Working...' );
+		console.log( progress );
 	}
 };
 
@@ -38,7 +49,23 @@ var parsePcap = function( input, items ) {
 		}
 	} );
 
-	var sessionCount = 0;
+	var sessionCount = 0, crwebCount = 0, dataCount = 0, packetCount = 0;
+
+	var makeSummary = function() {
+		return {
+			sessionCount: sessionCount,
+			crwebCount: crwebCount,
+			dataCount: dataCount,
+			packetCount: packetCount
+		};
+	};
+
+	var dataIncr = function() {
+		dataCount++;
+		if ( dataCount % 1000 == 0 ) {
+			sendProgress( makeSummary() );
+		}
+	};
 
 	var userInfoData = {};
 
@@ -196,6 +223,7 @@ var parsePcap = function( input, items ) {
 	};
 
 	tcp_tracker.on( 'session', function( session ) {
+		sessionCount++;
 		if ( session.missed_syn ) {
 			return; // it's difficult to analyze segments correctly...
 		}
@@ -237,6 +265,7 @@ var parsePcap = function( input, items ) {
 		};
 
 		session.on( 'data send', function( session, data ) {
+			dataIncr();
 			if ( !data ) {
 				return; // broken packets?
 			}
@@ -267,7 +296,7 @@ var parsePcap = function( input, items ) {
 						return;
 					} else { // server is set in session.crwebServer
 						isCrweb = true;
-						sessionCount++;
+						crwebCount++;
 						data = data.slice( copyLength - ( policyLength - ( policyTailIdx + policyTail.length ) ) );
 					}
 				}
@@ -276,9 +305,11 @@ var parsePcap = function( input, items ) {
 				return;
 			}
 			var packets = next( send, data );
+			packetCount += packets.length;
 		} );
 
 		session.on( 'data recv', function( session, data ) {
+			dataIncr();
 			if ( !data ) {
 				return; // broken packets?
 			}
@@ -303,6 +334,7 @@ var parsePcap = function( input, items ) {
 					onLootData( session, packet );
 				}
 			} );
+			packetCount += packets.length;
 		} );
 	} );
 
@@ -320,7 +352,7 @@ var parsePcap = function( input, items ) {
 	} );
 
 	parser.on( 'end', function() {
-		sendData( sessionCount, {
+		sendData( makeSummary(), {
 			userInfo: userInfoData,
 			profit: profitData,
 			garage: garageData,
