@@ -1484,7 +1484,7 @@ jQuery( function( $, undefined ) {
 					if ( e.data.ok ) {
 						if ( e.data.sessionCount == 0 ) {
 							$resultMessages.append( analyticsAlertTemplate( {
-								type: 'danger',
+								type: 'warning',
 								message: file.name + '中没有找到游戏数据流'
 							} ) );
 						}
