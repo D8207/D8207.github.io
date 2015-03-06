@@ -109,10 +109,17 @@ var parsePcap = function( input, items ) {
 			return;
 		}
 
-		var date = new Date( session.current_cap_time * 1000 );
-		var myProfit = data.readInt32BE( 0x9 );
-		var opProfit = data.readInt32BE( 0x1d );
-		profitData.push( [ date, myProfit, opProfit ] );
+		profitData.push( {
+			date: new Date( session.current_cap_time * 1000 ),
+			me: {
+				user: data.readUInt32BE( 0x5 ),
+				profit: data.readInt32BE( 0x9 )
+			},
+			oppo: {
+				user: data.readUInt32BE( 0x19 ),
+				profit: data.readInt32BE( 0x1d )
+			}
+		} );
 	};
 
 	var garageData = [];

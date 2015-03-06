@@ -1334,7 +1334,7 @@ jQuery( function( $, undefined ) {
 			var drawProfit = function( $dom, data ) {
 				var myData = [ 'my' ], opData = [ 'op' ], dates = [ 'x' ], date = new Date();
 				$.each( data, function() {
-					date = this[0];
+					date = this.date;
 					dates.push( date.getFullYear()
 						+ '-' + ( date.getMonth() + 1 )
 						+ '-' + date.getDate()
@@ -1342,8 +1342,8 @@ jQuery( function( $, undefined ) {
 						+ ':' + date.getMinutes()
 						+ ':' + date.getSeconds()
 					);
-					myData.push( this[1] );
-					opData.push( this[2] );
+					myData.push( this.me.profit );
+					opData.push( this.oppo.profit );
 				} );
 				var tzOffset = -( date.getTimezoneOffset() / 60 );
 				if ( tzOffset > 0 ) {
