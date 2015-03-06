@@ -1328,8 +1328,10 @@ jQuery( function( $, undefined ) {
 
 			$resultOutput.append( analyticsAlertTemplate( {
 				type: 'info',
+				'class': 'analytics-executing',
 				message: '正在分析，请稍候'
 			} ) );
+			var $analyticsExecutingExtra = $( '<span/>' ).appendTo( '.analytics-executing' )
 
 			var drawProfit = function( $dom, data, userInfo ) {
 				var myData = [ 'my' ], opData = [ 'op' ], dates = [ 'x' ], date = new Date();
@@ -1506,6 +1508,7 @@ jQuery( function( $, undefined ) {
 							message: file.name + '读取失败：' + e.data.message
 						} ) );
 					}
+					$analyticsExecutingExtra.text( '（' + pcapRecv + ' / ' + pcapCount + '）' );
 					if ( pcapCount == pcapRecv ) {
 						$resultOutput.empty();
 						if ( data.profit.length > 0 ) {
