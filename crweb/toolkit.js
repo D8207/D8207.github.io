@@ -1482,6 +1482,12 @@ jQuery( function( $, undefined ) {
 					worker.terminate();
 					pcapRecv++;
 					if ( e.data.ok ) {
+						if ( e.data.sessionCount == 0 ) {
+							$resultMessages.append( analyticsAlertTemplate( {
+								type: 'danger',
+								message: file.name + '中没有找到游戏数据流',
+							} ) );
+						}
 						$.each( dataArrays, function() {
 							if ( items[this] ) {
 								data[this] = data[this].concat( e.data.data[this] );

@@ -15,14 +15,15 @@ var sendError = function( message ) {
 	}
 };
 
-var sendData = function( data ) {
+var sendData = function( sessionCount, data ) {
 	if ( process.title == 'browser' ) {
 		postMessage( {
 			ok: true,
+			sessionCount: sessionCount,
 			data: data
 		} );
 	} else {
-		console.log( 'Data:' );
+		console.log( 'Data in ' + sessionCount + ' session(s):' );
 		console.log( data );
 	}
 };
@@ -36,6 +37,8 @@ var parsePcap = function( input, items ) {
 			sendError( '不支持的网络类型：' + header.linkLayerType );
 		}
 	} );
+
+	var sessionCount = 0;
 
 	var userInfoData = {};
 
@@ -229,6 +232,7 @@ var parsePcap = function( input, items ) {
 				if ( policyTailIdx > 0 ) {
 					if ( policyHeader.toString( 'ascii', 0, policyTailIdx ).indexOf( policyHost ) >= 0 ) {
 						isCrweb = true;
+						sessionCount++;
 						data = data.slice( copyLength - ( policyLength - ( policyTailIdx + policyTail.length ) ) );
 					} else {
 						isCrweb = false;
@@ -282,7 +286,7 @@ var parsePcap = function( input, items ) {
 	} );
 
 	parser.on( 'end', function() {
-		sendData( {
+		sendData( sessionCount, {
 			userInfo: userInfoData,
 			profit: profitData,
 			garage: garageData,
