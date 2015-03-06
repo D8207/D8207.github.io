@@ -1310,18 +1310,19 @@ jQuery( function( $, undefined ) {
 		var analyticsLootTemplate = Handlebars.compile( $( '#analytics-loot-template' ).html() );
 		$( '#analytics-exec' ).prop( 'disabled', false ).click( function() {
 			var pcaps = $( '#analytics-pcap' ).prop( 'files' );
-			var items = {};
-			$.each( $( '#analytics-select' ).val(), function() {
-				items[this] = true;
-			} );
+			var selects = $( '#analytics-select' ).val();
 			var $result = $( '<div/>' ).appendTo( $( '#analytics-result' ).empty() );
-			if ( pcaps.length == 0 ) {
+			if ( pcaps.length == 0 || !selects ) {
 				$result.append( analyticsAlertTemplate( {
 					type: 'danger',
-					message: '请选择文件'
+					message: '请选择文件和项目'
 				} ) );
 				return;
 			}
+			var items = {};
+			$.each( selects, function() {
+				items[this] = true;
+			} );
 
 			var $resultMessages = $( '<div/>' ).appendTo( $result );
 			var $resultOutput = $( '<div/>' ).appendTo( $result );
