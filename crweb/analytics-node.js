@@ -40,9 +40,7 @@ var parsePcap = function( input, items ) {
 	var userInfoData = {};
 
 	var onUserInfoData = function( session, data ) {
-		var length = data.readUInt8( 0x0 );
-		// this length might be truncated -- do not trust it.
-		if ( data.length < 0x5 ) {
+		if ( !data || data.length < 0x5 ) {
 			return;
 		}
 
@@ -90,15 +88,13 @@ var parsePcap = function( input, items ) {
 			if ( !( e instanceof RangeError ) ) {
 				throw e;
 			}
-			throw e;
 		}
 	};
 
 	var profitData = [];
 
 	var onProfitData = function( session, data ) {
-		var length = data.readUInt8( 0x0 );
-		if ( length < 0x22 || data.length < 0x21 ) {
+		if ( !data || data.length < 0x21 ) {
 			return;
 		}
 
@@ -123,8 +119,7 @@ var parsePcap = function( input, items ) {
 	var garageData = [];
 
 	var onGarageData = function( session, data ) {
-		var length = data.readUInt8( 0x0 );
-		if ( length < 0xe || data.length < 0xd ) {
+		if ( !data || data.length < 0xd ) {
 			return;
 		}
 
@@ -151,8 +146,7 @@ var parsePcap = function( input, items ) {
 	var lootData = [];
 
 	var onLootData = function( session, data ) {
-		var length = data.readUInt8( 0x0 );
-		if ( length < 0x8 || data.length < 0x7 ) {
+		if ( !data || data.length < 0x7 ) {
 			return;
 		}
 
