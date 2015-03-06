@@ -217,6 +217,9 @@ var parsePcap = function( input, items ) {
 		};
 
 		session.on( 'data send', function( session, data ) {
+			if ( !data ) {
+				return; // broken packets?
+			}
 			if ( isCrweb === null ) {
 				var copyLength = policyHeader.length - policyLength;
 				if ( copyLength <= 0 ) {
@@ -250,6 +253,9 @@ var parsePcap = function( input, items ) {
 		} );
 
 		session.on( 'data recv', function( session, data ) {
+			if ( !data ) {
+				return; // broken packets?
+			}
 			if ( !isCrweb ) { // null or false
 				// crweb server doesn't send data before policy header is received
 				isCrweb = false;
