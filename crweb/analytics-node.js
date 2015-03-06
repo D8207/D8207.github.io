@@ -137,6 +137,9 @@ var parsePcap = function( input, items ) {
 		};
 
 		for ( var i = 0xd; i < data.length - 1; i += 2 ) {
+			if ( userData.trains.length >= userData.trainCount ) {
+				break;
+			}
 			userData.trains.push( data.readUInt16BE( i ) );
 		}
 
