@@ -126,7 +126,9 @@ var parsePcap = function( input, items ) {
 		}
 
 		var magic = data.readUInt16BE( 0x0 );
-		if ( magic != 0x00f2 ) {
+		if ( magic != 0x00f2 // from loot list
+			&& magic != 0x00ef // from friends
+		) {
 			return;
 		}
 
