@@ -1331,8 +1331,9 @@ jQuery( function( $, undefined ) {
 				message: '正在分析，请稍候'
 			} ) );
 
-			var drawProfit = function( $dom, data ) {
+			var drawProfit = function( $dom, data, userInfo ) {
 				var myData = [ 'my' ], opData = [ 'op' ], dates = [ 'x' ], date = new Date();
+				var usersByDate = {};
 				$.each( data, function() {
 					date = this.date;
 					dates.push( date.getFullYear()
@@ -1344,6 +1345,10 @@ jQuery( function( $, undefined ) {
 					);
 					myData.push( this.me.profit );
 					opData.push( this.oppo.profit );
+					usersByDate[date.getTime() - ( date.getTime() % 1000 )] = {
+						me: this.me.user,
+						op: this.oppo.user
+					};
 				} );
 				var tzOffset = -( date.getTimezoneOffset() / 60 );
 				if ( tzOffset > 0 ) {
@@ -1378,7 +1383,24 @@ jQuery( function( $, undefined ) {
 					tooltip: {
 						format: {
 							title: function( d ) {
-								return d.toString();
+								var me = usersByDate[d.getTime()].me;
+								var op = usersByDate[d.getTime()].op;
+								var meText = '公司' + me, opText = '公司' + op;
+								if ( userInfo[me] ) {
+									meText = '<img src="' + userInfo[me].avatar
+											.replace( /&/g, '&amp;').replace( /"/g, '&quot;')
+										+ '"> '
+										+ $( '<span/>' ).text( userInfo[me].name ).html()
+										+ '（' + meText + '）';
+								}
+								if ( userInfo[op] ) {
+									opText = '<img src="' + userInfo[op].avatar
+											.replace( /&/g, '&amp;').replace( /"/g, '&quot;')
+										+ '"> '
+										+ $( '<span/>' ).text( userInfo[op].name ).html()
+										+ '（' + opText + '）';
+								}
+								return d.toString() + '<br>' + meText + ' - ' + opText;
 							}
 						}
 					}
@@ -1481,7 +1503,7 @@ jQuery( function( $, undefined ) {
 					if ( pcapCount == pcapRecv ) {
 						$resultOutput.empty();
 						if ( data.profit.length > 0 ) {
-							drawProfit( $( '<div/>' ).appendTo( $resultOutput ), data.profit );
+							drawProfit( $( '<div/>' ).appendTo( $resultOutput ), data.profit, data.userInfo );
 						} else if ( items.profit ) {
 							$resultOutput.append( analyticsAlertTemplate( {
 								type: 'warning',
