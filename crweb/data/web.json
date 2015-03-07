@@ -1,5 +1,6 @@
 {
 	"runningTimeReverse": "1970-01-01T22:00:00.000+0800",
 	"currencyName": "Q币",
-	"trainImageRoot": "http://app100679516.imgcache.qzoneapp.com/app100679516/crweb/pic20130606/"
+	"trainImageRoot": "http://app100679516.imgcache.qzoneapp.com/app100679516/crweb/pic20130606/",
+	"server": "desktop"
 }

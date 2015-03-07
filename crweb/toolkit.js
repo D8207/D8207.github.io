@@ -1554,7 +1554,8 @@ jQuery( function( $, undefined ) {
 				};
 				worker.postMessage( {
 					file: file,
-					items: items
+					items: items,
+					server: localData.server
 				} );
 			} );
 		} );

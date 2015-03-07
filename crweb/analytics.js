@@ -41,7 +41,7 @@ var sendProgress = function( progress ) {
 	}
 };
 
-var parsePcap = function( input, items ) {
+var parsePcap = function( input, items, server ) {
 	var parser = pcapp.parse( input );
 	var tcp_tracker = new pcap_tcp_tracker.TCPTracker();
 
@@ -287,6 +287,9 @@ var parsePcap = function( input, items ) {
 				var policyTailIdx = policyText.indexOf( policyTail );
 				if ( policyTailIdx > 0 ) {
 					if ( serverNeedles.every( function( serverNeedle ) {
+						if ( server && serverNeedle[0] != server ) {
+							return true; // server type mismatch
+						}
 						if ( policyHeader.toString( 'ascii', 0, policyTailIdx ).indexOf( serverNeedle[1] ) >= 0 ) {
 							session.crwebServer = serverNeedle[0];
 							return false;
@@ -370,7 +373,7 @@ var parsePcap = function( input, items ) {
 if ( process.title == 'browser' ) {
 	onmessage = function( e ) {
 		var stream = new FileReadStream( e.data.file );
-		parsePcap( stream, e.data.items );
+		parsePcap( stream, e.data.items, e.data.server );
 	};
 } else {
 	if ( process.argv.length < 3 ) {
