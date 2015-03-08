@@ -159,7 +159,7 @@ var calculate = function( train, stations, useStations, wayPoints, insert, penal
 		accelerationCost: Math.ceil( costCoins / 400 ),
 		priceDistance: priceDistance,
 		priceCoins: priceCoins,
-		pricePoints: Math.floor( priceDistance / 500 ),
+		pricePoints: Math.ceil( priceDistance / 500 ),
 		costCoins: costCoins,
 		totalGross: totalGross,
 		totalNet: totalNet,
