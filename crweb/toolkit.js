@@ -552,7 +552,7 @@ jQuery( function( $, undefined ) {
 				} ) );
 			}
 			var summaryGross = new Array( trainCount ), summaryNet = new Array( trainCount );
-			var dailyGross = 0, dailyNet = 0, onewayCost = 0;
+			var dailyGross = 0, dailyNet = 0, onewayCost = 0, totalPassengerLoads = 0, totalCargoLoads = 0, totalLoads = 0;
 			var trainTextById = {};
 			var trainColorById = {};
 			var filterData = function( data ) {
@@ -676,7 +676,10 @@ jQuery( function( $, undefined ) {
 				$summary.append( Handlebars.compile( $( '#route-summary-template' ).html() )( {
 					dailyGross: dailyGross,
 					dailyNet: dailyNet,
-					onewayCost: onewayCost
+					onewayCost: onewayCost,
+					totalPassengerLoads: totalPassengerLoads,
+					totalCargoLoads: totalCargoLoads,
+					totalLoads: totalLoads
 				} ) );
 			};
 
@@ -742,6 +745,9 @@ jQuery( function( $, undefined ) {
 								summaryNet[trainId] = [ trainId, calculated.dailyNet ];
 								dailyNet += calculated.dailyNet;
 								onewayCost += calculated.costCoins;
+								totalPassengerLoads += trains[type][8];
+								totalCargoLoads += trains[type][9];
+								totalLoads += train.loads;
 							}
 							var runningTimeReverseRef = new Date( localData.runningTimeReverse );
 							var runningTimeReverse = new Date(
