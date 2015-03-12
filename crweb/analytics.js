@@ -17,10 +17,21 @@ var sendError = function( message ) {
 	}
 };
 
+var sendWarning = function( message ) {
+	if ( process.title == 'browser' ) {
+		postMessage( {
+			warning: message
+		} );
+	} else {
+		console.error( 'WARNING: ' + message );
+	}
+};
+
 var sendData = function( summary, data ) {
 	if ( process.title == 'browser' ) {
 		postMessage( {
 			ok: true,
+			terminate: true,
 			summary: summary,
 			data: data
 		} );
@@ -255,6 +266,7 @@ var parsePcap = function( input, items, server ) {
 				var length = buffer.buffer.readUInt16BE( 0x0 );
 				if ( length < 2 ) {
 					buffer.broken = true;
+					sendWarning( '无效包长度：' + length );
 					break;
 				}
 				if ( buffer.length < length ) {

@@ -1539,6 +1539,13 @@ jQuery( function( $, undefined ) {
 						$pcapProgressExtra.html( analyticsPcapProgressTemplate( e.data.progress ) );
 						return;
 					}
+					if ( e.data.warning ) {
+						$resultMessages.append( analyticsAlertTemplate( {
+							type: 'warning',
+							message: file.name + '：' + e.data.warning
+						} ) );
+						return;
+					}
 					$pcapProgress.remove();
 					worker.terminate();
 					pcapRecv++;
