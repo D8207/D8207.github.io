@@ -45,6 +45,30 @@ jQuery( function( $, undefined ) {
 
 	var init = function() {
 		var attribNames = [ 'speed', 'distance', 'weight', 'battery' ];
+		// Data
+		var trains = {};
+		var trainsSelect = [];
+		$.each( staticData.train, function() {
+			trains[this[0]] = this;
+			trainsSelect.push( {
+				id: this[0],
+				text: this[1] + ' | ' + this[3] + '星'
+			} );
+		} );
+		var stations = {};
+		var stationsSelect = [], stationsSelectShort = [];
+		var stationsTerminals = null;
+		$.each( staticData.station, function() {
+			stations[this[0]] = this;
+			stationsSelect.push( {
+				id: this[0],
+				text: this[1] + ' | ' + this[4] + '星'
+			} );
+			stationsSelectShort.push( {
+				id: this[0],
+				text: this[1]
+			} );
+		} );
 		// Utils
 		var serializeTrain = function( $train ) {
 			var data = {
@@ -101,6 +125,7 @@ jQuery( function( $, undefined ) {
 		var stationsUpdated = function() {
 			if ( !inStationsBatch ) {
 				localStorage['crwebToolkitStations_' + dataset] = JSON.stringify( serializeStations() );
+				stationsTerminals = estimateTerminals( useStations() );
 				$( '.station-list-select' ).trigger( 'do-update' );
 			}
 		};
@@ -131,16 +156,43 @@ jQuery( function( $, undefined ) {
 				return null;
 			}
 		};
-		// Trains
-		var trains = {};
-		var trainsSelect = [];
-		$.each( staticData.train, function() {
-			trains[this[0]] = this;
-			trainsSelect.push( {
-				id: this[0],
-				text: this[1] + ' | ' + this[3] + '星'
+		var useStations = function() {
+			return $( '.station-row' ).map( function() {
+				return $( this ).data( 'id' );
+			} ).get();
+		};
+		var estimateTerminals = function( usedStations ) {
+			if ( usedStations.length < 2 ) {
+				return [ null, null ];
+			}
+			var xSum = 0, ySum = 0;
+			$.each( usedStations, function() {
+				xSum += stations[this][5];
+				ySum += stations[this][6];
 			} );
-		} );
+			var xCtr = xSum / usedStations.length, yCtr = ySum / usedStations.length;
+			var terminal1 = null, t1distSq = 0;
+			$.each( usedStations, function() {
+				var x = stations[this][5] - xCtr, y = stations[this][6] - yCtr;
+				var distSq = x * x + y * y;
+				if ( distSq >= t1distSq ) {
+					terminal1 = this;
+					t1distSq = distSq;
+				}
+			} );
+			var t1x = stations[terminal1][5], t1y = stations[terminal1][6];
+			var terminal2 = null, t2distSq = 0;
+			$.each( usedStations, function() {
+				var x = stations[this][5] - t1x, y = stations[this][6] - t1y;
+				var distSq = x * x + y * y;
+				if ( distSq >= t2distSq ) {
+					terminal2 = this;
+					t2distSq = distSq;
+				}
+			} );
+			return [ parseInt( terminal1 ), parseInt( terminal2 ) ];
+		};
+		// Trains
 		var trainNameByType = function( type ) {
 			if ( type < 0 ) {
 				return '自定义' + -type + '星级火车';
@@ -313,8 +365,6 @@ jQuery( function( $, undefined ) {
 		trainsBatchEnd();
 
 		// Stations
-		var stations = {};
-		var stationsSelect = [], stationsSelectShort = [];
 		var $stationsBody = $( '#stations-table tbody' );
 		var stationTemplate = Handlebars.compile( $( '#station-template' ).html() );
 		var stationCountryById = {
@@ -358,17 +408,6 @@ jQuery( function( $, undefined ) {
 			1: '欧亚',
 			2: '美洲'
 		};
-		$.each( staticData.station, function() {
-			stations[this[0]] = this;
-			stationsSelect.push( {
-				id: this[0],
-				text: this[1] + ' | ' + this[4] + '星'
-			} );
-			stationsSelectShort.push( {
-				id: this[0],
-				text: this[1]
-			} );
-		} );
 		var stationPrice = function( station ) {
 			var type = station[10], stars = station[4], pop = station[7];
 			if ( type == 0 && stars < 3 ) {
@@ -506,11 +545,6 @@ jQuery( function( $, undefined ) {
 			} );
 			stationsBatchEnd();
 		} );
-		var useStations = function() {
-			return $( '.station-row' ).map( function() {
-				return $( this ).data( 'id' );
-			} ).get();
-		};
 
 		// Route
 		$( '#route-waypoints' ).sortable( {
@@ -904,6 +938,12 @@ jQuery( function( $, undefined ) {
 			};
 			worker.postMessage( [ train, stations, [], [], false, 0 ] );
 		} );
+		if ( stationsTerminals[0] ) {
+			$( '#optimization-from' ).val( stationsTerminals[0] ).change();
+		}
+		if ( stationsTerminals[1] ) {
+			$( '#optimization-to' ).val( stationsTerminals[1] ).change();
+		}
 		$( '#optimization-expr-vars a' ).click( function( e ) {
 			e.preventDefault();
 			$( '#optimization-expr' ).selection( 'replace', {
