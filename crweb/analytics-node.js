@@ -255,16 +255,13 @@ var parsePcap = function( input, items, server ) {
 
 		var next = function( buffer, data ) {
 			var packets = [];
-			if ( buffer.broken ) {
-				return packets;
-			}
 			data.copy( buffer.buffer, buffer.length );
 			buffer.length += data.length;
 			while ( buffer.length >= 2 ) {
 				var length = buffer.buffer.readUInt16BE( 0x0 );
 				if ( length < 2 ) {
-					buffer.broken = true;
 					sendWarning( '无效包长度：' + length );
+					buffer.length = 0; // try to recover by clearing the buffer
 					break;
 				}
 				if ( buffer.length < length ) {
