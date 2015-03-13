@@ -1716,10 +1716,23 @@ jQuery( function( $, undefined ) {
 			} ) );
 			var $analyticsExecutingExtra = $( '<span/>' ).appendTo( '.analytics-executing' )
 
+			var safeLog = function( val ) {
+				if ( val >= -1 && val <= 1 ) {
+					return val;
+				}
+				return val / Math.abs( val ) * ( Math.log( Math.abs( val ) ) + 1 );
+			};
+			var safeExp = function( val ) {
+				if ( val >= -1 && val <= 1 ) {
+					return val;
+				}
+				return val / Math.abs( val ) * Math.round( Math.exp( Math.abs( val ) - 1 ) );
+			};
 			var drawProfit = function( $dom, data, userInfo ) {
 				var myData = [ 'my' ], opData = [ 'op' ], dates = [ 'x' ], date = new Date();
+				var myDataDiff = [ 'my-diff', null ], opDataDiff = [ 'op-diff', null ];
 				var usersByDate = {};
-				$.each( data, function() {
+				$.each( data, function( idx ) {
 					date = this.date;
 					dates.push( date.getFullYear()
 						+ '-' + ( date.getMonth() + 1 )
@@ -1730,6 +1743,10 @@ jQuery( function( $, undefined ) {
 					);
 					myData.push( this.me.profit );
 					opData.push( this.oppo.profit );
+					if ( idx > 0 ) {
+						myDataDiff.push( safeLog( this.me.profit - data[idx - 1].me.profit ) );
+						opDataDiff.push( safeLog( this.oppo.profit - data[idx - 1].oppo.profit ) );
+					}
 					usersByDate[date.getTime() - ( date.getTime() % 1000 )] = {
 						me: this.me.user,
 						op: this.oppo.user
@@ -1746,11 +1763,19 @@ jQuery( function( $, undefined ) {
 					data: {
 						x: 'x',
 						xFormat: '%Y-%m-%d %H:%M:%S',
-						columns: [ dates, myData, opData ],
+						columns: [ dates, myData, opData, myDataDiff, opDataDiff ],
 						names: {
 							'my': '我的收入',
-							'op': '对手收入'
+							'op': '对手收入',
+							'my-diff': '我的收入变化',
+							'op-diff': '对手收入变化'
 						},
+						axes: {
+							'my': 'y',
+							'op': 'y',
+							'my-diff': 'y2',
+							'op-diff': 'y2'
+						}
 					},
 					axis: {
 						x: {
@@ -1763,6 +1788,13 @@ jQuery( function( $, undefined ) {
 						},
 						y: {
 							inner: true
+						},
+						y2: {
+							show: true,
+							inner: true,
+							tick: {
+								values: [ 0 ]
+							}
 						}
 					},
 					tooltip: {
@@ -1786,6 +1818,12 @@ jQuery( function( $, undefined ) {
 										+ '（' + opText + '）';
 								}
 								return d.toString() + '<br>' + meText + ' - ' + opText;
+							},
+							value: function( value, ratio, id, index ) {
+								if ( id == 'my-diff' || id == 'op-diff' ) {
+									value = safeExp( value );
+								}
+								return value;
 							}
 						}
 					}
