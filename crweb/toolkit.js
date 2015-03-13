@@ -1717,16 +1717,13 @@ jQuery( function( $, undefined ) {
 			var $analyticsExecutingExtra = $( '<span/>' ).appendTo( '.analytics-executing' )
 
 			var safeLog = function( val ) {
-				if ( val >= -1 && val <= 1 ) {
-					return val;
-				}
-				return val / Math.abs( val ) * ( Math.log( Math.abs( val ) ) + 1 );
+				return val ? val / Math.abs( val ) * Math.sqrt( Math.sqrt( Math.abs( val ) ) ) : 0;
 			};
 			var safeExp = function( val ) {
 				if ( val >= -1 && val <= 1 ) {
 					return val;
 				}
-				return val / Math.abs( val ) * Math.round( Math.exp( Math.abs( val ) - 1 ) );
+				return val ? val / Math.abs( val ) * Math.round( val * val * val * val ) : 0;
 			};
 			var drawProfit = function( $dom, data, userInfo ) {
 				var myData = [ 'my' ], opData = [ 'op' ], dates = [ 'x' ], date = new Date();
