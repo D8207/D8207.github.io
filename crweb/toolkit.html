@@ -632,6 +632,13 @@
 					</div>
 					<form class=form-horizontal role=form>
 						<div class=form-group>
+							<div class="col-md-10 col-md-offset-2 checkbox">
+								<label>
+									<input type=checkbox id=spike-saturday checked> 收入增加20%（周六活动）
+								</label>
+							</div>
+						</div>
+						<div class=form-group>
 							<label class="col-md-2 control-label" for=spike-penalty>中转罚分（里程）：</label>
 							<div class=col-md-10>
 								<input class=form-control type=number min=0 value=1 id=spike-penalty>
@@ -659,6 +666,53 @@
 					</form>
 					<div id=spike-result>
 					</div>
+					<script id=spike-alert-template type=text/x-handlebars-template>
+						<div class=row>
+							<div class=col-md-12>
+								<div class="alert alert-{{type}} alert-dismissible {{class}}" role=alert>
+									<button type=button class=close data-dismiss=alert aria-label=Close>
+										<span aria-hidden=true>&times;</span>
+									</button>
+									{{message}}
+									<ul>
+										{{#each messages}}
+											<li>{{this}}
+										{{/each}}
+									</ul>
+								</div>
+							</div>
+						</div>
+					</script>
+					<script id=spike-result-template type=text/x-handlebars-template>
+						<h3>统计信息</h3>
+						<dl class=dl-horizontal>
+							<dt>总运输成本
+							<dd>{{totalCost}}金币
+							<dt>总金币收入
+							<dd>{{totalGross}}金币
+							<dt>总金币利润
+							<dd>{{totalNet}}金币
+						</dl>
+						<h3>发车计划</h3>
+						<table class=table>
+							<tr>
+								<th>发车时间
+								<th>车辆
+								<th>径路
+								<th>到达时间
+								<th>运输成本
+								<th>累计运输成本
+							{{#each schedule}}
+							<tr>
+								<td>{{departTime}}
+								<td>{{text}}
+								<td>{{path}}
+								<td>{{arriveTime}}
+								<td>{{cost}}金币
+								<td>{{accumCost}}金币
+							{{/each}}
+						</table>
+					</script>
 				</div>
 			</div>
 		</div>

@@ -1401,13 +1401,15 @@ jQuery( function( $, undefined ) {
 
 				var img = trains[type][10];
 				var alt = trainNameByType( type );
+				var $img = $spike.find( '.spike-img' );
 				if ( img ) {
 					var imgUrl = cloudServer + '/crweb/train_image/' + dataset + '/' + img;
-					var $img = $spike.find( '.spike-img' );
 					if ( imgUrl != $img.attr( 'src' ) ) {
 						$img.attr( 'src', '' ).attr( 'alt', '' );
 						$img.attr( 'src', imgUrl ).attr( 'alt', alt );
 					}
+				} else {
+					$img.attr( 'src', '' ).attr( 'alt', '' );
 				}
 			} );
 
@@ -1418,6 +1420,225 @@ jQuery( function( $, undefined ) {
 				}
 			} );
 		} ).trigger( 'do-update' );
+		var spikeAlertTemplate = Handlebars.compile( $( '#spike-alert-template' ).html() );
+		var spikeResultTemplate = Handlebars.compile( $( '#spike-result-template' ).html() );
+		$( '#spike-calculate' ).prop( 'disabled', false ).click( function() {
+			var $result = $( '#spike-result' ).empty();
+			var spikes = [], errors = [];
+			$( '.spike-row' ).each( function() {
+				var $this = $( this );
+				if ( $this.find( '.spike-use:checked' ).length == 0 ) {
+					return;
+				}
+				var id = $this.data( 'id' );
+				var heading = $this.find( '.spike-heading' ).text();
+				var depart = $this.find( '.spike-depart' ).val();
+				var arrive = $this.find( '.spike-arrive' ).val();
+				var from = $this.find( '.spike-from' ).val();
+				var to = $this.find( '.spike-to' ).val();
+
+				if ( !depart || !arrive || !from || !to ) {
+					errors.push( heading + '：请指定火车和客货的发到站，或取消使用该火车' );
+					return;
+				}
+
+				if ( from == to ) {
+					errors.push( heading + '：客货的始发站和终到站不能为同一站' );
+					return;
+				}
+
+				if ( depart == to ) {
+					errors.push( heading + '：无法将客货从其终到站运出' );
+					return;
+				}
+
+				var path;
+				if ( arrive == to ) {
+					path = [ depart, arrive ];
+				} else {
+					path = [ depart, to, arrive ];
+				}
+
+				spikes.push( {
+					id: id,
+					text: heading,
+					path: path,
+					from: from,
+					to: to
+				} );
+			} );
+			if ( spikes.length == 0 ) {
+				errors.push( '没有火车参与秒杀' );
+			}
+			if ( errors.length ) {
+				$result.append( spikeAlertTemplate( {
+					type: 'danger',
+					messages: errors
+				} ) );
+				return;
+			}
+
+			$result.append( spikeAlertTemplate( {
+				type: 'info',
+				message: '正在计算，请稍候'
+			} ) );
+
+			var useStationsV = useStations();
+			var coef = $( '#spike-saturday:checked' ).length > 0 ? 1.2 : 1;
+			var penalty = parseInt( $( '#spike-penalty' ).val() ) || 0;
+			var delay = ( parseInt( $( '#spike-delay' ).val() ) || 0 ) * 1000;
+			var reverseRef = new Date( localData.runningTimeReverse ).getTime()
+				- ( parseInt( $( '#spike-ahead' ).val() ) || 0 ) * 1000;
+
+			var tasks = [], spikeResults = {}, taskIdx = 0, taskRecv = 0; // results keyed by train id
+
+			$.each( spikes, function() {
+				var spike = this;
+				spikeResults[spike.id] = {
+					text: spike.text
+				};
+				var $train = $( '#train-' + spike.id );
+
+				// Incomplete trains don't appear in spikes
+				var type = parseInt( $train.find( '.train-select' ).val() );
+				var speed = parseInt( $train.find( '.train-attrib-value.train-attrib-speed' ).val() );
+				var distance = parseInt( $train.find( '.train-attrib-value.train-attrib-distance' ).val() );
+				var weight = parseInt( $train.find( '.train-attrib-value.train-attrib-weight' ).val() );
+				var battery = parseInt( $train.find( '.train-attrib-value.train-attrib-battery' ).val() );
+
+				var train = {
+					speed: speed,
+					distance: distance,
+					weight: weight,
+					battery: battery,
+					stars: trains[type][3],
+					loads: trains[type][8] + trains[type][9]
+				};
+
+				// Goods task:
+				var goodsTrain = {
+					speed: 1,
+					distance: Number.MAX_VALUE,
+					weight: 0,
+					battery: Number.MAX_VALUE,
+					stars: 1,
+					loads: train.loads
+				};
+				var goodsPath = [ spike.from, spike.to ];
+				tasks.push( {
+					onmessage: function( e ) {
+						spikeResults[spike.id].goods = e.data;
+					},
+					message: [
+						goodsTrain, stations, goodsPath, goodsPath,
+						false, 0, coef
+					]
+				} );
+
+				// Train task:
+				tasks.push( {
+					onmessage: function( e ) {
+						spikeResults[spike.id].train = e.data;
+					},
+					message: [
+						train, stations, useStationsV, spike.path,
+						true, penalty, coef
+					]
+				} );
+			} );
+
+			var showSpikeResults = function() {
+				var errors = [], schedule = [];
+				var totalCost = 0, totalGross = 0;
+				$result.empty();
+				for ( var spikeId in spikeResults ) {
+					var spikeResult = spikeResults[spikeId];
+					var spikeErrors = [];
+					if ( !spikeResult.train.ok ) {
+						spikeErrors.push( spikeResult.train.message );
+					}
+					if ( !spikeResult.goods.ok ) {
+						// This shouldn't happen
+						spikeErrors.push( spikeResult.goods.message );
+					}
+					if ( spikeErrors.length ) {
+						errors.push( spikeResult.text + '：' + spikeErrors.join( '、' ) );
+						continue;
+					}
+
+					totalCost += spikeResult.train.costCoins;
+					totalGross += spikeResult.goods.totalGross;
+					var reverse = reverseRef - spikeResult.train.runningTime * 1000;
+
+					schedule.push( {
+						depart: reverse,
+						arrive: reverseRef,
+						text: spikeResult.text,
+						path: makePathText( spikeResult.train ),
+						cost: spikeResult.train.costCoins
+					} );
+				}
+				if ( schedule.length ) {
+					schedule.sort( function( a, b ) {
+						return a.depart - b.depart;
+					} );
+					for ( var i = schedule.length - 2; i >= 0; i-- ) {
+						var gap = schedule[i + 1].depart - schedule[i].depart;
+						if ( gap < delay ) {
+							var diff = delay - gap;
+							schedule[i].depart -= diff;
+							schedule[i].arrive -= diff;
+						}
+					}
+					var accumCost = 0;
+					for ( var i = 0; i < schedule.length; i++ ) {
+						accumCost += schedule[i].cost;
+						schedule[i].accumCost = accumCost;
+						schedule[i].departTime = new Date( schedule[i].depart ).toTimeString();
+						schedule[i].arriveTime = new Date( schedule[i].arrive ).toTimeString();
+					}
+				} else {
+					errors.push( '计算结果中没有数据' );
+				}
+				if ( errors.length ) {
+					$result.append( spikeAlertTemplate( {
+						type: schedule.length ? 'warning' : 'danger',
+						messages: errors
+					} ) );
+				}
+				if ( schedule.length ) {
+					$result.append( spikeResultTemplate( {
+						totalCost: totalCost,
+						totalGross: totalGross,
+						totalNet: totalGross - totalCost,
+						schedule: schedule
+					} ) );
+				}
+			};
+
+			$.each( new Array( 4 ), function( i ) { // 4 workers
+				var worker = new Worker( 'calculator.js' );
+				var fetchedTask = taskIdx++;
+				var next = function() {
+					if ( fetchedTask >= tasks.length ) {
+						worker.terminate();
+					} else {
+						worker.postMessage( tasks[fetchedTask].message );
+					}
+				};
+				worker.onmessage = function( e ) {
+					tasks[fetchedTask].onmessage( e );
+					taskRecv++;
+					if ( taskRecv == tasks.length ) {
+						showSpikeResults();
+					} else {
+						fetchedTask = taskIdx++;
+						next();
+					}
+				};
+				next();
+			} );
+		} );
 
 		// Dump
 		var dumpCSV = function( jsArray, filename ) {
