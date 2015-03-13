@@ -772,11 +772,7 @@ jQuery( function( $, undefined ) {
 				var battery = parseInt( $train.find( '.train-attrib-value.train-attrib-battery' ).val() );
 
 				// trainText is too long.
-				if ( type < 0 ) {
-					trainTextById[trainId] = trainNameByType( type );
-				} else {
-					trainTextById[trainId] = trains[type][1];
-				}
+				trainTextById[trainId] = trainNameByType( type );
 				trainColorById[trainId] = trainColor;
 
 				if ( isNaN( speed ) || isNaN( distance ) || isNaN( weight ) || isNaN( battery ) ) {
