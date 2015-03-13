@@ -558,6 +558,104 @@
 			</div>
 		</div>
 		<div class="panel panel-default">
+			<div class=panel-heading role=tab id=spike-heading>
+				<h2 class=panel-title>
+					<a data-toggle=collapse data-parent=#mainAccordion href=#spike aria-expanded=false aria-controls=spike>秒杀</a>
+				</h2>
+			</div>
+			<div id=spike class="panel-collapse collapse in" role=tabpanel aria-labelledby=spike-heading>
+				<div class=panel-body>
+					<div id=spike-container>
+						<script id=spike-template type=text/x-handlebars-template>
+							<div id="spike-{{id}}" class=spike-row data-id="{{id}}">
+								<h3 class=spike-heading></h3>
+								<div class=row>
+									<div class=col-md-2>
+										<p><img class="spike-img img-responsive" src="" alt="">
+									</div>
+									<div class=col-md-10>
+										<form class=form-horizontal role=form>
+											<div class=form-group>
+												<div class="col-md-12 checkbox">
+													<label>
+														<input type=checkbox class=spike-use>
+														使用此车
+													</label>
+												</div>
+											</div>
+											<div class="form-group spike-data">
+												<div class=col-md-12>
+													<select class="spike-copy form-control">
+														<option>
+															选择一个方案，或在下方填写
+														</option>
+													</select>
+												</div>
+											</div>
+										</form>
+									</div>
+								</div>
+								<form class="spike-data form-horizontal" role=form>
+									<div class=form-group>
+										<label class="col-md-2 control-label">火车信息</label>
+										<label class="col-md-2 control-label">发车站：</label>
+										<div class=col-md-3>
+											<select class="spike-depart form-control station-list-select"></select>
+										</div>
+										<label class="col-md-2 control-label">到达站：</label>
+										<div class=col-md-3>
+											<select class="spike-arrive form-control station-list-select"></select>
+										</div>
+									</div>
+									<div class=form-group>
+										<label class="col-md-2 control-label">客货信息</label>
+										<label class="col-md-2 control-label">始发站：</label>
+										<div class=col-md-3>
+											<select class="spike-from form-control station-list-select"></select>
+										</div>
+										<label class="col-md-2 control-label">终到站：</label>
+										<div class=col-md-3>
+											<select class="spike-to form-control station-list-select"></select>
+										</div>
+									</div>
+								</form>
+								<hr>
+							</div>
+						</script>
+					</div>
+					<form class=form-horizontal role=form>
+						<div class=form-group>
+							<label class="col-md-2 control-label" for=spike-penalty>中转罚分（里程）：</label>
+							<div class=col-md-10>
+								<input class=form-control type=number min=0 value=1 id=spike-penalty>
+							</div>
+						</div>
+						<div class=form-group>
+							<label class="col-md-2 control-label" for=spike-delay>最小发车间隔：</label>
+							<div class=col-md-8>
+								<input class=form-control type=number min=0 value=10 id=spike-delay>
+							</div>
+							<div class=col-md-2>秒</div>
+						</div>
+						<div class=form-group>
+							<label class="col-md-2 control-label" for=spike-ahead>提前到达：</label>
+							<div class=col-md-8>
+								<input class=form-control type=number value=150 id=spike-ahead>
+							</div>
+							<div class=col-md-2>秒</div>
+						</div>
+						<div class=form-group>
+							<div class=col-md-12>
+								<button type=button id=spike-calculate class="btn btn-primary btn-block" disabled>计算</button>
+							</div>
+						</div>
+					</form>
+					<div id=spike-result>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="panel panel-default">
 			<div class=panel-heading role=tab id=dump-heading>
 				<h2 class=panel-title>
 					<a data-toggle=collapse data-parent=#mainAccordion href=#dump aria-expanded=false aria-controls=dump>输出</a>

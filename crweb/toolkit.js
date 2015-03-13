@@ -119,6 +119,7 @@ jQuery( function( $, undefined ) {
 			if ( !inTrainsBatch ) {
 				localStorage['crwebToolkitTrains_' + dataset] = JSON.stringify( serializeTrains() );
 				$( '.train-list-select' ).trigger( 'do-update' );
+				$( '#spike-container' ).trigger( 'do-update' );
 			}
 		};
 		var inStationsBatch = false;
@@ -142,6 +143,44 @@ jQuery( function( $, undefined ) {
 		var stationsBatchEnd = function() {
 			inStationsBatch = false;
 			stationsUpdated();
+		};
+		var trainNameByType = function( type ) {
+			if ( type < 0 ) {
+				return '自定义' + -type + '星级火车';
+			} else {
+				return trains[type][1];
+			}
+		};
+		var makeTrainText = function( trainId, allowNegative ) {
+			var $train = $( '#train-' + trainId );
+
+			var type = parseInt( $train.find( '.train-select' ).val() );
+			if ( type < 0 && !allowNegative ) {
+				return null;
+			}
+			var typeText = trainNameByType( type );
+
+			var speed = parseInt( $train.find( '.train-attrib-value.train-attrib-speed' ).val() );
+			var distance = parseInt( $train.find( '.train-attrib-value.train-attrib-distance' ).val() );
+			var weight = parseInt( $train.find( '.train-attrib-value.train-attrib-weight' ).val() );
+			var battery = parseInt( $train.find( '.train-attrib-value.train-attrib-battery' ).val() );
+			var speedLevel = parseInt( $train.find( '.train-attrib-level.train-attrib-speed' ).val() );
+			var distanceLevel = parseInt( $train.find( '.train-attrib-level.train-attrib-distance' ).val() );
+			var weightLevel = parseInt( $train.find( '.train-attrib-level.train-attrib-weight' ).val() );
+			var batteryLevel = parseInt( $train.find( '.train-attrib-level.train-attrib-battery' ).val() );
+
+			if ( isNaN( speed ) || isNaN( distance ) || isNaN( weight ) || isNaN( battery ) ) {
+				return null;
+			}
+
+			var text = typeText
+				+ ' | ' + ( type < 0 ? -type : trains[type][3] ) + '星'
+				+ ' | 速度（' + speedLevel + '级）' + speed
+				+ ' | 距离（' + distanceLevel + '级）' + distance
+				+ ' | 重量（' + weightLevel + '级）' + weight
+				+ ' | 电量（' + batteryLevel + '级）' + battery;
+
+			return text;
 		};
 		var makePathText = function( calculated ) {
 			if ( calculated.path ) {
@@ -193,13 +232,6 @@ jQuery( function( $, undefined ) {
 			return [ parseInt( terminal1 ), parseInt( terminal2 ) ];
 		};
 		// Trains
-		var trainNameByType = function( type ) {
-			if ( type < 0 ) {
-				return '自定义' + -type + '星级火车';
-			} else {
-				return trains[type][1];
-			}
-		};
 		var trainNextId = 0;
 		var trainTemplate = Handlebars.compile( $( '#train-template' ).html() );
 
@@ -725,7 +757,7 @@ jQuery( function( $, undefined ) {
 			var penalty = parseInt( $( '#route-penalty' ).val() ) || 0;
 			var tasks = [], taskIdx = 0;
 			$.each( trainIds, function() {
-				var trainId = this, trainText = $( '#route-train option[value=' + trainId + ']' ).text();
+				var trainId = this, trainText = makeTrainText( trainId, true );
 				var trainColor = randomColor();
 				$( '<h3/>' ).attr( 'id', 'route-result-heading-train-' + trainId )
 					.text( trainText ).css( 'color', trainColor ).appendTo( '#route-result' );
@@ -868,30 +900,6 @@ jQuery( function( $, undefined ) {
 		} ).trigger( 'change' );
 
 		// Optimization
-		$( '.station-list-select' ).on( 'do-update', function() {
-			var $select = $( this );
-			var val = $select.val();
-			try {
-				$select.select2( 'destory' );
-			} catch ( e ) {
-				// before select2 gets initialized
-			}
-			$select.empty();
-
-			$( '.station-row' ).each( function() {
-				var $this = $( this );
-
-				var id = $this.data( 'id' );
-				var station = stations[id];
-
-				$( '<option/>' ).attr( 'value', id ).text(
-					station[1] + ' | ' + station[4] + '星'
-				).appendTo( $select );
-			} );
-
-			$select.val( val );
-			$select.select2();
-		} ).trigger( 'do-update' );
 		var optimizationBaseTemplate = Handlebars.compile( $( '#optimization-base-template' ).html() );
 		var optimizationTrain = function( group ) {
 			if ( !group ) {
@@ -1305,6 +1313,115 @@ jQuery( function( $, undefined ) {
 			worker.postMessage( [ train, stations, [], [], false, 0 ] );
 		} );
 
+		// Spike
+		var $spikeTemplate = $( '#spike-template' );
+		var spikeTemplate = Handlebars.compile( $spikeTemplate.html() );
+		$( '#spike-container' ).on( 'do-update', function( e ) {
+			var $this = $( this );
+			var hasTrain = {};
+			var $prevSpike = $spikeTemplate;
+
+			$( '.train-row' ).each( function() {
+				var $train = $( this );
+
+				var id = $train.data( 'id' );
+				var type = parseInt( $train.find( '.train-select' ).val() );
+				var text = makeTrainText( id, false );
+				if ( !text ) {
+					return;
+				}
+				hasTrain[id] = true;
+
+				var $spike = $( '#spike-' + id );
+				if ( $spike.length == 0 ) {
+					$spike = $( spikeTemplate( {
+						id: id
+					} ) ).insertAfter( $prevSpike );
+
+					$spike.find( '.spike-use' ).change( function( e ) {
+						var isChecked = $( this ).is( ':checked' );
+						$spike.find( '.spike-data' ).toggle( isChecked );
+						if ( isChecked ) {
+							// Make sure the list is correctly populated and resized
+							$spike.find( '.station-list-select' ).trigger( 'do-update' );
+						}
+					} ).change();
+
+					$spike.find( '.spike-copy' ).change( function( e ) {
+						var $this = $( this );
+
+						if ( $this.val() ) {
+							var pieces = $this.val().split( '-' );
+							if ( pieces.length == 4 ) {
+								$spike.find( '.spike-depart' ).val( pieces[0] ).trigger( 'change' );
+								$spike.find( '.spike-arrive' ).val( pieces[1] ).trigger( 'change' );
+								$spike.find( '.spike-from' ).val( pieces[2] ).trigger( 'change' );
+								$spike.find( '.spike-to' ).val( pieces[3] ).trigger( 'change' );
+							}
+							$this.val( '' );
+						}
+					} );
+
+					$spike.find( '.station-list-select' ).change( function( e ) {
+						var schemas = {};
+
+						$( '.spike-row' ).each( function( e ) {
+							var $this = $( this );
+							var depart = $this.find( '.spike-depart' ).val();
+							var arrive = $this.find( '.spike-arrive' ).val();
+							var from = $this.find( '.spike-from' ).val();
+							var to = $this.find( '.spike-to' ).val();
+
+							if ( !depart || !arrive || !from || !to ) {
+								return;
+							}
+
+							var key = depart + '-' + arrive + '-' + from + '-' + to;
+							if ( schemas[key] ) {
+								return
+							}
+
+							var text = '火车：' + stations[depart][1] + '→' + stations[arrive][1]
+								+ ' | 客货：' + stations[from][1] + '→' + stations[to][1];
+							schemas[key] = text;
+						} );
+
+						$( '.spike-copy' ).each( function( e ) {
+							var $select = $( this );
+
+							$select.empty();
+							$( '<option/>' ).attr( 'value', '' ).text( '选择一个方案，或在下方填写' ).appendTo( $select );
+
+							for ( var key in schemas ) {
+								$( '<option/>' ).attr( 'value', key ).text( schemas[key] ).appendTo( $select );
+							}
+						} );
+					} );
+				}
+				$prevSpike = $spike;
+
+				$spike.find( '.spike-heading' ).text( text );
+
+				var img = trains[type][10];
+				var alt = trainNameByType( type );
+				if ( img ) {
+					var imgUrl = cloudServer + '/crweb/train_image/' + dataset + '/' + img;
+					var $img = $spike.find( '.spike-img' );
+					if ( imgUrl != $img.attr( 'src' ) ) {
+						$img.attr( 'src', '' ).attr( 'alt', '' );
+						$img.attr( 'src', imgUrl ).attr( 'alt', alt );
+					}
+				}
+			} );
+
+			$( '.spike-row' ).each( function() {
+				var $this = $( this );
+				if ( !hasTrain[$this.data( 'id' )] ) {
+					$this.remove();
+				}
+			} );
+		} ).trigger( 'do-update' );
+
 		// Dump
 		var dumpCSV = function( jsArray, filename ) {
 			var csv = Papa.unparse( jsArray );
@@ -1614,39 +1731,17 @@ jQuery( function( $, undefined ) {
 		} );
 
 		// Shared
-		$( '.train-list-select' ).on( 'do-update', function() {
+		$( 'body' ).on( 'do-update', '.train-list-select', function() {
 			var $select = $( this );
 			var val = $select.val();
 			$select.empty();
 
 			$( '.train-row' ).each( function() {
-				var $this = $( this );
-
-				var id = $this.data( 'id' );
-				var type = parseInt( $this.find( '.train-select' ).val() );
-				if ( type < 0 && !$select.data( 'negative' ) ) {
+				var id = $( this ).data( 'id' );
+				var text = makeTrainText( id, $select.data( 'negative' ) );
+				if ( !text ) {
 					return;
 				}
-				var typeText = trainNameByType( type );
-				var speed = parseInt( $this.find( '.train-attrib-value.train-attrib-speed' ).val() );
-				var distance = parseInt( $this.find( '.train-attrib-value.train-attrib-distance' ).val() );
-				var weight = parseInt( $this.find( '.train-attrib-value.train-attrib-weight' ).val() );
-				var battery = parseInt( $this.find( '.train-attrib-value.train-attrib-battery' ).val() );
-				var speedLevel = parseInt( $this.find( '.train-attrib-level.train-attrib-speed' ).val() );
-				var distanceLevel = parseInt( $this.find( '.train-attrib-level.train-attrib-distance' ).val() );
-				var weightLevel = parseInt( $this.find( '.train-attrib-level.train-attrib-weight' ).val() );
-				var batteryLevel = parseInt( $this.find( '.train-attrib-level.train-attrib-battery' ).val() );
-
-				if ( isNaN( speed ) || isNaN( distance ) || isNaN( weight ) || isNaN( battery ) ) {
-					return;
-				}
-
-				var text = typeText
-					+ ' | ' + ( type < 0 ? -type : trains[type][3] ) + '星'
-					+ ' | 速度（' + speedLevel + '级）' + speed
-					+ ' | 距离（' + distanceLevel + '级）' + distance
-					+ ' | 重量（' + weightLevel + '级）' + weight
-					+ ' | 电量（' + batteryLevel + '级）' + battery;
 				$( '<option/>' ).attr( 'value', id ).text( text ).appendTo( $select );
 			} );
 
@@ -1654,7 +1749,31 @@ jQuery( function( $, undefined ) {
 			if ( $select.prop( 'multiple' ) ) {
 				$select.attr( 'size', $select.find( 'option' ).length );
 			}
-		} ).trigger( 'do-update' );
+		} ).find( '.train-list-select' ).trigger( 'do-update' );
+		$( 'body' ).on( 'do-update', '.station-list-select', function() {
+			var $select = $( this );
+			var val = $select.val();
+			try {
+				$select.select2( 'destory' );
+			} catch ( e ) {
+				// before select2 gets initialized
+			}
+			$select.empty();
+
+			$( '.station-row' ).each( function() {
+				var $this = $( this );
+
+				var id = $this.data( 'id' );
+				var station = stations[id];
+
+				$( '<option/>' ).attr( 'value', id ).text(
+					station[1] + ' | ' + station[4] + '星'
+				).appendTo( $select );
+			} );
+
+			$select.val( val );
+			$select.select2();
+		} ).find( '.station-list-select' ).trigger( 'do-update' );
 	};
 
 	$.getJSON( 'data/' + dataset + '.json', function( data ) {
