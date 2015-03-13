@@ -79,10 +79,15 @@ var buildPath = function( train, stations, useStations, wayPoints, penalty ) {
  * @param Array wayPoints
  * @param Boolean insert
  * @param Integer penalty
+ * @param Float incomeCoef
  * @return Object { ok, message }
  */
-var calculate = function( train, stations, useStations, wayPoints, insert, penalty ) {
+var calculate = function( train, stations, useStations, wayPoints, insert, penalty, incomeCoef ) {
 	var path, totalDistance, distances, priceDistance;
+
+	if ( !incomeCoef ) {
+		incomeCoef = 1; // legacy call
+	}
 
 	if ( wayPoints.length < 2 ) {
 		// Calculate "ideal" profit now.
@@ -142,7 +147,9 @@ var calculate = function( train, stations, useStations, wayPoints, insert, penal
 	var priceCoins = priceDistance + 50;
 	var costCoins = Math.floor( train.speed * train.weight * totalDistance / 400000 ) + 1;
 	// real total gross income is NOT the sum of all prices labeled due to rounding issues
-	var totalGross = train.loads < 0 ? NaN : Math.floor( train.loads * priceCoins * ( train.loads > 1 ? 1.25 : 1 ) );
+	var totalGross = train.loads < 0 ? NaN : Math.floor(
+		Math.floor( train.loads * priceCoins * ( train.loads > 1 ? 1.25 : 1 ) ) * incomeCoef
+	);
 	var totalNet = train.loads < 0 ? NaN : ( totalGross - costCoins );
 	var dailyCount = Math.floor( train.battery / batteryConsumed );
 	var dailyRemaining = train.battery - dailyCount * batteryConsumed;

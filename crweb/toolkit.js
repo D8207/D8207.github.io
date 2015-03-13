@@ -753,6 +753,7 @@ jQuery( function( $, undefined ) {
 			var wayPoints = $( '#route-waypoints li.ui-state-default' ).map( function() {
 				return $( this ).data( 'id' );
 			} ).get();
+			var coef = $( '#route-saturday:checked' ).length > 0 ? 1.2 : 1;
 			var insert = $( '#route-insert:checked' ).length > 0;
 			var penalty = parseInt( $( '#route-penalty' ).val() ) || 0;
 			var tasks = [], taskIdx = 0;
@@ -863,7 +864,7 @@ jQuery( function( $, undefined ) {
 					},
 					message: [
 						train, stations, useStationsV, wayPoints,
-						insert, penalty
+						insert, penalty, coef
 					]
 				} );
 			} );
