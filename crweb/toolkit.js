@@ -1992,6 +1992,10 @@ jQuery( function( $, undefined ) {
 			$select.val( val );
 			$select.select2();
 		} ).find( '.station-list-select' ).trigger( 'do-update' );
+
+		if ( new Date().getDay() == 6 ) {
+			$( '.saturday' ).prop( 'checked', true );
+		}
 	};
 
 	$.getJSON( 'data/' + dataset + '.json', function( data ) {
