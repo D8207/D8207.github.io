@@ -1647,7 +1647,7 @@ jQuery( function( $, undefined ) {
 			saveAs( blob, filename );
 		};
 		var dumpItems = {
-			trains: function() {
+			all_trains: function() {
 				var data = [
 					[ '名称', '描述', '星级', '客运仓位', '货运仓位', '速度', '距离', '重量', '电量' ]
 					.concat( localData.trainImageRoot ? [ '图片' ] : [] )
@@ -1661,9 +1661,9 @@ jQuery( function( $, undefined ) {
 						trainParts[this[26]][6], trainParts[this[27]][6], trainParts[this[29]][6] ] )
 					);
 				} );
-				return dumpCSV( data, 'trains.csv' );
+				return dumpCSV( data, 'all_trains.csv' );
 			},
-			stations: function() {
+			all_stations: function() {
 				var data = [
 					[ '名称', '描述', '下辖', '星级', 'X坐标', 'Y坐标', '人口', '国家', '类型' ]
 				];
@@ -1674,7 +1674,32 @@ jQuery( function( $, undefined ) {
 						stationTypeById[this[10]]
 					] );
 				} );
-				return dumpCSV( data, 'stations.csv' );
+				return dumpCSV( data, 'all_stations.csv' );
+			},
+			trains: function() {
+				var data = [
+					[ '名称', '速度', '速度等级', '距离', '距离等级', '重量', '重量等级', '电量', '电量等级' ]
+				];
+				$( '.train-row' ).each( function() {
+					var $train = $( this );
+
+					var type = parseInt( $train.find( '.train-select' ).val() );
+					var name = trainNameByType( type );
+
+					var speed = parseInt( $train.find( '.train-attrib-value.train-attrib-speed' ).val() );
+					var distance = parseInt( $train.find( '.train-attrib-value.train-attrib-distance' ).val() );
+					var weight = parseInt( $train.find( '.train-attrib-value.train-attrib-weight' ).val() );
+					var battery = parseInt( $train.find( '.train-attrib-value.train-attrib-battery' ).val() );
+					var speedLevel = parseInt( $train.find( '.train-attrib-level.train-attrib-speed' ).val() );
+					var distanceLevel = parseInt( $train.find( '.train-attrib-level.train-attrib-distance' ).val() );
+					var weightLevel = parseInt( $train.find( '.train-attrib-level.train-attrib-weight' ).val() );
+					var batteryLevel = parseInt( $train.find( '.train-attrib-level.train-attrib-battery' ).val() );
+
+					data.push( [
+						name, speed, speedLevel, distance, distanceLevel, weight, weightLevel, battery, batteryLevel
+					] );
+				} );
+				return dumpCSV( data, 'trains.csv' );
 			}
 		};
 		$( '#dump-exec' ).prop( 'disabled', false ).click( function() {
