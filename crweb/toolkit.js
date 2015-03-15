@@ -1665,7 +1665,7 @@ jQuery( function( $, undefined ) {
 			},
 			stations: function() {
 				var data = [
-					['名称', '描述', '下辖', '星级', 'X坐标', 'Y坐标', '人口', '国家', '类型' ]
+					[ '名称', '描述', '下辖', '星级', 'X坐标', 'Y坐标', '人口', '国家', '类型' ]
 				];
 				$.each( stations, function() {
 					data.push( [
