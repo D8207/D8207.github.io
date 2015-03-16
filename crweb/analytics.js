@@ -242,8 +242,8 @@ var parsePcap = function( input, items, server ) {
 		}
 
 		var policyHeader = new Buffer( 0xffff ), policyLength = 0, isCrweb = null;
-		var send = { buffer: new Buffer( 0x1ffff ), length: 0 };
-		var recv = { buffer: new Buffer( 0x1ffff ), length: 0 };
+		var send = { buffer: new Buffer( 0x1ffff ), length: 0, typical: 0x0004000a, typicalBytes: 4 };
+		var recv = { buffer: new Buffer( 0x1ffff ), length: 0, typical: 0x0004000b, typicalBytes: 4 };
 		var policyTail = '<policy-file-succeed/>';
 		var serverNeedles = [
 			[ 'desktop', '.app100679516.' ],
@@ -255,15 +255,43 @@ var parsePcap = function( input, items, server ) {
 			send = recv = null;
 		};
 
+		var readUIntBE = {
+			1: 'readUInt8',
+			2: 'readUInt16BE',
+			4: 'readUInt32BE'
+		};
+
 		var next = function( buffer, data ) {
 			var packets = [];
 			data.copy( buffer.buffer, buffer.length );
+			var prevLength = buffer.length; // for recovery
 			buffer.length += data.length;
+			if ( buffer.recovering ) {
+				for ( var i = prevLength - buffer.typicalBytes + 1; i <= buffer.length - buffer.typicalBytes; i++ ) {
+					if ( i < 0 ) {
+						continue;
+					}
+					if ( buffer.buffer[readUIntBE[buffer.typicalBytes]]( i ) == buffer.typical ) {
+						buffer.recovering = false;
+						buffer.buffer.copy( buffer.buffer, 0, i, buffer.length );
+						buffer.length -= i;
+						break;
+					}
+				}
+				if ( buffer.recovering ) {
+					if ( buffer.length >= buffer.typicalBytes ) {
+						buffer.buffer.copy( buffer.buffer, 0, buffer.length - buffer.typicalBytes + 1, buffer.length );
+						buffer.length = buffer.typicalBytes - 1;
+					}
+					return packets;
+				}
+			}
 			while ( buffer.length >= 2 ) {
 				var length = buffer.buffer.readUInt16BE( 0x0 );
 				if ( length < 2 ) {
 					sendWarning( '无效包长度：' + length );
-					buffer.length = 0; // try to recover by clearing the buffer
+					buffer.length = 0;
+					buffer.recovering = true;
 					break;
 				}
 				if ( buffer.length < length ) {
