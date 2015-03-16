@@ -1754,6 +1754,9 @@ jQuery( function( $, undefined ) {
 				var myData = [ 'my' ], opData = [ 'op' ], dates = [ 'x' ], date = new Date();
 				var myDataDiff = [ 'my-diff', null ], opDataDiff = [ 'op-diff', null ];
 				var usersByDate = {};
+				data.sort( function( a, b ) {
+					return a.date.getTime() - b.date.getTime();
+				} );
 				$.each( data, function( idx ) {
 					date = this.date;
 					dates.push( date.getFullYear()
