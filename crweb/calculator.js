@@ -51,25 +51,8 @@ var buildPath = function( train, stations, useStations, wayPoints, penalty ) {
 	} );
 
 	var graph = new Graph( map );
-	var result = [], prev = null;
-
-	wayPoints.forEach( function( curr ) {
-		if ( result === null ) {
-			return;
-		}
-		if ( prev !== null ) {
-			var path = graph.findShortestPath( prev, curr );
-			if ( path === null ) {
-				result = null;
-			} else {
-				result.pop();
-				result = result.concat( path );
-			}
-		}
-		prev = curr;
-	} );
-
-	return result;
+	// findShortestPath emptys the array passed in
+	return graph.findShortestPath( wayPoints.slice( 0 ) );
 };
 
 /**
