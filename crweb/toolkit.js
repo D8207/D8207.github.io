@@ -820,6 +820,7 @@ jQuery( function( $, undefined ) {
 								hasLoads: train.loads >= 0,
 								path: makePathText( calculated ),
 								totalDistance: calculated.totalDistance,
+								totalDistanceRatio: calculated.totalDistance / calculated.priceDistance,
 								runningTime: calculated.runningTime,
 								runningHours: Math.floor( calculated.runningTime / 3600 ),
 								runningMinutes: Math.floor( calculated.runningTime / 60 ) % 60,
