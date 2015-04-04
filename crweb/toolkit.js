@@ -231,6 +231,13 @@ jQuery( function( $, undefined ) {
 			} );
 			return [ parseInt( terminal1 ), parseInt( terminal2 ) ];
 		};
+		var getTrainImageUrl = function( img ) {
+			if ( localData.trainImageRoot ) {
+				return localData.trainImageRoot + img;
+			} else {
+				return cloudServer + '/crweb/train_image/' + dataset + '/' + img;
+			}
+		};
 		// Trains
 		var trainNextId = 0;
 		var trainTemplate = Handlebars.compile( $( '#train-template' ).html() );
@@ -295,7 +302,7 @@ jQuery( function( $, undefined ) {
 				$train.find( '.train-img' ).attr( 'src', '' ).attr( 'alt', '' );
 				if ( img ) {
 					$train.find( '.train-img' )
-						.attr( 'src', cloudServer + '/crweb/train_image/' + dataset + '/' + img )
+						.attr( 'src', getTrainImageUrl( img ) )
 						.attr( 'alt', name );
 				}
 				$train.find( '.train-info' ).html(
@@ -1404,7 +1411,7 @@ jQuery( function( $, undefined ) {
 				var alt = trainNameByType( type );
 				var $img = $spike.find( '.spike-img' );
 				if ( img ) {
-					var imgUrl = cloudServer + '/crweb/train_image/' + dataset + '/' + img;
+					var imgUrl = getTrainImageUrl( img );
 					if ( imgUrl != $img.attr( 'src' ) ) {
 						$img.attr( 'src', '' ).attr( 'alt', '' );
 						$img.attr( 'src', imgUrl ).attr( 'alt', alt );
