@@ -325,11 +325,11 @@ jQuery( function( $, undefined ) {
 					$.each( [ 2, 0, 1, 3 ], function() {
 						part = trainParts[trains[trainType][this + 26]];
 						trainPriceText.push(
-							'<span title="'
+							'<dfn title="'
 							+ part[1].replace( /&/g, '&amp;').replace( /"/g, '&quot;')
 							+ '">'
 							+ trainPartsAbbr[this]
-							+ '</span>：'
+							+ '</dfn>：'
 							+ part[6]
 							+ '点卷'
 						);
