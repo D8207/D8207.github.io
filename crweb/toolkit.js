@@ -337,6 +337,9 @@ jQuery( function( $, undefined ) {
 					// 3 = drawing is the last part above
 					trainPriceText.push( '启用：' + part[6] + '点卷' );
 					trainPriceText.push( '组装：' + ( Math.floor( part[6] / 2 ) + 1 ) + '点卷' );
+					trainPriceText.push( '<dfn title="速度 * 电量 * 仓位 / 启用点卷">评估值</dfn>：'
+						+ Math.floor( trains[trainType][5] * trains[trainType][7] * (
+							trains[trainType][8] + trains[trainType][9] ) / part[6] ) );
 					$train.find( '.train-price' ).html( trainPriceText.join( ' | ' ) ).show();
 				} else {
 					$train.find( '.train-price' ).hide();
