@@ -65,7 +65,7 @@ var buildPath = function( train, stations, useStations, wayPoints, penalty ) {
  * @param Float incomeCoef
  * @return Object { ok, message }
  */
-var calculate = function( train, stations, useStations, wayPoints, insert, penalty, incomeCoef ) {
+var calculate = function( train, stations, useStations, wayPoints, insert, penalty, incomeCoef, night ) {
 	var path, totalDistance, distances, priceDistance;
 
 	if ( !incomeCoef ) {
@@ -138,6 +138,9 @@ var calculate = function( train, stations, useStations, wayPoints, insert, penal
 	var dailyRemaining = train.battery - dailyCount * batteryConsumed;
 	var dailyGross = totalGross * dailyCount;
 	var dailyNet = totalNet * dailyCount;
+	if ( night ) {
+		dailyNet += costCoins;
+	}
 
 	return {
 		ok: true,

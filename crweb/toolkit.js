@@ -764,6 +764,7 @@ jQuery( function( $, undefined ) {
 				return $( this ).data( 'id' );
 			} ).get();
 			var coef = $( '#route-saturday:checked' ).length > 0 ? 1.2 : 1;
+			var night = $( '#route-night:checked' ).length > 0;
 			var insert = $( '#route-insert:checked' ).length > 0;
 			var penalty = parseInt( $( '#route-penalty' ).val() ) || 0;
 			var tasks = [], taskIdx = 0;
@@ -871,7 +872,7 @@ jQuery( function( $, undefined ) {
 					},
 					message: [
 						train, stations, useStationsV, wayPoints,
-						insert, penalty, coef
+						insert, penalty, coef, night
 					]
 				} );
 			} );
@@ -991,6 +992,7 @@ jQuery( function( $, undefined ) {
 			var toStation = $( '#optimization-to' ).val();
 			var exprInput = $( '#optimization-expr' ).val();
 			var numRows = parseInt( $( '#optimization-numrows' ).val() );
+			var night = $( '#optimization-night:checked' ).length > 0;
 			var penalty = parseInt( $( '#optimization-penalty' ).val() ) || 0;
 
 			if ( !train || !stations[fromStation] || !stations[toStation] ) {
@@ -1216,7 +1218,7 @@ jQuery( function( $, undefined ) {
 								battery: pair.battery
 							} ),
 							stations, useStationsV,
-							path.path, false, 0
+							path.path, false, 0, 1, night
 						] );
 					};
 					worker.onmessage = function( e ) {
