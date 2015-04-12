@@ -1,6 +1,6 @@
 {
 	"runningTimeReverse": "1970-01-01T22:00:00.000+0800",
-	"currencyName": "$",
+	"currencyName": "USD",
 	"trainImageRoot": "https://www.global-railway.com/grweb/pic/",
 	"i18nStrings": "StaticLangEn.js",
 	"server": "desktop"
