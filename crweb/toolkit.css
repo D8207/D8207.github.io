@@ -22,3 +22,7 @@
 .route-station-list li.ui-state-default {
 	cursor: default;
 }
+
+.flag-inline {
+	height: 2em;
+}

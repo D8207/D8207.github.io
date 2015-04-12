@@ -180,14 +180,6 @@
 								</div>
 							</div>
 							<div class=form-group>
-								<label class="col-md-2 control-label" for=stations-country>国家：</label>
-								<div class=col-md-10>
-									<select class=form-control id=stations-country>
-										<option value=>不限</option>
-									</select>
-								</div>
-							</div>
-							<div class=form-group>
 								<label class="col-md-2 control-label" for=stations-vector-base>基准站：</label>
 								<div class=col-md-3>
 									<select class=form-control id=stations-vector-base></select>
@@ -222,6 +214,7 @@
 					<table id=stations-table class="text-center table">
 						<thead>
 							<tr>
+								<th class=text-center>国旗
 								<th class=text-center>名称
 								<th class=text-center>星级
 								<th class=text-center>X
@@ -235,10 +228,15 @@
 								<tr title="{{desc}}
 
 类型：{{type}}
-国家：{{country}}
 下辖：{{admin}}"
 									id="station-{{id}}" class=station-row data-id="{{id}}"
 								>
+									<td>
+									{{#if flag}}
+										<img src="{{flag}}" class=flag-inline>
+									{{else}}
+										&nbsp;
+									{{/if}}
 									<td>{{name}}
 									<td>{{#each starArray}}<span class="glyphicon glyphicon-star" aria-hidden=true></span>{{/each}} {{stars}}星
 									<td>{{X}}

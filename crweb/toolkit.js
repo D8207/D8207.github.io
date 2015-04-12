@@ -437,42 +437,6 @@ jQuery( function( $, undefined ) {
 		// Stations
 		var $stationsBody = $( '#stations-table tbody' );
 		var stationTemplate = Handlebars.compile( $( '#station-template' ).html() );
-		var stationCountryById = {
-			0: '中国',
-			1: '英国',
-			2: '意大利',
-			3: '印度',
-			4: '伊朗',
-			5: '伊拉克',
-			6: '叙利亚',
-			7: '匈牙利',
-			8: '希腊',
-			9: '西班牙',
-			10: '乌兹别克斯坦',
-			11: '乌克兰',
-			12: '阿尔及利亚',
-			13: '阿富汗',
-			14: '埃及',
-			15: '奥地利',
-			16: '巴基斯坦',
-			17: '波兰',
-			18: '德国',
-			19: '俄罗斯',
-			20: '法国',
-			21: '哈萨克斯坦',
-			22: '荷兰',
-			23: '利比亚',
-			24: '罗马尼亚',
-			25: '蒙古',
-			26: '孟加拉国',
-			27: '突尼西亚',
-			28: '土耳其',
-			29: '韩国',
-			30: '日本',
-			31: '朝鲜',
-			32: '美国',
-			33: '加拿大'
-		};
 		var stationTypeById = {
 			0: '国内',
 			1: '欧亚',
@@ -505,7 +469,7 @@ jQuery( function( $, undefined ) {
 				Y: station[6],
 				pop: station[7],
 				admin: _( station[9] ),
-				country: stationCountryById[( station[8] || 'q_0' ).replace( 'q_', '' )],
+				flag: ( localData.trainImageRoot && station[8] ) ? ( localData.trainImageRoot + station[8] + '.gif' ) : null,
 				type: stationTypeById[station[10]],
 				price: stationPrice( station )
 			} ) );
@@ -549,21 +513,12 @@ jQuery( function( $, undefined ) {
 			$row.remove();
 			stationsUpdated();
 		} );
-		$( '#stations-country' ).select2( {
-			data: $.map( stationCountryById, function( country, id ) {
-				return {
-					id: id,
-					text: country
-				};
-			} )
-		} );
 		$( '#stations-vector-base, #stations-vector-ref' ).select2( {
 			data: stationsSelectShort
 		} );
 		var stationsSelectedList = function() {
 			var stars = parseInt( $( 'input[name=stations-stars]:checked' ).val() );
 			var type = parseInt( $( 'input[name=stations-type]:checked' ).val() );
-			var country = $( '#stations-country' ).val();
 			var vectorBaseStation = $( '#stations-vector-base' ).val();
 			var vectorRefStation = $( '#stations-vector-ref' ).val();
 			var vectorDir = parseInt( $( '#stations-vector-dir' ).val() );
@@ -581,9 +536,6 @@ jQuery( function( $, undefined ) {
 					return;
 				}
 				if ( type >= 0 && type != this[10] ) {
-					return;
-				}
-				if ( country !== '' && ( 'q_' + country ) !== ( this[8] || 'q_0' ) ) {
 					return;
 				}
 				var stationX = this[5] - baseX, stationY = this[6] - baseY;
@@ -1706,14 +1658,18 @@ jQuery( function( $, undefined ) {
 			},
 			all_stations: function() {
 				var data = [
-					[ '名称', '描述', '下辖', '星级', 'X坐标', 'Y坐标', '人口', '国家', '类型' ]
+					[ '名称', '描述', '下辖', '星级', 'X坐标', 'Y坐标', '人口' ]
+					.concat( localData.trainImageRoot ? [ '国旗' ] : [] )
+					.concat( [ '类型' ] )
 				];
 				$.each( stations, function() {
-					data.push( [
-						_( this[1] ), _( this[2] ), _( this[9] ), this[4], this[5], this[6], this[7],
-						stationCountryById[this[8] ? this[8].replace( 'q_', '' ) : 0],
-						stationTypeById[this[10]]
-					] );
+					data.push(
+						[ _( this[1] ), _( this[2] ), _( this[9] ), this[4], this[5], this[6], this[7] ]
+						.concat( localData.trainImageRoot ? [
+							this[8] ? ( localData.trainImageRoot + this[8] + '.gif' ) : ''
+						] : [] )
+						.concat( [ stationTypeById[this[10]] ] )
+					);
 				} );
 				return dumpCSV( data, 'all_stations.csv' );
 			},
