@@ -2,5 +2,6 @@
 	"runningTimeReverse": "1970-01-01T00:00:00.000+0800",
 	"currencyName": "宝石",
 	"trainImageRoot": null,
+	"i18nStrings": null,
 	"server": "mobile"
 }

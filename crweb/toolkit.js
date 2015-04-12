@@ -22,6 +22,34 @@ jQuery( function( $, undefined ) {
 
 	var staticData = {};
 	var localData = {};
+	var i18nData = {};
+
+	var _ = function( str ) {
+		if ( typeof i18nData[str] != 'undefined' ) {
+			return i18nData[str];
+		} else {
+			return str;
+		}
+	};
+
+	var readStrings = function() {
+		if ( localData.i18nStrings ) {
+			$.ajax( {
+				url: cloudServer + '/crweb/static_data/' + dataset + '/callback/' + localData.i18nStrings,
+				dataType: 'jsonp',
+				cache: true,
+				jsonp: false,
+				jsonpCallback: 'callback',
+			} ).done( function( data ) {
+				$.each( data, function() {
+					i18nData[this[1]] = this[2];
+				} );
+				readStaticData( 0 );
+			} );
+		} else {
+			readStaticData( 0 );
+		}
+	};
 
 	var staticDataFiles = [ 'station', 'train', 'trainLevel', 'part' ];
 	var readStaticData = function( idx ) {
@@ -52,7 +80,7 @@ jQuery( function( $, undefined ) {
 			trains[this[0]] = this;
 			trainsSelect.push( {
 				id: this[0],
-				text: this[1] + ' | ' + this[3] + '星'
+				text: _( this[1] ) + ' | ' + this[3] + '星'
 			} );
 		} );
 		var stations = {};
@@ -62,11 +90,11 @@ jQuery( function( $, undefined ) {
 			stations[this[0]] = this;
 			stationsSelect.push( {
 				id: this[0],
-				text: this[1] + ' | ' + this[4] + '星'
+				text: _( this[1] ) + ' | ' + this[4] + '星'
 			} );
 			stationsSelectShort.push( {
 				id: this[0],
-				text: this[1]
+				text: _( this[1] )
 			} );
 		} );
 		// Utils
@@ -148,7 +176,7 @@ jQuery( function( $, undefined ) {
 			if ( type < 0 ) {
 				return '自定义' + -type + '星级火车';
 			} else {
-				return trains[type][1];
+				return _( trains[type][1] );
 			}
 		};
 		var makeTrainText = function( trainId, allowNegative ) {
@@ -186,9 +214,9 @@ jQuery( function( $, undefined ) {
 			if ( calculated.path ) {
 				return $.map( calculated.path, function( station, index ) {
 					if ( index < calculated.path.length - 1 ) {
-						return [ stations[station][1], calculated.distances[index] ];
+						return [ _( stations[station][1] ), calculated.distances[index] ];
 					} else {
-						return stations[station][1];
+						return _( stations[station][1] );
 					}
 				} ).join( ' - ' );
 			} else {
@@ -273,7 +301,7 @@ jQuery( function( $, undefined ) {
 				var name = trainNameByType( trainType ), desc, img, pc, cc;
 
 				if ( trainType > 0 ) {
-					desc = trains[trainType][2];
+					desc = _( trains[trainType][2] );
 					img = trains[trainType][10];
 					stars = trains[trainType][3];
 					pc = trains[trainType][8];
@@ -326,7 +354,7 @@ jQuery( function( $, undefined ) {
 						part = trainParts[trains[trainType][this + 26]];
 						trainPriceText.push(
 							'<dfn title="'
-							+ part[1].replace( /&/g, '&amp;').replace( /"/g, '&quot;')
+							+ _( part[1] ).replace( /&/g, '&amp;').replace( /"/g, '&quot;')
 							+ '">'
 							+ trainPartsAbbr[this]
 							+ '</dfn>：'
@@ -469,14 +497,14 @@ jQuery( function( $, undefined ) {
 			var station = stations[id];
 			$stationsBody.append( stationTemplate( {
 				id: station[0],
-				name: station[1],
-				desc: station[2],
+				name: _( station[1] ),
+				desc: _( station[2] ),
 				stars: station[4],
 				starArray: new Array( station[4] ),
 				X: station[5],
 				Y: station[6],
 				pop: station[7],
-				admin: station[9],
+				admin: _( station[9] ),
 				country: stationCountryById[( station[8] || 'q_0' ).replace( 'q_', '' )],
 				type: stationTypeById[station[10]],
 				price: stationPrice( station )
@@ -484,7 +512,7 @@ jQuery( function( $, undefined ) {
 			$( '#route-stations' ).append(
 				$( '<li/>' ).addClass( 'ui-state-default station-' + id )
 					.attr( 'data-id', id )
-					.text( station[1] )
+					.text( _( station[1] ) )
 					.draggable( {
 						connectToSortable: '#route-waypoints',
 						helper: 'clone',
@@ -1391,8 +1419,8 @@ jQuery( function( $, undefined ) {
 								return
 							}
 
-							var text = '火车：' + stations[depart][1] + '→' + stations[arrive][1]
-								+ ' | 客货：' + stations[from][1] + '→' + stations[to][1];
+							var text = '火车：' + _( stations[depart][1] ) + '→' + _( stations[arrive][1] )
+								+ ' | 客货：' + _( stations[from][1] ) + '→' + _( stations[to][1] );
 							schemas[key] = text;
 						} );
 
@@ -1668,7 +1696,7 @@ jQuery( function( $, undefined ) {
 				];
 				$.each( trains, function() {
 					data.push(
-						[ this[1], this[2], this[3], this[8], this[9], this[5], this[4], this[6], this[7] ]
+						[ _( this[1] ), _( this[2] ), this[3], this[8], this[9], this[5], this[4], this[6], this[7] ]
 						.concat( localData.trainImageRoot ? [ this[10] ? localData.trainImageRoot + this[10] : '' ] : [] )
 						.concat( [ this[12] || '', this[13] || '', trainParts[this[28]][6],
 						trainParts[this[26]][6], trainParts[this[27]][6], trainParts[this[29]][6] ] )
@@ -1682,7 +1710,7 @@ jQuery( function( $, undefined ) {
 				];
 				$.each( stations, function() {
 					data.push( [
-						this[1], this[2], this[9], this[4], this[5], this[6], this[7],
+						_( this[1] ), _( this[2] ), _( this[9] ), this[4], this[5], this[6], this[7],
 						stationCountryById[this[8] ? this[8].replace( 'q_', '' ) : 0],
 						stationTypeById[this[10]]
 					] );
@@ -2061,7 +2089,7 @@ jQuery( function( $, undefined ) {
 				var station = stations[id];
 
 				$( '<option/>' ).attr( 'value', id ).text(
-					station[1] + ' | ' + station[4] + '星'
+					_( station[1] ) + ' | ' + station[4] + '星'
 				).appendTo( $select );
 			} );
 
@@ -2076,6 +2104,6 @@ jQuery( function( $, undefined ) {
 
 	$.getJSON( 'data/' + dataset + '.json', function( data ) {
 		localData = data;
-		readStaticData( 0 );
+		readStrings();
 	} );
 } );
