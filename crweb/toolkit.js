@@ -55,7 +55,7 @@ jQuery( function( $, undefined ) {
 
 	var readStrings = function() {
 		if ( localData.i18nStrings ) {
-			loadingItemCount = staticDataFiles.length + 1;
+			loadingItemCount = staticDataFiles.length + 3;
 			loadingProgress( '正在载入语言文件' );
 			$.ajax( {
 				url: cloudServer + '/crweb/static_data/' + dataset + '/callback/' + localData.i18nStrings,
@@ -71,15 +71,19 @@ jQuery( function( $, undefined ) {
 				readStaticData( 0 );
 			} ).fail( readStrings );
 		} else {
-			loadingItemCount = staticDataFiles.length;
+			loadingItemCount = staticDataFiles.length + 2;
 			readStaticData( 0 );
 		}
 	};
 
 	var readStaticData = function( idx ) {
 		if ( idx >= staticDataFiles.length ) {
-			loadingProgress();
-			init();
+			loadingProgress( '正在初始化界面' );
+			requestAnimationFrame( function() {
+				init();
+				loadingItemDone++;
+				loadingProgress();
+			} );
 		} else {
 			loadingProgress( '正在载入' + staticDataFiles[idx].desc );
 			var staticDataKey = staticDataFiles[idx].key;
@@ -2089,6 +2093,7 @@ jQuery( function( $, undefined ) {
 	};
 
 	$.getJSON( 'data/' + dataset + '.json', function( data ) {
+		loadingItemDone++;
 		localData = data;
 		readStrings();
 	} );
