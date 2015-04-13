@@ -32,8 +32,31 @@ jQuery( function( $, undefined ) {
 		}
 	};
 
+	var loadingItemCount, loadingItemDone = 0;
+
+	var loadingProgress = function( str ) {
+		if ( loadingItemDone < loadingItemCount ) {
+			var $bar = $( '#loading-progress-bar' );
+			$bar.css( 'width', loadingItemDone * 100 / loadingItemCount + '%' );
+			if ( typeof str != 'undefined' ) {
+				$bar.text( str );
+			}
+		} else {
+			$( '#loading-progress' ).remove();
+		}
+	};
+
+	var staticDataFiles = [
+		{ key: 'station', desc: '车站数据' },
+		{ key: 'train', desc: '火车数据' },
+		{ key: 'trainLevel', desc: '火车等级数据' },
+		{ key: 'part', desc: '零件数据' }
+	];
+
 	var readStrings = function() {
 		if ( localData.i18nStrings ) {
+			loadingItemCount = staticDataFiles.length + 1;
+			loadingProgress( '正在载入语言文件' );
 			$.ajax( {
 				url: cloudServer + '/crweb/static_data/' + dataset + '/callback/' + localData.i18nStrings,
 				dataType: 'jsonp',
@@ -41,22 +64,26 @@ jQuery( function( $, undefined ) {
 				jsonp: false,
 				jsonpCallback: 'callback',
 			} ).done( function( data ) {
+				loadingItemDone++;
 				$.each( data, function() {
 					i18nData[this[1]] = this[2];
 				} );
 				readStaticData( 0 );
-			} );
+			} ).fail( readStrings );
 		} else {
+			loadingItemCount = staticDataFiles.length;
 			readStaticData( 0 );
 		}
 	};
 
-	var staticDataFiles = [ 'station', 'train', 'trainLevel', 'part' ];
 	var readStaticData = function( idx ) {
 		if ( idx >= staticDataFiles.length ) {
+			loadingProgress();
 			init();
 		} else {
-			var staticDataKey = staticDataFiles[idx];
+			loadingProgress( '正在载入' + staticDataFiles[idx].desc );
+			var staticDataKey = staticDataFiles[idx].key;
+			loadingProgress();
 			$.ajax( {
 				url: cloudServer + '/crweb/static_data/' + dataset + '/callback/Static'
 					+ staticDataKey.charAt(0).toUpperCase() + staticDataKey.slice(1) + '.js',
@@ -65,8 +92,11 @@ jQuery( function( $, undefined ) {
 				jsonp: false,
 				jsonpCallback: 'callback',
 			} ).done( function( data ) {
+				loadingItemDone++;
 				staticData[staticDataKey] = data;
 				readStaticData( idx + 1 );
+			} ).fail( function() {
+				readStaticData( idx );
 			} );
 		}
 	};

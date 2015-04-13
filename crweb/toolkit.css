@@ -26,3 +26,7 @@
 .flag-inline {
 	height: 2em;
 }
+
+#loading-progress {
+	margin: 1em 0;
+}
