@@ -79,11 +79,11 @@ jQuery( function( $, undefined ) {
 	var readStaticData = function( idx ) {
 		if ( idx >= staticDataFiles.length ) {
 			loadingProgress( '正在初始化界面' );
-			requestAnimationFrame( function() {
+			setTimeout( function() {
 				init();
 				loadingItemDone++;
 				loadingProgress();
-			} );
+			}, 1000 );
 		} else {
 			loadingProgress( '正在载入' + staticDataFiles[idx].desc );
 			var staticDataKey = staticDataFiles[idx].key;
