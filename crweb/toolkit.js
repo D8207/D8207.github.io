@@ -1032,6 +1032,7 @@ jQuery( function( $, undefined ) {
 					收入: calculated.dailyGross,
 					利润: calculated.dailyNet,
 					单程里程: calculated.totalDistance,
+					单程时间: calculated.runningTime,
 					行车次数: calculated.dailyCount,
 					剩余电量: calculated.dailyRemaining,
 					点卷消耗: cost.total,
