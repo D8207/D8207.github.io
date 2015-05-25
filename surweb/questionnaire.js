@@ -250,7 +250,11 @@ jQuery( function( $, undefined ) {
 	} ).add( '#train' ).keyup( function( e ) {
 		var $this = $( this );
 
-		$this.val( $this.val().toUpperCase() );
+		var oldVal = $this.val();
+		var newVal = oldVal.toUpperCase();
+		if ( oldVal !== newVal ) {
+			$this.val( newVal );
+		}
 	} );
 
 	$( '#form-submit' ).click( function( e ) {
