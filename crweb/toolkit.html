@@ -122,7 +122,6 @@
 			</div>
 			<div id=stations class="panel-collapse collapse in" role=tabpanel aria-labelledby=stations-heading>
 				<div class=panel-body>
-					<p>只有列表中的车站会参与行车和优化计算。可以选择已经开通的车站，或是选择愿意开通的所有车站。
 					<form class=form-horizontal role=form>
 						<div class=form-group>
 							<div class=col-md-12>
@@ -214,6 +213,14 @@
 								</div>
 							</div>
 						</fieldset>
+						<div class=form-group>
+							<div class="col-md-10 col-md-offset-2 checkbox">
+								<label>
+									<input type=checkbox id=stations-useall>
+									路径计算时允许使用列表外的车站
+								</label>
+							</div>
+						</div>
 					</form>
 					<table id=stations-table class="text-center table">
 						<thead>
