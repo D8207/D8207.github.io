@@ -188,7 +188,7 @@ jQuery( function( $, undefined ) {
 		var stationsUpdated = function() {
 			if ( !inStationsBatch ) {
 				localStorage['crwebToolkitStations_' + dataset] = JSON.stringify( serializeStations() );
-				stationsTerminals = estimateTerminals( useStations() );
+				stationsTerminals = estimateTerminals( useStations( true ) );
 				$( '.station-list-select' ).trigger( 'do-update' );
 			}
 		};
@@ -257,10 +257,16 @@ jQuery( function( $, undefined ) {
 				return null;
 			}
 		};
-		var useStations = function() {
-			return $( '.station-row' ).map( function() {
-				return $( this ).data( 'id' );
-			} ).get();
+		var useStations = function( notAll ) {
+			if ( notAll || !$( '#stations-useall' ).is( ':checked' ) ) {
+				return $( '.station-row' ).map( function() {
+					return $( this ).data( 'id' );
+				} ).get();
+			} else {
+				return $.map( staticData.station, function( x ) {
+					return x[0];
+				} );
+			}
 		};
 		var estimateTerminals = function( usedStations ) {
 			if ( usedStations.length < 2 ) {
