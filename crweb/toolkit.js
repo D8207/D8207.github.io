@@ -601,6 +601,9 @@ jQuery( function( $, undefined ) {
 			} );
 			stationsBatchEnd();
 		} );
+		$( '#stations-useall' ).click( function( e ) {
+			localStorage['crwebToolkitStationsUseAll_' + dataset] = JSON.stringify( $( this ).is( ':checked' ) );
+		} ).prop( 'checked', JSON.parse( localStorage['crwebToolkitStationsUseAll_' + dataset] || 'false' ) );
 
 		// Route
 		$( '#route-waypoints' ).sortable( {
