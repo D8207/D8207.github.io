@@ -126,7 +126,7 @@ var calculate = function( train, stations, useStations, wayPoints, insert, penal
 	}
 
 	var runningTime = Math.floor( totalDistance * 450 / train.speed ); // In seconds
-	var batteryConsumed = Math.floor( runningTime / 60 );
+	var batteryConsumed = Math.max( 1, Math.floor( runningTime / 60 ) );
 	var priceCoins = priceDistance + 50;
 	var costCoins = Math.floor( train.speed * train.weight * totalDistance / 400000 ) + 1;
 	// real total gross income is NOT the sum of all prices labeled due to rounding issues
