@@ -1,1 +1,1 @@
-var cloudServer = 'https://misc-crutils.rhcloud.com';
+var cloudServer = 'http://misc-crutils.rhcloud.com';
